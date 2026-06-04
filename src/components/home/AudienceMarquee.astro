@@ -1,0 +1,46 @@
+---
+const audiences = [
+  "Athletics departments",
+  "Booster clubs",
+  "Alumni associations",
+  "Universities",
+  "Athletic foundations",
+  "Club & youth sports",
+];
+// Duplicated once so the -50% translate loops seamlessly.
+const track = [...audiences, ...audiences];
+---
+
+<div class="xp-marquee overflow-hidden bg-lime py-4" aria-hidden="true">
+  <div class="xp-marquee-track flex w-max items-center">
+    {track.map((item) => (
+      <div class="flex items-center">
+        <span class="font-editorial whitespace-nowrap px-7 text-[1.75rem] italic leading-none text-ink">
+          {item}
+        </span>
+        <svg class="h-3 w-3 shrink-0 text-ink/70" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 2l2.4 6.9L21 9.3l-5.4 4.3L17.6 21 12 16.9 6.4 21l2-7.4L3 9.3l6.6-.4z" />
+        </svg>
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .xp-marquee-track {
+    animation: xpMarquee 28s linear infinite;
+  }
+  @keyframes xpMarquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .xp-marquee-track {
+      animation: none;
+    }
+  }
+</style>

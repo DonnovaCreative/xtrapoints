@@ -1,0 +1,54 @@
+---
+import CtaButton from "@/components/CtaButton.astro";
+import StatTrio from "@/components/islands/StatTrio.tsx";
+import PhoneMockup from "@/components/home/PhoneMockup.astro";
+---
+
+<section class="relative overflow-hidden bg-ink">
+  <!-- soft brand glow -->
+  <div
+    class="pointer-events-none absolute -right-24 top-0 h-[480px] w-[480px] rounded-full opacity-50 blur-3xl"
+    style="background: radial-gradient(circle, rgba(170,241,10,0.18) 0%, transparent 65%);"
+    aria-hidden="true"
+  >
+  </div>
+
+  <div
+    class="relative mx-auto grid max-w-7xl gap-14 px-6 pb-20 pt-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:px-10 lg:pb-28 lg:pt-20"
+  >
+    <!-- copy -->
+    <div>
+      <h1
+        class="font-display text-[clamp(2.75rem,6.5vw,5rem)] uppercase leading-[1.05] tracking-tight text-white"
+      >
+        Every purchase,
+        <span class="font-editorial inline-block text-[0.62em] lowercase leading-none text-lime [text-transform:none]">
+          a small act of support
+        </span>
+        for your team.
+      </h1>
+
+      <p class="mt-6 max-w-xl text-lg leading-relaxed text-white/75">
+        Xtra Points helps athletic departments, alumni associations, and booster
+        clubs turn everyday spending into recurring donor revenue — paired with
+        the marketing tools to grow it. No implementation cost. Live in days.
+      </p>
+
+      <div class="mt-8 flex flex-wrap items-center gap-4">
+        <CtaButton href="/contact" variant="lime">Get Started</CtaButton>
+        <span class="font-mono text-xs uppercase tracking-[0.04em] text-white/50">
+          Zero upfront cost · No long contracts
+        </span>
+      </div>
+
+      <div class="mt-12 max-w-md">
+        <StatTrio client:visible />
+      </div>
+    </div>
+
+    <!-- phone -->
+    <div class="relative">
+      <PhoneMockup />
+    </div>
+  </div>
+</section>

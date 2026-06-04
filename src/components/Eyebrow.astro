@@ -1,0 +1,18 @@
+---
+export interface Props {
+  index: string; // e.g. "01"
+  label: string; // e.g. "How it works"
+  dark?: boolean;
+}
+const { index, label, dark = false } = Astro.props;
+---
+
+<p
+  class={`flex items-center gap-2.5 font-mono text-sm uppercase tracking-[0.04em] ${
+    dark ? "text-white/55" : "text-primary-500"
+  }`}
+>
+  <span class="font-bold text-lime-dark">{index}</span>
+  <span aria-hidden="true" class={dark ? "text-white/30" : "text-gray-300"}>—</span>
+  <span>{label}</span>
+</p>

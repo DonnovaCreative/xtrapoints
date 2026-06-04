@@ -1,0 +1,91 @@
+---
+// Production site for LPT corporate links is www.lpt.io. The live Webflow page
+// used root-relative paths (/company, /security, ...) that resolve to the
+// lacore.webflow.io staging host — remapped here to the production domain.
+// See README "Footer links to confirm" before launch.
+const LPT = "https://www.lpt.io";
+
+const company = [
+  { label: "About us", href: `${LPT}/company` },
+  { label: "Security", href: `${LPT}/security` },
+  { label: "Partners", href: `${LPT}/partners` },
+];
+const resources = [
+  { label: "Developers", href: "https://foundry.lacorepayments.com/login" },
+  { label: "Media kit", href: "https://live.standards.site/lpt" },
+  { label: "Press", href: `${LPT}/press` },
+  { label: "LinkedIn", href: "https://www.linkedin.com/company/lpt-io/" },
+];
+const contact = [
+  { label: "sales@lpt.io", href: "mailto:sales@lpt.io" },
+  { label: "support@lpt.io", href: "mailto:support@lpt.io" },
+  { label: "press@lpt.io", href: "mailto:press@lpt.io" },
+  { label: "billing@lpt.io", href: "mailto:billing@lpt.io" },
+  { label: "security@lpt.io", href: "mailto:security@lpt.io" },
+];
+
+const colClass = "flex flex-col gap-3";
+const headClass =
+  "font-mono text-[0.6875rem] uppercase tracking-[0.12em] text-white/40";
+const linkClass =
+  "text-sm text-white/70 transition-colors hover:text-lime w-fit";
+---
+
+<footer class="bg-ink-bg text-white">
+  <div class="mx-auto max-w-7xl px-6 py-16 lg:px-10 lg:py-20">
+    <div class="grid grid-cols-2 gap-10 md:grid-cols-3 lg:grid-cols-6">
+      <!-- Brand + contact details -->
+      <div class="col-span-2 flex flex-col gap-6 lg:col-span-3">
+        <img
+          src="/assets/xtrapoints-logo-white.svg"
+          alt="Xtra Points"
+          width="170"
+          height="29"
+          class="h-7 w-auto"
+        />
+        <div class="grid grid-cols-2 gap-6 sm:grid-cols-3 sm:max-w-lg">
+          <div class={colClass}>
+            <span class={headClass}>Sales</span>
+            <a href="mailto:sales@xtrapoints.com" class={linkClass}
+              >sales@xtrapoints.com</a
+            >
+          </div>
+          <div class={colClass}>
+            <span class={headClass}>Headquarters</span>
+            <span class="text-sm leading-relaxed text-white/70"
+              >900 Wilmeth Rd<br />McKinney, TX 75069</span
+            >
+          </div>
+          <div class={colClass}>
+            <span class={headClass}>Web</span>
+            <a href="https://www.lpt.io" class={linkClass}>lpt.io</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Link columns -->
+      <nav class={colClass} aria-label="Company">
+        <span class={headClass}>Company</span>
+        {company.map((l) => <a href={l.href} class={linkClass}>{l.label}</a>)}
+      </nav>
+      <nav class={colClass} aria-label="Resources">
+        <span class={headClass}>Resources</span>
+        {resources.map((l) => <a href={l.href} class={linkClass}>{l.label}</a>)}
+      </nav>
+      <nav class={colClass} aria-label="Contact">
+        <span class={headClass}>Contact</span>
+        {contact.map((l) => <a href={l.href} class={linkClass}>{l.label}</a>)}
+      </nav>
+    </div>
+
+    <div
+      class="mt-14 flex flex-col gap-4 border-t border-white/10 pt-8 text-sm text-white/50 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <p>© LaCore Payments Technologies, Inc. All rights reserved.</p>
+      <div class="flex items-center gap-6">
+        <a href="https://www.lpt.io/terms" class={linkClass}>Terms</a>
+        <a href="https://www.lpt.io/privacy-policy" class={linkClass}>Privacy</a>
+      </div>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,71 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import ContactForm from "@/components/islands/ContactForm.tsx";
+
+const points = [
+  "No implementation cost. Live in days.",
+  "One unified dashboard for every supporter.",
+  "Done-for-you marketing campaigns included.",
+  "SOC 2 Type II · PCI DSS certified.",
+];
+---
+
+<Layout
+  title="Get Started with Xtra Points"
+  description="Bring Xtra Points to your athletic department, booster club, or alumni association. Get started with Xtra Points — no implementation cost, live in days."
+>
+  <Header />
+  <main>
+    <section class="bg-ink">
+      <div class="mx-auto max-w-7xl px-6 pb-16 pt-14 lg:px-10 lg:pb-24 lg:pt-20">
+        <div class="grid gap-12 lg:grid-cols-[1fr_1fr] lg:gap-16">
+          <!-- value prop -->
+          <div class="lg:pt-6">
+            <p class="font-mono text-xs uppercase tracking-[0.06em] text-lime">
+              Get started
+            </p>
+            <h1
+              class="font-display mt-4 text-[clamp(2.5rem,5.5vw,4.25rem)] uppercase leading-[0.95] tracking-tight text-white"
+            >
+              Bring Xtra Points to your program.
+            </h1>
+            <p class="mt-5 max-w-md text-lg leading-relaxed text-white/75">
+              Tell us a little about your athletic department, booster club, or
+              alumni association and our team will reach out to get you live —
+              usually within one business day.
+            </p>
+
+            <ul class="mt-9 flex flex-col gap-4">
+              {points.map((p) => (
+                <li class="flex items-center gap-3 text-white/85">
+                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-lime-soft text-lime">
+                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </span>
+                  {p}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <!-- form card -->
+          <div class="rounded-3xl bg-white p-6 shadow-2xl sm:p-8 lg:p-10">
+            <h2 class="text-2xl font-bold tracking-tight text-gray-900">
+              Request a walkthrough
+            </h2>
+            <p class="mt-2 text-gray-600">
+              No commitment — just a conversation about your program.
+            </p>
+            <div class="mt-7">
+              <ContactForm client:load />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Layout>

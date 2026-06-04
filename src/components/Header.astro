@@ -1,0 +1,28 @@
+---
+import CtaButton from "@/components/CtaButton.astro";
+---
+
+<header class="relative z-50 bg-ink">
+  <div
+    class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-5 lg:px-10"
+  >
+    <a href="/" class="flex items-center gap-3" aria-label="Xtra Points home">
+      <img
+        src="/assets/xtrapoints-logo-white.svg"
+        alt="Xtra Points"
+        width="160"
+        height="27"
+        class="h-[26px] w-auto"
+      />
+      <span
+        class="hidden border-l border-white/15 pl-3 font-mono text-[0.6875rem] uppercase tracking-[0.12em] text-white/55 sm:inline"
+      >
+        For the team behind the team
+      </span>
+    </a>
+
+    <CtaButton href="/contact" variant="lime" class="!px-5 !py-2.5 !text-sm"
+      >Get Started</CtaButton
+    >
+  </div>
+</header>

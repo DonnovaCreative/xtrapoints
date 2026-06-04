@@ -1,0 +1,90 @@
+---
+// Static styled markup (zero JS). Only motion is a CSS-only progress fill.
+const quickAmounts = ["$5", "$25", "$50", "$100"];
+---
+
+<div class="relative mx-auto w-full max-w-[300px]">
+  <!-- Floating chips -->
+  <div
+    class="absolute -left-6 top-16 z-20 hidden items-center gap-2.5 rounded-xl border border-gray-100 bg-white px-3.5 py-2.5 shadow-xl sm:flex"
+  >
+    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </span>
+    <span>
+      <span class="block font-mono text-[10px] uppercase tracking-[0.06em] text-gray-500">Round-up</span>
+      <span class="block text-base font-bold tracking-tight text-gray-900">$0.43</span>
+    </span>
+  </div>
+  <div
+    class="absolute -right-4 bottom-24 z-20 hidden items-center gap-2.5 rounded-xl border border-gray-100 bg-white px-3.5 py-2.5 shadow-xl sm:flex"
+  >
+    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+    <span>
+      <span class="block font-mono text-[10px] uppercase tracking-[0.06em] text-gray-500">Recurring</span>
+      <span class="block text-base font-bold tracking-tight text-gray-900">Monthly</span>
+    </span>
+  </div>
+
+  <!-- Device -->
+  <div class="relative z-10 overflow-hidden rounded-[2.25rem] border-[6px] border-gray-900 bg-white shadow-[0_40px_80px_-30px_rgba(0,0,0,0.6)]">
+    <!-- status bar -->
+    <div class="flex items-center justify-between px-6 pb-2.5 pt-4 text-xs font-semibold text-gray-900">
+      <span>9:41</span>
+      <span class="flex items-center gap-1 text-gray-400">●&nbsp;▪&nbsp;▮</span>
+    </div>
+
+    <!-- org header -->
+    <div class="flex items-center gap-2.5 px-5 pb-4 pt-1">
+      <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary-800 to-primary-600 text-sm font-bold text-white">B</span>
+      <span class="text-xs font-medium text-gray-900">Bobcat Athletics Fund</span>
+    </div>
+
+    <!-- card -->
+    <div class="mx-4 mb-4 rounded-2xl border border-gray-100 bg-gray-25 p-4">
+      <p class="mb-2 font-mono text-[10px] uppercase tracking-[0.06em] text-gray-500">Next minimum donation</p>
+      <p class="mb-1 text-[2.25rem] font-bold leading-none tracking-tight text-gray-900">$15.00</p>
+      <p class="mb-4 font-mono text-[10px] text-gray-500">10 / 31 / 2026</p>
+      <div class="h-2 w-full overflow-hidden rounded-full bg-gray-100">
+        <div class="xp-fill h-full rounded-full bg-lime"></div>
+      </div>
+      <div class="mt-4 flex items-center justify-center gap-2 rounded-lg bg-ink py-2.5 text-xs font-semibold text-white">
+        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Add another card
+      </div>
+    </div>
+
+    <!-- quick give -->
+    <div class="px-5 pb-6">
+      <p class="mb-3 text-center text-[10px] text-gray-600">Looking to give a little extra?</p>
+      <div class="grid grid-cols-4 gap-1.5">
+        {quickAmounts.map((a) => (
+          <span class="rounded-full border border-gray-200 py-2 text-center text-xs font-semibold text-gray-600">{a}</span>
+        ))}
+      </div>
+      <div class="mt-3 rounded-lg bg-lime py-2.5 text-center text-xs font-bold text-ink">
+        Give a one-time donation
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .xp-fill {
+    width: 0;
+    animation: xpFill 2s 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+  @keyframes xpFill {
+    to {
+      width: 72%;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .xp-fill {
+      width: 72%;
+      animation: none;
+    }
+  }
+</style>

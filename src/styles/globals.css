@@ -1,0 +1,170 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* =============================================================================
+   XtraPoints design tokens — single source of truth.
+   Brand colors + fonts pulled from the live page (lacore.webflow.io/xtra-points).
+   Nothing in components should hardcode a hex or a font-family; reference these.
+   ============================================================================= */
+
+@theme {
+  /* --- Fonts --------------------------------------------------------------- */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Anton", "Inter", sans-serif;   /* uppercase athletic display */
+  --font-editorial: "Permanent Marker", cursive;  /* handwritten accent / marquee */
+  --font-mono: "Space Mono", ui-monospace, monospace;
+
+  /* --- Brand: electric lime (primary athletic accent) ---------------------- */
+  --color-lime: #aaf10a;
+  --color-lime-deep: #a3d234;
+  --color-lime-dark: #81af00; /* on-light text contrast */
+  --color-lime-soft: rgba(194, 242, 86, 0.12);
+  --color-gold: #f5b921;
+
+  /* --- Brand: ink / dark sections (navy charcoal) -------------------------- */
+  --color-ink: #03116d;       /* primary900 */
+  --color-ink-soft: #020b3c;  /* footer container */
+  --color-ink-bg: #000628;    /* footer background */
+
+  /* --- Primary (blue) scale ------------------------------------------------ */
+  --color-primary-25: #f0f7ff;
+  --color-primary-50: #e0efff;
+  --color-primary-100: #c1dfff;
+  --color-primary-200: #9bcbfe;
+  --color-primary-300: #76b7fe;
+  --color-primary-400: #51a3fd;
+  --color-primary-500: #2b8ffc;
+  --color-primary-600: #2170d8;
+  --color-primary-700: #1750b4;
+  --color-primary-800: #0d3191;
+  --color-primary-900: #03116d;
+  --color-primary-950: #000946;
+
+  /* --- Gray scale ---------------------------------------------------------- */
+  --color-gray-25: #fbfbff;
+  --color-gray-50: #f3f5fc;
+  --color-gray-100: #e8ebf7;
+  --color-gray-200: #d9dded;
+  --color-gray-300: #b8bed5;
+  --color-gray-400: #7c88b1;
+  --color-gray-500: #5c6999;
+  --color-gray-600: #495379;
+  --color-gray-700: #3b466d;
+  --color-gray-800: #2c3553;
+  --color-gray-900: #111422;
+  --color-gray-950: #060a18;
+
+  /* --- Success (lime-green) scale ------------------------------------------ */
+  --color-success-50: #f3fae0;
+  --color-success-100: #e9f5c8;
+  --color-success-500: #97cc04;
+  --color-success-700: #5b7a02;
+
+  /* --- Error scale (form validation) --------------------------------------- */
+  --color-error-50: #fef3f2;
+  --color-error-500: #f04438;
+  --color-error-600: #d92d20;
+  --color-error-700: #b42318;
+
+  /* --- Radii --------------------------------------------------------------- */
+  --radius-card: 1.5rem;
+}
+
+/* =============================================================================
+   shadcn/ui semantic tokens — mapped onto the brand palette above.
+   ============================================================================= */
+:root {
+  --radius: 0.625rem;
+
+  --background: #ffffff;
+  --foreground: var(--color-gray-900);
+
+  --card: #ffffff;
+  --card-foreground: var(--color-gray-900);
+  --popover: #ffffff;
+  --popover-foreground: var(--color-gray-900);
+
+  /* Lime is the action color; ink text sits on it for contrast. */
+  --primary: var(--color-lime);
+  --primary-foreground: var(--color-ink);
+
+  --secondary: var(--color-gray-50);
+  --secondary-foreground: var(--color-gray-900);
+  --muted: var(--color-gray-50);
+  --muted-foreground: var(--color-gray-500);
+  --accent: var(--color-lime-soft);
+  --accent-foreground: var(--color-ink);
+
+  --destructive: var(--color-error-600);
+  --destructive-foreground: #ffffff;
+
+  --border: var(--color-gray-200);
+  --input: var(--color-gray-200);
+  --ring: var(--color-lime-deep);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* =============================================================================
+   Base
+   ============================================================================= */
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  /* Anton/Permanent Marker render heavy; never let the browser fake-bold them. */
+  .font-display,
+  .font-editorial {
+    font-weight: 400;
+  }
+}
+
+/* =============================================================================
+   Shared motion — used by the CSS-only marquee (section 3) and small accents.
+   ============================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

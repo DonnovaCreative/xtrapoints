@@ -1,0 +1,46 @@
+---
+// Static styled markup (zero JS).
+const rows = [
+  { name: "Season Kickoff ’26", channel: "Email · Social · SMS", metric: "$84k", pill: "+38%" },
+  { name: "Lapsed Booster Win-Back", channel: "Email · Automated", metric: "412", pill: "+12%" },
+  { name: "Championship Run Match", channel: "Social · Push", metric: "$22k", pill: "+61%" },
+  { name: "Alumni Game-Day Push", channel: "Email · SMS", metric: "2.1k", pill: "Live" },
+];
+const tabs = ["Campaigns", "Active · 4", "Scheduled"];
+---
+
+<div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_30px_60px_-24px_rgba(3,17,109,0.25)]">
+  <div class="flex items-center gap-2 border-b border-gray-100 bg-gray-50 px-4 py-3">
+    <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary-800 to-primary-600 text-xs font-bold text-white">B</span>
+    <span class="text-sm font-bold tracking-tight text-gray-900">Bobcat Athletics</span>
+  </div>
+
+  <div class="px-5 py-4 sm:px-6">
+    <div class="flex gap-5 border-b border-gray-100">
+      {tabs.map((t, i) => (
+        <span class={`-mb-px border-b-2 pb-2 font-mono text-[0.6875rem] uppercase tracking-[0.08em] ${i === 0 ? "border-ink text-gray-900" : "border-transparent text-gray-500"}`}>{t}</span>
+      ))}
+    </div>
+
+    <ul class="mt-2 divide-y divide-gray-100">
+      {rows.map((r) => (
+        <li class="flex items-center gap-3 py-3">
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </span>
+          <span class="min-w-0 flex-1">
+            <span class="block truncate text-sm font-semibold leading-tight text-gray-900">{r.name}</span>
+            <span class="mt-0.5 block font-mono text-[0.625rem] uppercase tracking-[0.04em] text-gray-500">{r.channel}</span>
+          </span>
+          <span class="font-display text-2xl leading-none text-gray-900">{r.metric}</span>
+          <span class={`rounded-full px-2 py-1 font-mono text-[0.625rem] font-bold uppercase tracking-[0.04em] ${r.pill === "Live" ? "bg-lime-soft text-lime-dark" : "bg-success-50 text-success-700"}`}>{r.pill}</span>
+        </li>
+      ))}
+    </ul>
+
+    <div class="mt-3 flex items-center justify-between border-t border-gray-100 pt-3">
+      <span class="font-mono text-[0.625rem] uppercase tracking-[0.06em] text-gray-500">Last 30 days</span>
+      <span class="text-sm font-bold tracking-tight text-gray-900">$108,420 <span class="text-lime-dark">↑ 41%</span></span>
+    </div>
+  </div>
+</div>

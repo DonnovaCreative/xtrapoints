@@ -1,0 +1,66 @@
+---
+import Eyebrow from "@/components/Eyebrow.astro";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+
+const blocks = [
+  {
+    title: "Recurring donors you wouldn’t otherwise have.",
+    body: "Round-up gives supporters a frictionless way to give every day. Our engine projects each donor’s monthly impact and prompts optional minimums and multipliers — so the average gift grows on its own.",
+    tags: ["Forecasting", "Multipliers", "Minimums"],
+  },
+  {
+    title: "Revenue you can actually plan around.",
+    body: "Choose the rhythm that fits your supporters — weekly, monthly, quarterly, annual — and let the platform handle every renewal in the background. Predictable cycles, healthier forecasts.",
+    tags: ["Weekly", "Monthly", "Quarterly", "Annual"],
+  },
+  {
+    title: "A branded experience supporters actually open.",
+    body: "Every gift lives inside a dedicated mobile app carrying your colors, marks, and program identity — instant access, transparency into impact, and a reason to come back.",
+    tags: ["iOS", "Android", "Your brand"],
+  },
+];
+---
+
+<section class="bg-gray-50 py-20 lg:py-28">
+  <div class="mx-auto max-w-7xl px-6 lg:px-10">
+    <div class="max-w-3xl">
+      <Eyebrow index="02" label="What it does for you" />
+      <h2
+        class="font-display mt-4 text-[clamp(2.25rem,5vw,3.5rem)] uppercase leading-[0.95] tracking-tight text-gray-900"
+      >
+        Built to multiply every gift.
+      </h2>
+      <p class="mt-5 text-lg leading-relaxed text-gray-600">
+        Three things working together to turn casual fans into compounding
+        supporters — and small change into season-long revenue.
+      </p>
+    </div>
+
+    <div class="mt-14 grid gap-6 md:grid-cols-3">
+      {blocks.map((b, i) => (
+        <Card class="flex h-full flex-col border-gray-200/80 bg-white shadow-sm">
+          <CardContent class="flex flex-1 flex-col px-6">
+            <span class="font-display text-2xl leading-none text-lime-dark">
+              0{i + 1}
+            </span>
+            <h3 class="mt-4 text-xl font-bold leading-snug tracking-tight text-gray-900">
+              {b.title}
+            </h3>
+            <p class="mt-3 flex-1 leading-relaxed text-gray-600">{b.body}</p>
+            <div class="mt-6 flex flex-wrap gap-2">
+              {b.tags.map((t) => (
+                <Badge
+                  variant="secondary"
+                  class="rounded-full border border-gray-200 bg-gray-50 font-mono text-[0.625rem] font-medium uppercase tracking-[0.06em] text-gray-600"
+                >
+                  {t}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,92 @@
+---
+import Eyebrow from "@/components/Eyebrow.astro";
+
+const bullets = [
+  {
+    title: "Real, verified growth.",
+    body: "App downloads, verified registrations, and recurring donors you can measure — every signup tied back to the ambassador who drove it.",
+  },
+  {
+    title: "Reach you can’t buy.",
+    body: "Taps audiences staff can’t easily access — Greek life, athletic events, alumni gatherings, the spaces where actual influence lives.",
+  },
+  {
+    title: "Turnkey for you.",
+    body: "We provide the platform, toolkit, and coaching; your campus brings the energy. No new hires, no new program to build from scratch.",
+  },
+];
+---
+
+<section class="bg-white py-20 lg:py-28">
+  <div class="mx-auto max-w-7xl px-6 lg:px-10">
+    <div class="max-w-3xl">
+      <Eyebrow index="05" label="Student ambassadors" />
+      <h2
+        class="font-display mt-4 text-[clamp(2.25rem,5vw,3.5rem)] uppercase leading-[0.95] tracking-tight text-gray-900"
+      >
+        Put your students to work for your program.
+      </h2>
+      <p class="mt-5 text-lg leading-relaxed text-gray-600">
+        The Ambassador Program is a student-powered growth engine — driving app
+        downloads, verified registrations, and recurring donors through channels
+        staff outreach can’t reach: Greek life, tailgates, orientation, alumni
+        weekends. It’s low-cost, always-on marketing that builds school pride
+        today and a pipeline of future alumni donors who give for years after
+        they graduate.
+      </p>
+    </div>
+
+    <div class="mt-14 grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
+      <!-- ∞ stat panel -->
+      <div
+        class="relative flex min-h-[360px] flex-col justify-between overflow-hidden rounded-3xl bg-ink p-10 text-white"
+      >
+        <div
+          class="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full opacity-40 blur-3xl"
+          style="background: radial-gradient(circle, rgba(170,241,10,0.3) 0%, transparent 65%);"
+          aria-hidden="true"
+        >
+        </div>
+        <div class="relative">
+          <p class="font-mono text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-lime">
+            Always-on growth
+          </p>
+          <p class="font-display -mt-2 text-[clamp(7rem,14vw,11rem)] leading-[0.85] text-lime">
+            ∞
+          </p>
+          <p class="max-w-sm text-[0.9375rem] leading-relaxed text-white/75">
+            Recruitment that never sleeps — students reach corners of campus and
+            alumni networks your staff simply can’t.
+          </p>
+        </div>
+        <div class="relative mt-8 flex items-center justify-between border-t border-white/10 pt-5">
+          <span class="font-mono text-[0.625rem] font-bold uppercase tracking-[0.08em] text-white/50">
+            Channels we tap
+          </span>
+          <span class="text-[0.8125rem] font-semibold text-white">
+            Greek · Athletics · Alumni · Events
+          </span>
+        </div>
+      </div>
+
+      <!-- bullets + CTA -->
+      <div class="flex flex-col justify-between">
+        <ul class="flex flex-col gap-7">
+          {bullets.map((b) => (
+            <li class="border-l-2 border-lime pl-5">
+              <h3 class="text-lg font-bold tracking-tight text-gray-900">{b.title}</h3>
+              <p class="mt-1.5 leading-relaxed text-gray-600">{b.body}</p>
+            </li>
+          ))}
+        </ul>
+        <a
+          href="mailto:sales@xtrapoints.com"
+          class="mt-8 inline-flex w-fit items-center gap-2.5 rounded-full bg-lime px-6 py-3.5 text-[0.9375rem] font-bold text-ink transition-all duration-300 hover:bg-lime-deep hover:-translate-y-0.5"
+        >
+          Learn about the Ambassador Program
+          <svg class="h-4 w-4" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

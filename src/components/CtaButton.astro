@@ -1,0 +1,41 @@
+---
+/**
+ * Static CTA pill — a styled anchor (zero JS). Matches the live page's
+ * `.xp-cta-btn`. shadcn <Button> is reserved for the interactive contact form;
+ * marketing CTAs are plain links and shouldn't ship a React island each.
+ */
+export interface Props {
+  href: string;
+  /** lime: primary action · light: white pill for dark sections · ghost: text+border */
+  variant?: "lime" | "light" | "ghost";
+  class?: string;
+}
+const { href, variant = "lime", class: className = "" } = Astro.props;
+
+const base =
+  "group inline-flex items-center justify-center gap-2.5 rounded-full font-semibold transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] px-7 py-3.5 text-[1.0625rem]";
+const variants = {
+  lime: "bg-lime text-ink border border-lime hover:bg-lime-deep hover:-translate-y-0.5 shadow-[0_12px_32px_-8px_rgba(170,241,10,0.35)]",
+  light:
+    "bg-white text-ink border border-white hover:bg-gray-50 hover:-translate-y-0.5 shadow-[0_12px_32px_-8px_rgba(0,0,0,0.3)]",
+  ghost:
+    "border border-white/25 text-white hover:bg-white/10 hover:-translate-y-0.5",
+};
+---
+
+<a href={href} class={`${base} ${variants[variant]} ${className}`}>
+  <slot />
+  <svg
+    class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5"
+    viewBox="0 0 16 16"
+    fill="none"
+    aria-hidden="true"
+  >
+    <path
+      d="M3 8h10M9 4l4 4-4 4"
+      stroke="currentColor"
+      stroke-width="1.75"
+      stroke-linecap="round"
+      stroke-linejoin="round"></path>
+  </svg>
+</a>

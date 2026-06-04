@@ -1,0 +1,65 @@
+---
+import Eyebrow from "@/components/Eyebrow.astro";
+import CampaignsDashboard from "@/components/home/CampaignsDashboard.astro";
+
+const bullets = [
+  {
+    title: "Pre-built campaign templates.",
+    body: "Season kickoff, end-of-year giving, championship runs — drop-in playbooks proven across hundreds of programs.",
+  },
+  {
+    title: "Social & email plug-in.",
+    body: "One-click sharing across the channels your supporters actually use, with templated copy and assets in your colors.",
+  },
+  {
+    title: "Targeted re-engagement.",
+    body: "Win back lapsed supporters automatically with sequences that learn from real giving behavior.",
+  },
+];
+---
+
+<section class="bg-gray-50 py-20 lg:py-28">
+  <div
+    class="mx-auto grid max-w-7xl items-center gap-14 px-6 lg:grid-cols-2 lg:px-10"
+  >
+    <!-- dashboard first on desktop -->
+    <div class="order-2 lg:order-1">
+      <CampaignsDashboard />
+    </div>
+
+    <div class="order-1 lg:order-2">
+      <Eyebrow index="04" label="Marketing support" />
+      <h2
+        class="font-display mt-4 text-[clamp(2.25rem,5vw,3.5rem)] uppercase leading-[0.95] tracking-tight text-gray-900"
+      >
+        A full marketing arm — without the headcount.
+      </h2>
+      <p class="mt-5 text-lg leading-relaxed text-gray-600">
+        Not every athletic department has a 20-person comms team. Xtra Points
+        includes done-for-you marketing campaigns and social tools that drive
+        more supporters to your platform — so the program with one part-time
+        admin can reach donors like the program with a full agency.
+      </p>
+
+      <ul class="mt-8 flex flex-col gap-5">
+        {bullets.map((b) => (
+          <li class="flex gap-3.5">
+            <span class="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-lime-soft text-lime-dark">
+              <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <span>
+              <span class="font-semibold text-gray-900">{b.title}</span>{" "}
+              <span class="text-gray-600">{b.body}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      <p class="mt-6 font-mono text-xs uppercase tracking-[0.04em] text-gray-500">
+        Included in select plans. Talk to sales about marketing tier eligibility.
+      </p>
+    </div>
+  </div>
+</section>

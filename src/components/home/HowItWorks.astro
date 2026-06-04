@@ -1,0 +1,76 @@
+---
+import Eyebrow from "@/components/Eyebrow.astro";
+
+const items = [
+  {
+    n: "01",
+    kicker: "Fast to market",
+    title: "Live in hours, not quarters.",
+    body: "Done-for-you onboarding. Your supporters download the app, link an account, and start contributing. Implementation on your end is zero-touch.",
+  },
+  {
+    n: "02",
+    kicker: "Predictable revenue",
+    title: "A steady stream, not a season scramble.",
+    body: "Recurring giving turns one-off donors into a planning surface. Forecast cycles, fund initiatives early, and stop relying on a single big push to close the year.",
+  },
+  {
+    n: "03",
+    kicker: "Every kind of gift",
+    title: "One-time. Recurring. Round-up.",
+    body: "Capture support at every altitude — from the $0.37 round-up on a game-day coffee to a $5,000 commemorative gift, all from the same surface.",
+  },
+  {
+    n: "04",
+    kicker: "Pay how donors already pay",
+    title: "Cards, Apple Pay, bank transfers.",
+    body: "We meet supporters at the payment method they already trust — no new wallets, no new accounts, no friction between intent and impact.",
+  },
+  {
+    n: "05",
+    kicker: "Tribute & team giving",
+    title: "Gifts in honor of a coach, an alum, or a championship season.",
+    body: "Tribute giving captures the moments that move supporters most — milestone seasons, retiring jerseys, a coach’s anniversary — and turns each one into a lasting connection between your program and the people who care about it.",
+  },
+];
+---
+
+<section class="bg-white py-20 lg:py-28">
+  <div class="mx-auto max-w-7xl px-6 lg:px-10">
+    <div class="max-w-3xl">
+      <Eyebrow index="01" label="How it works" />
+      <h2
+        class="font-display mt-4 text-[clamp(2.25rem,5vw,3.5rem)] uppercase leading-[0.95] tracking-tight text-gray-900"
+      >
+        More recurring revenue, less work for your team.
+      </h2>
+      <p class="mt-5 text-lg leading-relaxed text-gray-600">
+        Boosters, alumni, and fans want to give — they just want it to be easy.
+        Xtra Points captures small recurring gifts you’d otherwise leave on the
+        table, so you spend less time chasing pledges and more time on the
+        season ahead.
+      </p>
+    </div>
+
+    <ul class="mt-14 divide-y divide-gray-100 border-t border-gray-100">
+      {items.map((item) => (
+        <li class="grid grid-cols-1 gap-4 py-7 md:grid-cols-[auto_1fr] md:gap-10">
+          <span class="font-display text-3xl leading-none text-lime-dark md:text-4xl">
+            {item.n}
+          </span>
+          <div class="grid gap-3 md:grid-cols-[1fr_1.4fr] md:gap-10">
+            <div>
+              <p class="font-mono text-xs uppercase tracking-[0.08em] text-primary-500">
+                {item.kicker}
+              </p>
+              <h3 class="mt-2 text-xl font-bold tracking-tight text-gray-900">
+                {item.title}
+              </h3>
+            </div>
+            <p class="leading-relaxed text-gray-600">{item.body}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
