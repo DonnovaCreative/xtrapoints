@@ -4,9 +4,21 @@ const quickAmounts = ["$5", "$25", "$50", "$100"];
 ---
 
 <div class="relative mx-auto w-full max-w-[300px]">
+  <!-- concentric ring guides behind the device -->
+  <div
+    class="pointer-events-none absolute left-1/2 top-1/2 -z-0 hidden -translate-x-1/2 -translate-y-1/2 sm:block"
+    aria-hidden="true"
+  >
+    <div class="h-[420px] w-[420px] rounded-full border border-white/[0.07]">
+      <div class="m-[60px] h-[300px] w-[300px] rounded-full border border-white/[0.06]">
+        <div class="m-[60px] h-[180px] w-[180px] rounded-full border border-white/[0.05]"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Floating chips -->
   <div
-    class="absolute -left-6 top-16 z-20 hidden items-center gap-2.5 rounded-xl border border-gray-100 bg-white px-3.5 py-2.5 shadow-xl sm:flex"
+    class="anim-float-1 absolute -left-6 top-16 z-20 hidden items-center gap-2.5 rounded-xl border border-gray-100 bg-white px-3.5 py-2.5 shadow-xl sm:flex"
   >
     <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
       <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -17,7 +29,7 @@ const quickAmounts = ["$5", "$25", "$50", "$100"];
     </span>
   </div>
   <div
-    class="absolute -right-4 bottom-24 z-20 hidden items-center gap-2.5 rounded-xl border border-gray-100 bg-white px-3.5 py-2.5 shadow-xl sm:flex"
+    class="anim-float-2 absolute -right-4 bottom-24 z-20 hidden items-center gap-2.5 rounded-xl border border-gray-100 bg-white px-3.5 py-2.5 shadow-xl sm:flex"
   >
     <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
       <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>

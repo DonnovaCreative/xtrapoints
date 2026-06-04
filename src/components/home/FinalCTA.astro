@@ -8,27 +8,34 @@ import LiveFeed from "@/components/islands/LiveFeed.tsx";
     <div
       class="relative overflow-hidden rounded-[2rem] bg-ink p-8 sm:p-12 lg:p-16"
     >
+      <div class="dot-grid"></div>
       <div
         class="pointer-events-none absolute -left-20 -top-20 h-80 w-80 rounded-full opacity-40 blur-3xl"
         style="background: radial-gradient(circle, rgba(170,241,10,0.22) 0%, transparent 65%);"
         aria-hidden="true"
       >
       </div>
+      <!-- giant outlined editorial backdrop -->
+      <span
+        class="backdrop-type"
+        style="bottom:-14%;right:-2%;font-size:clamp(7rem,16vw,16rem);opacity:0.12;"
+        aria-hidden="true">XTRAPOINTS</span
+      >
 
       <div
-        class="relative grid items-center gap-10 lg:grid-cols-[1.05fr_1fr]"
+        class="reveal relative grid items-center gap-10 lg:grid-cols-[1.05fr_1fr]"
       >
         <div>
           <span
             class="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3.5 py-1.5 font-mono text-xs uppercase tracking-[0.06em] text-white/70 backdrop-blur-sm"
           >
-            <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-lime"></span>
+            <span class="anim-pulse-dot h-1.5 w-1.5 rounded-full bg-lime"></span>
             Live in days · not quarters
           </span>
           <h2
             class="font-display text-[clamp(2.5rem,5.5vw,4.5rem)] uppercase leading-[0.95] tracking-tight text-white"
           >
-            Ready to launch your program’s giving platform?
+            Ready to <span class="ed">Launch</span> your program’s giving platform?
           </h2>
           <p class="mt-5 max-w-md text-lg leading-relaxed text-white/75">
             Bring Xtra Points to your athletic department, booster club, or

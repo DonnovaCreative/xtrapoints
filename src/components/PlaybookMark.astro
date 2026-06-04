@@ -1,0 +1,27 @@
+---
+/**
+ * Decorative lime "playbook" chalk mark (X / O / arrow / underline) from the
+ * brand SVGs, rendered as a mask so the lime token drives the color.
+ * Purely decorative — aria-hidden. Position + size via `class`.
+ */
+export interface Props {
+  mark: "x" | "o" | "arrow" | "underline";
+  class?: string;
+  rotate?: number;
+  opacity?: number;
+  float?: 1 | 2 | false;
+}
+const { mark, class: className = "", rotate = 0, opacity = 1, float = false } =
+  Astro.props;
+
+const file = { x: "ex", o: "oh", arrow: "arrow", underline: "underline" }[mark];
+const url = `/assets/${file}.svg`;
+const floatClass = float ? `anim-float-${float}` : "";
+---
+
+<span
+  aria-hidden="true"
+  class={`playbook-mark ${floatClass} ${className}`}
+  style={`-webkit-mask-image:url('${url}');mask-image:url('${url}');transform:rotate(${rotate}deg);opacity:${opacity};`}
+>
+</span>

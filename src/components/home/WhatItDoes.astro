@@ -24,12 +24,12 @@ const blocks = [
 
 <section class="bg-gray-50 py-20 lg:py-28">
   <div class="mx-auto max-w-7xl px-6 lg:px-10">
-    <div class="max-w-3xl">
+    <div class="reveal max-w-3xl">
       <Eyebrow index="02" label="What it does for you" />
       <h2
         class="font-display mt-4 text-[clamp(2.25rem,5vw,3.5rem)] uppercase leading-[0.95] tracking-tight text-gray-900"
       >
-        Built to multiply every gift.
+        Built to <span class="ed ed-dark">Multiply</span> every gift.
       </h2>
       <p class="mt-5 text-lg leading-relaxed text-gray-600">
         Three things working together to turn casual fans into compounding
@@ -37,7 +37,7 @@ const blocks = [
       </p>
     </div>
 
-    <div class="mt-14 grid gap-6 md:grid-cols-3">
+    <div class="stagger mt-14 grid gap-6 md:grid-cols-3">
       {blocks.map((b, i) => (
         <Card class="flex h-full flex-col border-gray-200/80 bg-white shadow-sm">
           <CardContent class="flex flex-1 flex-col px-6">

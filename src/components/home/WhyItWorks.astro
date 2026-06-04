@@ -1,5 +1,6 @@
 ---
 import Eyebrow from "@/components/Eyebrow.astro";
+import PlaybookMark from "@/components/PlaybookMark.astro";
 
 // NOTE: both photos below are Pexels stock pulled from the live page.
 // Flagged for replacement with owned XtraPoints imagery — see README.
@@ -22,8 +23,17 @@ const plays = [
 ---
 
 <section class="relative overflow-hidden bg-ink py-20 text-white lg:py-28">
-  <div class="mx-auto max-w-7xl px-6 lg:px-10">
-    <div class="max-w-3xl">
+  <div class="dot-grid"></div>
+  <!-- tic-tac-toe playbook cluster -->
+  <div class="pointer-events-none absolute -right-4 top-10 hidden h-44 w-44 lg:block" aria-hidden="true">
+    <PlaybookMark mark="x" class="left-0 top-0 h-14 w-14" rotate={-6} opacity={0.18} />
+    <PlaybookMark mark="o" class="right-0 top-2 h-14 w-14" rotate={8} opacity={0.14} />
+    <PlaybookMark mark="o" class="bottom-0 left-2 h-14 w-14" rotate={-4} opacity={0.14} />
+    <PlaybookMark mark="x" class="bottom-2 right-2 h-14 w-14" rotate={10} opacity={0.18} />
+  </div>
+
+  <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">
+    <div class="reveal max-w-3xl">
       <Eyebrow index="06" label="Why it works" dark />
       <h2
         class="font-display mt-4 text-[clamp(2.25rem,5vw,3.5rem)] uppercase leading-[0.95] tracking-tight text-white"
@@ -40,7 +50,7 @@ const plays = [
       </p>
     </div>
 
-    <div class="mt-14 grid gap-6 md:grid-cols-2">
+    <div class="stagger mt-14 grid gap-6 md:grid-cols-2">
       {plays.map((p) => (
         <article class="flex flex-col overflow-hidden rounded-3xl border border-white/12 bg-white/[0.04] shadow-[0_22px_50px_-18px_rgba(0,0,0,0.45)]">
           <div class="relative h-52 overflow-hidden">
@@ -68,7 +78,7 @@ const plays = [
     </div>
 
     <!-- trust badges -->
-    <div class="mt-12 flex flex-col items-start gap-6 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
+    <div class="reveal mt-12 flex flex-col items-start gap-6 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
       <span class="font-mono text-xs uppercase tracking-[0.08em] text-white/45">
         Built on enterprise-grade infrastructure
       </span>

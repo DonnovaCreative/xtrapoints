@@ -37,12 +37,12 @@ const items = [
 
 <section class="bg-white py-20 lg:py-28">
   <div class="mx-auto max-w-7xl px-6 lg:px-10">
-    <div class="max-w-3xl">
+    <div class="reveal max-w-3xl">
       <Eyebrow index="01" label="How it works" />
       <h2
         class="font-display mt-4 text-[clamp(2.25rem,5vw,3.5rem)] uppercase leading-[0.95] tracking-tight text-gray-900"
       >
-        More recurring revenue, less work for your team.
+        More recurring revenue, <span class="ed ed-dark">Less</span> work for your team.
       </h2>
       <p class="mt-5 text-lg leading-relaxed text-gray-600">
         Boosters, alumni, and fans want to give — they just want it to be easy.
@@ -52,7 +52,7 @@ const items = [
       </p>
     </div>
 
-    <ul class="mt-14 divide-y divide-gray-100 border-t border-gray-100">
+    <ul class="stagger mt-14 divide-y divide-gray-100 border-t border-gray-100">
       {items.map((item) => (
         <li class="grid grid-cols-1 gap-4 py-7 md:grid-cols-[auto_1fr] md:gap-10">
           <span class="font-display text-3xl leading-none text-lime-dark md:text-4xl">

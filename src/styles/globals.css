@@ -156,7 +156,182 @@
 }
 
 /* =============================================================================
-   Shared motion — used by the CSS-only marquee (section 3) and small accents.
+   Editorial type — Permanent Marker accent words inside Anton headings.
+   Mirrors the live page, where headings mix display + handwritten lime accents.
+   ============================================================================= */
+.ed {
+  font-family: var(--font-editorial);
+  color: var(--color-lime);
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-size: 1.12em;
+  line-height: 0.9;
+  /* nudge the handwritten baseline to sit with the uppercase Anton caps */
+  display: inline-block;
+  transform: translateY(0.06em) rotate(-2deg);
+}
+/* lime is unreadable on white — use the deeper lime for accents on light sections */
+.ed-dark {
+  color: var(--color-lime-dark);
+}
+
+/* =============================================================================
+   Decorative playbook marks — lime chalk shapes (X / O / arrow / underline)
+   rendered as masks so a single color token drives them. Purely decorative.
+   ============================================================================= */
+.playbook-mark {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+  background-color: var(--color-lime);
+  -webkit-mask-mode: alpha;
+  mask-mode: alpha;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+/* Giant outlined display word sitting behind content for editorial depth. */
+.backdrop-type {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 0.82;
+  white-space: nowrap;
+  color: transparent;
+  -webkit-text-stroke: 2px var(--color-lime);
+}
+
+/* Soft drifting color blobs for atmosphere on dark sections. */
+.glow {
+  position: absolute;
+  z-index: 0;
+  border-radius: 9999px;
+  pointer-events: none;
+  filter: blur(64px);
+}
+
+/* Subtle dot-grid texture overlay (dark sections). */
+.dot-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 26px 26px;
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 78%);
+  mask-image: radial-gradient(ellipse at center, #000 30%, transparent 78%);
+}
+
+/* =============================================================================
+   Scroll-reveal system. Base = hidden ONLY when JS is active (.js on <html>);
+   the IntersectionObserver in Layout.astro adds .is-visible on entry. Without
+   JS, or with reduced motion, everything is shown immediately.
+   ============================================================================= */
+.js .reveal,
+.js .reveal-left,
+.js .reveal-right {
+  opacity: 0;
+  will-change: opacity, transform;
+  transition:
+    opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.js .reveal {
+  transform: translateY(30px);
+}
+.js .reveal-left {
+  transform: translateX(-40px);
+}
+.js .reveal-right {
+  transform: translateX(40px);
+}
+/* Staggered children — set --i on each child (or rely on nth-child fallback). */
+.js .stagger > * {
+  opacity: 0;
+  transform: translateY(28px);
+  will-change: opacity, transform;
+  transition:
+    opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition-delay: calc(var(--i, 0) * 90ms);
+}
+.js .stagger.is-visible > * {
+  opacity: 1;
+  transform: none;
+}
+.js .stagger > *:nth-child(1) { --i: 0; }
+.js .stagger > *:nth-child(2) { --i: 1; }
+.js .stagger > *:nth-child(3) { --i: 2; }
+.js .stagger > *:nth-child(4) { --i: 3; }
+.js .stagger > *:nth-child(5) { --i: 4; }
+.js .stagger > *:nth-child(6) { --i: 5; }
+.js .reveal.is-visible,
+.js .reveal-left.is-visible,
+.js .reveal-right.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Hero word-by-word rise (load-time, staggered via inline animation-delay). */
+.hero-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.5em);
+  animation: xpWordRise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* =============================================================================
+   Keyframes
+   ============================================================================= */
+@keyframes xpWordRise {
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes xpFloat1 {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes xpFloat2 {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(9px); }
+}
+@keyframes xpDrift1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(40px, -30px) scale(1.08); }
+  66% { transform: translate(-25px, 20px) scale(0.95); }
+}
+@keyframes xpDrift2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-35px, -40px) scale(1.12); }
+}
+@keyframes xpDrift3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  40% { transform: translate(30px, 35px) scale(1.1); }
+  80% { transform: translate(-20px, -15px) scale(0.92); }
+}
+@keyframes xpPulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+@keyframes xpMarkIn {
+  from { opacity: 0; transform: translateY(8px) rotate(var(--rot, 0deg)) scale(0.9); }
+  to { opacity: var(--mark-opacity, 1); transform: translateY(0) rotate(var(--rot, 0deg)) scale(1); }
+}
+
+.anim-float-1 { animation: xpFloat1 6s ease-in-out infinite; }
+.anim-float-2 { animation: xpFloat2 7s ease-in-out infinite; }
+.anim-pulse-dot { animation: xpPulseDot 2.2s ease-in-out infinite; }
+
+/* =============================================================================
+   Reduced motion — disable all of the above.
    ============================================================================= */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -166,5 +341,13 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+  .js .reveal,
+  .js .reveal-left,
+  .js .reveal-right,
+  .js .stagger > *,
+  .hero-word {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

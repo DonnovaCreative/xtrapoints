@@ -21,6 +21,10 @@ const ogImageUrl = new URL(ogImage, Astro.site).href;
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Flag JS early so scroll-reveal base state only hides when JS can restore it. -->
+    <script is:inline>
+      document.documentElement.classList.add("js");
+    </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
@@ -56,5 +60,31 @@ const ogImageUrl = new URL(ogImage, Astro.site).href;
   </head>
   <body>
     <slot />
+
+    <!-- Scroll-reveal: add .is-visible to reveal/stagger elements as they enter. -->
+    <script is:inline>
+      (() => {
+        const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const els = document.querySelectorAll(
+          ".reveal, .reveal-left, .reveal-right, .stagger",
+        );
+        if (reduce || !("IntersectionObserver" in window)) {
+          els.forEach((el) => el.classList.add("is-visible"));
+          return;
+        }
+        const io = new IntersectionObserver(
+          (entries, obs) => {
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                e.target.classList.add("is-visible");
+                obs.unobserve(e.target);
+              }
+            });
+          },
+          { rootMargin: "0px 0px -10% 0px", threshold: 0.12 },
+        );
+        els.forEach((el) => io.observe(el));
+      })();
+    </script>
   </body>
 </html>

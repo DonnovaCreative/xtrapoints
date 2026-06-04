@@ -55,6 +55,21 @@ public/
 - Audience marquee and the phone/campaign mockups are **static** (zero JS); the
   marquee and phone progress bar are CSS-only animations.
 
+### Motion & decoration (matches the original page)
+
+- **Scroll reveals**: `.reveal` / `.reveal-left` / `.reveal-right` (and `.stagger`
+  for sequenced children) are defined in `globals.css`; a tiny inline
+  IntersectionObserver in `Layout.astro` adds `.is-visible` on entry. Base state
+  only hides when JS is active (`.js` on `<html>`) and is disabled under
+  `prefers-reduced-motion`, so content is never stuck hidden.
+- **Hero**: word-by-word rise (`.hero-word`, staggered `animation-delay`).
+- **Editorial accents**: Permanent Marker lime words inside Anton headings via
+  `.ed` (dark sections) / `.ed .ed-dark` (light sections).
+- **Playbook marks**: `PlaybookMark.astro` renders the brand SVGs
+  (`ex`/`oh`/`arrow`/`underline`) as lime masks — the scattered ✕/◯ chalk marks.
+- **Atmosphere**: `.dot-grid` texture, drifting `.glow` blobs, and the giant
+  outlined `.backdrop-type` word — all decorative and `aria-hidden`.
+
 ## Design tokens
 
 Brand colors and fonts were pulled from the live page and defined **once** in

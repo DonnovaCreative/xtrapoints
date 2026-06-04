@@ -1,5 +1,6 @@
 ---
 import Eyebrow from "@/components/Eyebrow.astro";
+import PlaybookMark from "@/components/PlaybookMark.astro";
 
 const bullets = [
   {
@@ -19,12 +20,12 @@ const bullets = [
 
 <section class="bg-white py-20 lg:py-28">
   <div class="mx-auto max-w-7xl px-6 lg:px-10">
-    <div class="max-w-3xl">
+    <div class="reveal max-w-3xl">
       <Eyebrow index="05" label="Student ambassadors" />
       <h2
         class="font-display mt-4 text-[clamp(2.25rem,5vw,3.5rem)] uppercase leading-[0.95] tracking-tight text-gray-900"
       >
-        Put your students to work for your program.
+        Put your students to <span class="ed ed-dark">Work</span> for your program.
       </h2>
       <p class="mt-5 text-lg leading-relaxed text-gray-600">
         The Ambassador Program is a student-powered growth engine — driving app
@@ -39,14 +40,16 @@ const bullets = [
     <div class="mt-14 grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
       <!-- ∞ stat panel -->
       <div
-        class="relative flex min-h-[360px] flex-col justify-between overflow-hidden rounded-3xl bg-ink p-10 text-white"
+        class="reveal-left relative flex min-h-[360px] flex-col justify-between overflow-hidden rounded-3xl bg-ink p-10 text-white"
       >
+        <div class="dot-grid"></div>
         <div
           class="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full opacity-40 blur-3xl"
           style="background: radial-gradient(circle, rgba(170,241,10,0.3) 0%, transparent 65%);"
           aria-hidden="true"
         >
         </div>
+        <PlaybookMark mark="o" class="bottom-6 right-8 h-20 w-20" rotate={-8} opacity={0.5} />
         <div class="relative">
           <p class="font-mono text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-lime">
             Always-on growth
@@ -70,7 +73,7 @@ const bullets = [
       </div>
 
       <!-- bullets + CTA -->
-      <div class="flex flex-col justify-between">
+      <div class="reveal-right flex flex-col justify-between">
         <ul class="flex flex-col gap-7">
           {bullets.map((b) => (
             <li class="border-l-2 border-lime pl-5">

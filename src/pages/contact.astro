@@ -3,6 +3,7 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import ContactForm from "@/components/islands/ContactForm.tsx";
+import PlaybookMark from "@/components/PlaybookMark.astro";
 
 const points = [
   "No implementation cost. Live in days.",
@@ -18,18 +19,26 @@ const points = [
 >
   <Header />
   <main>
-    <section class="bg-ink">
-      <div class="mx-auto max-w-7xl px-6 pb-16 pt-14 lg:px-10 lg:pb-24 lg:pt-20">
+    <section class="relative overflow-hidden bg-ink">
+      <div class="dot-grid"></div>
+      <div
+        class="glow"
+        style="width:420px;height:420px;top:-10%;right:-4%;background:radial-gradient(circle,rgba(170,241,10,0.2) 0%,transparent 65%);opacity:0.6;animation:xpDrift2 16s ease-in-out infinite;"
+        aria-hidden="true"
+      >
+      </div>
+      <PlaybookMark mark="x" class="bottom-10 left-6 hidden h-20 w-20 lg:block" rotate={-8} opacity={0.5} />
+      <div class="relative z-10 mx-auto max-w-7xl px-6 pb-16 pt-14 lg:px-10 lg:pb-24 lg:pt-20">
         <div class="grid gap-12 lg:grid-cols-[1fr_1fr] lg:gap-16">
           <!-- value prop -->
-          <div class="lg:pt-6">
+          <div class="reveal-left lg:pt-6">
             <p class="font-mono text-xs uppercase tracking-[0.06em] text-lime">
               Get started
             </p>
             <h1
               class="font-display mt-4 text-[clamp(2.5rem,5.5vw,4.25rem)] uppercase leading-[0.95] tracking-tight text-white"
             >
-              Bring Xtra Points to your program.
+              Bring Xtra Points to your <span class="ed">Program.</span>
             </h1>
             <p class="mt-5 max-w-md text-lg leading-relaxed text-white/75">
               Tell us a little about your athletic department, booster club, or
@@ -52,7 +61,7 @@ const points = [
           </div>
 
           <!-- form card -->
-          <div class="rounded-3xl bg-white p-6 shadow-2xl sm:p-8 lg:p-10">
+          <div class="reveal-right rounded-3xl bg-white p-6 shadow-2xl sm:p-8 lg:p-10">
             <h2 class="text-2xl font-bold tracking-tight text-gray-900">
               Request a walkthrough
             </h2>
