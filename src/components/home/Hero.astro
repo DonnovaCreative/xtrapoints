@@ -3,15 +3,31 @@ import CtaButton from "@/components/CtaButton.astro";
 import StatTrio from "@/components/islands/StatTrio.tsx";
 import PhoneMockup from "@/components/home/PhoneMockup.astro";
 import PlaybookMark from "@/components/PlaybookMark.astro";
+import DotGrid from "@/components/islands/DotGrid.tsx";
 import { brand } from "@/config/brand";
+
+// Giant backdrop wordmark (decorative), uppercased from the brand name.
+const wordmark = brand.name.replace(/[™®]/g, "").toUpperCase();
 ---
 
 <section class="relative overflow-hidden bg-ink">
+  <!-- interactive dot-grid background (ReactBits) -->
+  <div class="absolute inset-0 z-0" aria-hidden="true">
+    <DotGrid
+      client:load
+      dotSize={2}
+      gap={28}
+      baseColor="#061786"
+      activeColor="#aaf10a"
+      proximity={130}
+    />
+  </div>
+
   <!-- giant outlined wordmark anchored to the bottom edge -->
   <span
-    class="backdrop-type bottom-[-7%] left-1/2 -translate-x-1/2"
+    class="backdrop-type bottom-[-7%] left-1/2 z-0 -translate-x-1/2"
     style="font-size:clamp(6rem,18vw,16rem);opacity:0.13;"
-    aria-hidden="true">XTRAPOINTS</span
+    aria-hidden="true">{wordmark}</span
   >
 
   <!-- playbook chalk marks (positioned against the section, like the live page) -->
