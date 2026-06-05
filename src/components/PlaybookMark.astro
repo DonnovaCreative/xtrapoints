@@ -2,26 +2,43 @@
 /**
  * Decorative lime "playbook" chalk mark (X / O / arrow / underline) from the
  * brand SVGs, rendered as a mask so the lime token drives the color.
- * Purely decorative — aria-hidden. Position + size via `class`.
+ * Width drives size; height comes from each SVG's native aspect ratio so the
+ * tall arrow (300:444) and wide underline (1002:69) keep their proportions.
+ * Purely decorative — aria-hidden.
  */
 export interface Props {
   mark: "x" | "o" | "arrow" | "underline";
   class?: string;
+  /** CSS length (e.g. "96px"/"100%"). If omitted, size via `class` (w-/h-). */
+  width?: string;
   rotate?: number;
   opacity?: number;
-  float?: 1 | 2 | false;
+  delay?: number; // seconds, for the staggered fade-in
 }
-const { mark, class: className = "", rotate = 0, opacity = 1, float = false } =
-  Astro.props;
+const {
+  mark,
+  class: className = "",
+  width,
+  rotate = 0,
+  opacity = 1,
+  delay = 0,
+} = Astro.props;
 
 const file = { x: "ex", o: "oh", arrow: "arrow", underline: "underline" }[mark];
+const ratio = { x: "1/1", o: "1/1", arrow: "300/444", underline: "1002/69" }[
+  mark
+];
 const url = `/assets/${file}.svg`;
-const floatClass = float ? `anim-float-${float}` : "";
+
+// Only constrain width + aspect-ratio when a width is given; otherwise the
+// caller's w-/h- classes drive the size.
+const sizing = width ? `width:${width};aspect-ratio:${ratio};` : "";
+const style = `-webkit-mask-image:url('${url}');mask-image:url('${url}');${sizing}--rot:${rotate}deg;--mark-opacity:${opacity};animation-delay:${delay}s;transform:rotate(${rotate}deg);opacity:${opacity};`;
 ---
 
 <span
   aria-hidden="true"
-  class={`playbook-mark ${floatClass} ${className}`}
-  style={`-webkit-mask-image:url('${url}');mask-image:url('${url}');transform:rotate(${rotate}deg);opacity:${opacity};`}
+  class={`playbook-mark mark-in ${className}`}
+  style={style}
 >
 </span>

@@ -6,37 +6,20 @@ import PlaybookMark from "@/components/PlaybookMark.astro";
 ---
 
 <section class="relative overflow-hidden bg-ink">
-  <!-- atmosphere -->
-  <div class="dot-grid"></div>
-  <div
-    class="glow anim-float-1"
-    style="width:460px;height:460px;top:-8%;right:6%;background:radial-gradient(circle,rgba(170,241,10,0.22) 0%,transparent 65%);opacity:0.7;"
-    aria-hidden="true"
+  <!-- giant outlined wordmark anchored to the bottom edge -->
+  <span
+    class="backdrop-type bottom-[-7%] left-1/2 -translate-x-1/2"
+    style="font-size:clamp(6rem,18vw,16rem);opacity:0.13;"
+    aria-hidden="true">XTRAPOINTS</span
   >
-  </div>
-  <div
-    class="glow"
-    style="width:380px;height:380px;bottom:-12%;left:-4%;background:radial-gradient(circle,rgba(43,143,252,0.28) 0%,transparent 65%);opacity:0.6;animation:xpDrift2 16s ease-in-out infinite;"
-    aria-hidden="true"
-  >
-  </div>
-  <div
-    class="glow"
-    style="width:300px;height:300px;top:34%;left:38%;background:radial-gradient(circle,rgba(196,181,253,0.22) 0%,transparent 65%);opacity:0.5;animation:xpDrift3 18s ease-in-out infinite;"
-    aria-hidden="true"
-  >
-  </div>
 
-  <!-- playbook chalk mark -->
-  <PlaybookMark
-    mark="x"
-    class="right-6 top-6 h-16 w-16 lg:right-12 lg:top-10 lg:h-28 lg:w-28"
-    rotate={6}
-    opacity={0.95}
-  />
+  <!-- playbook chalk marks (positioned against the section, like the live page) -->
+  <PlaybookMark mark="x" class="top-[6%] right-[7%]" width="clamp(56px,7vw,96px)" rotate={12} delay={0.4} />
+  <PlaybookMark mark="o" class="top-[52%] right-[2%] hidden lg:block" width="84px" rotate={-10} delay={1} />
+  <PlaybookMark mark="arrow" class="bottom-[19%] left-[42%] hidden lg:block" width="54px" rotate={26} delay={0.7} opacity={0.9} />
 
   <div
-    class="relative z-10 mx-auto grid max-w-7xl gap-14 px-6 pb-20 pt-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:px-10 lg:pb-28 lg:pt-20"
+    class="relative z-10 mx-auto grid max-w-7xl gap-10 px-6 pb-20 pt-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-12 lg:px-10 lg:pb-28 lg:pt-20"
   >
     <!-- copy -->
     <div>
@@ -58,8 +41,16 @@ import PlaybookMark from "@/components/PlaybookMark.astro";
         </span>
         <span class="block">
           <span class="hero-word" style="animation-delay:0.72s">For</span>
-          <span class="hero-word" style="animation-delay:0.78s">Your</span>
-          <span class="hero-word" style="animation-delay:0.84s">Team.</span>
+          <span class="relative inline-block">
+            <span class="hero-word" style="animation-delay:0.78s">Your</span>
+            <span class="hero-word" style="animation-delay:0.84s">Team.</span>
+            <PlaybookMark
+              mark="underline"
+              class="-bottom-3 left-0"
+              width="100%"
+              delay={1.1}
+            />
+          </span>
         </span>
       </h1>
 
@@ -84,7 +75,7 @@ import PlaybookMark from "@/components/PlaybookMark.astro";
       </div>
     </div>
 
-    <!-- phone -->
+    <!-- phone visual -->
     <div class="relative reveal-right">
       <PhoneMockup />
     </div>
