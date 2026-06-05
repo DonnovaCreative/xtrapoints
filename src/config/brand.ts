@@ -18,9 +18,9 @@ export const brand = {
   plural: PLURAL,
 
   /** One-word wordmark, e.g. "XtraPoint" (used in UI labels, subjects, alt). */
-  name: PLURAL ? "XtraPoints" : "XtraPoint",
+  name: PLURAL ? "XtraPoints™" : "XtraPoint™",
   /** Two-word form used in body copy, e.g. "Xtra Point". */
-  nameSpaced: PLURAL ? "Xtra Points" : "Xtra Point",
+  nameSpaced: PLURAL ? "XtraPoints™" : "XtraPoint™",
 
   domain,
   url: `https://${domain}`,
