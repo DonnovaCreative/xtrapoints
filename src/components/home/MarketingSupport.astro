@@ -4,62 +4,75 @@ import CampaignsDashboard from "@/components/home/CampaignsDashboard.astro";
 
 const bullets = [
   {
+    icon: `<path d="M3 17l6-6 4 4 8-8M14 7h7v7" />`,
     title: "Pre-built campaign templates.",
     body: "Season kickoff, end-of-year giving, championship runs — drop-in playbooks proven across hundreds of programs.",
   },
   {
+    icon: `<path d="M4 4h16v12H5.2L4 18z" /><path d="M8 9h8M8 12h5" />`,
     title: "Social & email plug-in.",
     body: "One-click sharing across the channels your supporters actually use, with templated copy and assets in your colors.",
   },
   {
+    icon: `<circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" />`,
     title: "Targeted re-engagement.",
     body: "Win back lapsed supporters automatically with sequences that learn from real giving behavior.",
   },
 ];
 ---
 
-<section class="bg-gray-50 py-20 lg:py-28">
+<section class="relative overflow-hidden bg-gray-50 py-20 lg:py-28">
+  <!-- subtle halftone texture -->
   <div
-    class="mx-auto grid max-w-7xl items-center gap-14 px-6 lg:grid-cols-2 lg:px-10"
+    class="pointer-events-none absolute inset-0 z-0 opacity-[0.04]"
+    style="background-image:radial-gradient(var(--color-gray-900) 1px,transparent 1px);background-size:5px 5px;"
+    aria-hidden="true"
   >
-    <!-- dashboard first on desktop -->
-    <div class="reveal-left order-2 lg:order-1">
-      <CampaignsDashboard />
-    </div>
+  </div>
 
-    <div class="reveal-right order-1 lg:order-2">
+  <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">
+    <!-- full-width header -->
+    <div class="reveal max-w-3xl">
       <Eyebrow index="04" label="Marketing support" />
       <h2
-        class="font-display mt-4 text-[clamp(2.25rem,5vw,3.5rem)] uppercase leading-[0.95] tracking-tight text-gray-900"
+        class="font-display mt-4 max-w-[18ch] text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900"
       >
         A full marketing arm — <span class="ed ed-dark">Without The</span> headcount.
       </h2>
-      <p class="mt-5 text-lg leading-relaxed text-gray-600">
+      <p class="mt-5 max-w-2xl text-lg leading-relaxed text-gray-600">
         Not every athletic department has a 20-person comms team. Xtra Points
         includes done-for-you marketing campaigns and social tools that drive
         more supporters to your platform — so the program with one part-time
         admin can reach donors like the program with a full agency.
       </p>
+    </div>
 
-      <ul class="mt-8 flex flex-col gap-5">
-        {bullets.map((b) => (
-          <li class="flex gap-3.5">
-            <span class="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-lime-soft text-lime-dark">
-              <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </span>
-            <span>
-              <span class="font-semibold text-gray-900">{b.title}</span>{" "}
-              <span class="text-gray-600">{b.body}</span>
-            </span>
-          </li>
-        ))}
-      </ul>
+    <!-- bullets (left) + campaigns mockup (right) -->
+    <div
+      class="mt-14 grid items-center gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-16"
+    >
+      <div class="reveal-left">
+        <ul class="stagger flex flex-col gap-4">
+          {bullets.map((b) => (
+            <li class="flex items-start gap-3.5 rounded-xl border border-gray-200 bg-white px-5 py-4">
+              <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
+                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={b.icon} />
+              </span>
+              <span>
+                <strong class="font-semibold text-gray-900">{b.title}</strong>{" "}
+                <span class="text-gray-600">{b.body}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p class="mt-6 font-mono text-xs uppercase tracking-[0.04em] text-gray-500">
+          Included in select plans. Talk to sales about marketing tier eligibility.
+        </p>
+      </div>
 
-      <p class="mt-6 font-mono text-xs uppercase tracking-[0.04em] text-gray-500">
-        Included in select plans. Talk to sales about marketing tier eligibility.
-      </p>
+      <div class="reveal-right">
+        <CampaignsDashboard />
+      </div>
     </div>
   </div>
 </section>

@@ -4,24 +4,26 @@ import DonorDashboard from "@/components/islands/DonorDashboard.tsx";
 
 const bullets = [
   {
+    icon: `<path d="M3 12h4l2 6 4-12 2 6h6" />`,
     title: "Real-time donor activity.",
     body: "Every round-up, recurring gift, and one-time donation lands in one feed.",
   },
   {
+    icon: `<path d="M3 3v18h18" /><path d="M7 14l3-3 3 3 5-6" />`,
     title: "Segments & lifetime value.",
     body: "Know who your top supporters are, what they respond to, and where to focus.",
   },
 ];
 ---
 
-<section class="bg-white py-20 lg:py-28">
+<section class="relative overflow-hidden bg-white py-20 lg:py-28">
   <div
-    class="mx-auto grid max-w-7xl items-center gap-14 px-6 lg:grid-cols-2 lg:px-10"
+    class="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-[1fr_1.2fr] lg:gap-16 lg:px-10"
   >
     <div class="reveal-left">
       <Eyebrow index="03" label="Donor management" />
       <h2
-        class="font-display mt-4 text-[clamp(2.25rem,5vw,3.5rem)] uppercase leading-[0.95] tracking-tight text-gray-900"
+        class="font-display mt-4 max-w-[16ch] text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900"
       >
         One <span class="ed ed-dark">Unified</span> view of every supporter.
       </h2>
@@ -32,16 +34,14 @@ const bullets = [
         a quarterly report.
       </p>
 
-      <ul class="mt-8 flex flex-col gap-5">
+      <ul class="mt-8 flex flex-col gap-4">
         {bullets.map((b) => (
-          <li class="flex gap-3.5">
-            <span class="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-lime-soft text-lime-dark">
-              <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
+          <li class="flex items-start gap-3.5 rounded-xl border border-gray-200 bg-white px-5 py-4">
+            <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
+              <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={b.icon} />
             </span>
             <span>
-              <span class="font-semibold text-gray-900">{b.title}</span>{" "}
+              <strong class="font-semibold text-gray-900">{b.title}</strong>{" "}
               <span class="text-gray-600">{b.body}</span>
             </span>
           </li>

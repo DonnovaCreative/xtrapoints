@@ -11,24 +11,29 @@ const audiences = [
 const track = [...audiences, ...audiences];
 ---
 
-<div class="xp-marquee overflow-hidden bg-lime py-4" aria-hidden="true">
+<div class="xp-marquee group overflow-hidden bg-lime py-4" aria-hidden="true">
   <div class="xp-marquee-track flex w-max items-center">
     {track.map((item) => (
-      <div class="flex items-center">
-        <span class="font-editorial whitespace-nowrap px-7 text-[1.75rem] italic leading-none text-ink">
+      <>
+        <span
+          class="font-editorial mr-16 shrink-0 whitespace-nowrap text-[1.75rem] font-semibold italic leading-none tracking-[-0.01em] text-primary-900"
+        >
           {item}
         </span>
-        <svg class="h-3 w-3 shrink-0 text-ink/70" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M12 2l2.4 6.9L21 9.3l-5.4 4.3L17.6 21 12 16.9 6.4 21l2-7.4L3 9.3l6.6-.4z" />
-        </svg>
-      </div>
+        <span class="mr-16 h-1.5 w-1.5 shrink-0 rounded-full bg-primary-900"></span>
+      </>
     ))}
   </div>
 </div>
 
 <style>
   .xp-marquee-track {
-    animation: xpMarquee 28s linear infinite;
+    will-change: transform;
+    animation: xpMarquee 40s linear infinite;
+  }
+  /* Pause on hover, like the live page. */
+  .xp-marquee:hover .xp-marquee-track {
+    animation-play-state: paused;
   }
   @keyframes xpMarquee {
     from {

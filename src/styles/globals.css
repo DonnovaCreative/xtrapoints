@@ -159,16 +159,17 @@
    Editorial type — Permanent Marker accent words inside Anton headings.
    Mirrors the live page, where headings mix display + handwritten lime accents.
    ============================================================================= */
+/* Editorial accent word inside Anton headings — mirrors the live page's
+   .xp-italic (handwritten Permanent Marker, capitalized, sits on the baseline). */
 .ed {
   font-family: var(--font-editorial);
   color: var(--color-lime);
-  text-transform: none;
-  letter-spacing: 0.01em;
-  font-size: 1.12em;
-  line-height: 0.9;
-  /* nudge the handwritten baseline to sit with the uppercase Anton caps */
-  display: inline-block;
-  transform: translateY(0.06em) rotate(-2deg);
+  text-transform: capitalize;
+  letter-spacing: -0.015em;
+  font-size: 1.1em;
+  line-height: 0.92;
+  font-weight: 500;
+  vertical-align: baseline;
 }
 /* lime is unreadable on white — use the deeper lime for accents on light sections */
 .ed-dark {

@@ -1,7 +1,8 @@
 ---
 import Eyebrow from "@/components/Eyebrow.astro";
+import PlaybookMark from "@/components/PlaybookMark.astro";
 
-const items = [
+const caps = [
   {
     n: "01",
     kicker: "Fast to market",
@@ -26,21 +27,24 @@ const items = [
     title: "Cards, Apple Pay, bank transfers.",
     body: "We meet supporters at the payment method they already trust — no new wallets, no new accounts, no friction between intent and impact.",
   },
-  {
-    n: "05",
-    kicker: "Tribute & team giving",
-    title: "Gifts in honor of a coach, an alum, or a championship season.",
-    body: "Tribute giving captures the moments that move supporters most — milestone seasons, retiring jerseys, a coach’s anniversary — and turns each one into a lasting connection between your program and the people who care about it.",
-  },
 ];
+
+const wide = {
+  n: "05",
+  kicker: "Tribute & team giving",
+  title: "Gifts in honor of a coach, an alum, or a championship season.",
+  body: "Tribute giving captures the moments that move supporters most — milestone seasons, retiring jerseys, a coach’s anniversary — and turns each one into a lasting connection between your program and the people who care about it.",
+};
 ---
 
-<section class="bg-white py-20 lg:py-28">
-  <div class="mx-auto max-w-7xl px-6 lg:px-10">
+<section class="relative overflow-hidden bg-white py-20 lg:py-28">
+  <PlaybookMark mark="o" class="right-[4%] top-[12%] hidden lg:block" width="64px" rotate={14} opacity={0.16} />
+
+  <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">
     <div class="reveal max-w-3xl">
       <Eyebrow index="01" label="How it works" />
       <h2
-        class="font-display mt-4 text-[clamp(2.25rem,5vw,3.5rem)] uppercase leading-[0.95] tracking-tight text-gray-900"
+        class="font-display mt-4 max-w-[18ch] text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900"
       >
         More recurring revenue, <span class="ed ed-dark">Less</span> work for your team.
       </h2>
@@ -52,25 +56,36 @@ const items = [
       </p>
     </div>
 
-    <ul class="stagger mt-14 divide-y divide-gray-100 border-t border-gray-100">
-      {items.map((item) => (
-        <li class="grid grid-cols-1 gap-4 py-7 md:grid-cols-[auto_1fr] md:gap-10">
-          <span class="font-display text-3xl leading-none text-lime-dark md:text-4xl">
-            {item.n}
-          </span>
-          <div class="grid gap-3 md:grid-cols-[1fr_1.4fr] md:gap-10">
-            <div>
-              <p class="font-mono text-xs uppercase tracking-[0.08em] text-primary-500">
-                {item.kicker}
-              </p>
-              <h3 class="mt-2 text-xl font-bold tracking-tight text-gray-900">
-                {item.title}
-              </h3>
-            </div>
-            <p class="leading-relaxed text-gray-600">{item.body}</p>
-          </div>
-        </li>
+    <!-- bordered caps grid + wide dark card -->
+    <div class="stagger mt-14 grid grid-cols-1 border-t border-gray-200 md:grid-cols-2">
+      {caps.map((c, i) => (
+        <div
+          class={`px-8 py-12 transition-colors hover:bg-gray-50 border-gray-200 ${i < 2 ? "border-b" : ""} ${i % 2 === 0 ? "md:border-r" : ""}`}
+        >
+          <p class="font-mono text-xs uppercase tracking-[0.06em] text-primary-500">
+            <span class="text-lime-dark">{c.n}</span> / {c.kicker}
+          </p>
+          <h3 class="mt-3 text-xl font-bold leading-snug tracking-tight text-gray-900">
+            {c.title}
+          </h3>
+          <p class="mt-3 leading-relaxed text-gray-600">{c.body}</p>
+        </div>
       ))}
-    </ul>
+
+      <!-- wide dark card -->
+      <div class="relative col-span-1 mt-6 overflow-hidden rounded-2xl bg-ink px-8 py-12 md:col-span-2">
+        <div class="dot-grid"></div>
+        <PlaybookMark mark="x" class="bottom-[-10%] right-[4%]" width="120px" rotate={12} opacity={0.12} />
+        <div class="relative z-10 max-w-3xl">
+          <p class="font-mono text-xs uppercase tracking-[0.06em] text-lime">
+            {wide.n} / {wide.kicker}
+          </p>
+          <h3 class="mt-3 text-2xl font-bold leading-snug tracking-tight text-white">
+            {wide.title}
+          </h3>
+          <p class="mt-3 leading-relaxed text-white/70">{wide.body}</p>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
