@@ -1,5 +1,6 @@
 ---
 import "@/styles/globals.css";
+import { brand } from "@/config/brand";
 
 export interface Props {
   title: string;
@@ -38,7 +39,7 @@ const ogImageUrl = new URL(ogImage, Astro.site).href;
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Xtra Points" />
+    <meta property="og:site_name" content={brand.nameSpaced} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />

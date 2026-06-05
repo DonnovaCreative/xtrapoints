@@ -6,10 +6,14 @@ import vercel from '@astrojs/vercel';
 import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
 
+// Single source of truth for the brand/domain (see src/config/brand.ts).
+import { brand } from './src/config/brand.ts';
+
 // https://astro.build/config
 export default defineConfig({
-  // Production apex domain — used for canonical URLs, sitemap, and OG tags.
-  site: 'https://xtrapoints.com',
+  // Production domain — follows the brand toggle. Make sure the Vercel custom
+  // domain matches this (xtrapoint.com vs xtrapoints.com).
+  site: brand.url,
 
   // Static build. The Vercel adapter ships the prerendered output to Vercel's
   // static hosting; no SSR runtime is used (the contact form posts client-side).

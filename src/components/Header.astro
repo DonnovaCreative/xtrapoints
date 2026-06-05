@@ -1,23 +1,24 @@
 ---
 import CtaButton from "@/components/CtaButton.astro";
+import { brand } from "@/config/brand";
 ---
 
 <header class="relative z-50 bg-ink">
   <div
     class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-5 lg:px-10"
   >
-    <a href="/" class="flex items-center gap-3" aria-label="Xtra Points home">
+    <a href="/" class="flex items-center gap-3" aria-label={`${brand.name} home`}>
       <img
-        src="/assets/xtrapoints-logo-white.svg"
-        alt="Xtra Points"
-        width="160"
-        height="27"
+        src={brand.logo.white}
+        alt={brand.name}
+        width={brand.logo.width}
+        height={brand.logo.height}
         class="h-[26px] w-auto"
       />
       <span
         class="hidden border-l border-white/15 pl-3 font-mono text-[0.6875rem] uppercase tracking-[0.12em] text-white/55 sm:inline"
       >
-        For the team behind the team
+        {brand.tagline}
       </span>
     </a>
 

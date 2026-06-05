@@ -1,6 +1,7 @@
 ---
 import Eyebrow from "@/components/Eyebrow.astro";
 import CampaignsDashboard from "@/components/home/CampaignsDashboard.astro";
+import { brand } from "@/config/brand";
 
 const bullets = [
   {
@@ -21,7 +22,7 @@ const bullets = [
 ];
 ---
 
-<section class="relative overflow-hidden bg-gray-50 py-20 lg:py-28">
+<section id="marketing" class="relative overflow-hidden bg-gray-50 py-20 lg:py-28">
   <!-- subtle halftone texture -->
   <div
     class="pointer-events-none absolute inset-0 z-0 opacity-[0.04]"
@@ -40,7 +41,7 @@ const bullets = [
         A full marketing arm — <span class="ed ed-dark">Without The</span> headcount.
       </h2>
       <p class="mt-5 max-w-2xl text-lg leading-relaxed text-gray-600">
-        Not every athletic department has a 20-person comms team. Xtra Points
+        Not every athletic department has a 20-person comms team. {brand.nameSpaced}
         includes done-for-you marketing campaigns and social tools that drive
         more supporters to your platform — so the program with one part-time
         admin can reach donors like the program with a full agency.

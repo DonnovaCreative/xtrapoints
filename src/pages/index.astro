@@ -11,10 +11,11 @@ import MarketingSupport from "@/components/home/MarketingSupport.astro";
 import Ambassadors from "@/components/home/Ambassadors.astro";
 import WhyItWorks from "@/components/home/WhyItWorks.astro";
 import FinalCTA from "@/components/home/FinalCTA.astro";
+import { brand } from "@/config/brand";
 ---
 
 <Layout
-  title="Xtra Points"
+  title={brand.nameSpaced}
   description="Partner with us and help shape the future of business relationships."
 >
   <Header />

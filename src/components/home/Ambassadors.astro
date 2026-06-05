@@ -1,6 +1,7 @@
 ---
 import Eyebrow from "@/components/Eyebrow.astro";
 import PlaybookMark from "@/components/PlaybookMark.astro";
+import { brand } from "@/config/brand";
 
 const bullets = [
   {
@@ -21,7 +22,7 @@ const bullets = [
 ];
 ---
 
-<section class="bg-white py-20 lg:py-28">
+<section id="ambassadors" class="bg-white py-20 lg:py-28">
   <div class="mx-auto max-w-7xl px-6 lg:px-10">
     <div class="reveal max-w-3xl">
       <Eyebrow index="05" label="Student ambassadors" />
@@ -91,7 +92,7 @@ const bullets = [
           ))}
         </ul>
         <a
-          href="mailto:sales@xtrapoints.com"
+          href={`mailto:${brand.salesEmail}`}
           class="mt-8 inline-flex w-fit items-center gap-2.5 rounded-full bg-lime px-6 py-3.5 text-[0.9375rem] font-bold text-ink transition-all duration-300 hover:bg-lime-deep hover:-translate-y-0.5"
         >
           Learn about the Ambassador Program

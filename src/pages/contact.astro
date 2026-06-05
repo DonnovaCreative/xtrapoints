@@ -4,6 +4,7 @@ import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import ContactForm from "@/components/islands/ContactForm.tsx";
 import PlaybookMark from "@/components/PlaybookMark.astro";
+import { brand } from "@/config/brand";
 
 const points = [
   "No implementation cost. Live in days.",
@@ -14,8 +15,8 @@ const points = [
 ---
 
 <Layout
-  title="Get Started with Xtra Points"
-  description="Bring Xtra Points to your athletic department, booster club, or alumni association. Get started with Xtra Points — no implementation cost, live in days."
+  title={`Get Started with ${brand.nameSpaced}`}
+  description={`Bring ${brand.nameSpaced} to your athletic department, booster club, or alumni association. Get started with ${brand.nameSpaced} — no implementation cost, live in days.`}
 >
   <Header />
   <main>
@@ -38,7 +39,7 @@ const points = [
             <h1
               class="font-display mt-4 text-[clamp(2.5rem,5.5vw,4.25rem)] uppercase leading-[0.95] tracking-tight text-white"
             >
-              Bring Xtra Points to your <span class="ed">Program.</span>
+              Bring {brand.nameSpaced} to your <span class="ed">Program.</span>
             </h1>
             <p class="mt-5 max-w-md text-lg leading-relaxed text-white/75">
               Tell us a little about your athletic department, booster club, or

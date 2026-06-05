@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import CountUp from "./CountUp";
+import { brand } from "@/config/brand";
 
 const stats = [
   { label: "Net giving", value: 776.39, prefix: "$", suffix: "k", decimals: 2, trend: "12.4% MoM" },
@@ -34,7 +35,7 @@ export default function DonorDashboard() {
           <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
         </span>
         <span className="ml-2 truncate font-mono text-[11px] text-gray-400">
-          app.xtrapoints.com / bobcat-athletics / overview
+          {brand.appHost} / bobcat-athletics / overview
         </span>
       </div>
 

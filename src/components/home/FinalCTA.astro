@@ -1,6 +1,7 @@
 ---
 import CtaButton from "@/components/CtaButton.astro";
 import CountUp from "@/components/islands/CountUp.tsx";
+import { brand } from "@/config/brand";
 
 // Static feed — matches the live page (fades in once; no cycling/reflow).
 const feed = [
@@ -46,7 +47,7 @@ const feed = [
           Ready to <span class="ed">Launch</span> your program’s giving platform?
         </h2>
         <p class="mt-5 max-w-md text-lg leading-relaxed text-white/75">
-          Bring Xtra Points to your athletic department, booster club, or alumni
+          Bring {brand.nameSpaced} to your athletic department, booster club, or alumni
           association — and see what a modern supporter experience looks like. No
           implementation cost. No long contracts.
         </p>

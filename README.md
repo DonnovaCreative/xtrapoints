@@ -79,6 +79,27 @@ Brand colors and fonts were pulled from the live page and defined **once** in
 body `Inter`). shadcn semantic tokens are mapped onto that palette. Components
 reference tokens only — no hardcoded hex/px.
 
+## Brand name / domain toggle
+
+The brand name, domain, all public emails, and which logo art renders are
+controlled from **one file**: [`src/config/brand.ts`](src/config/brand.ts).
+Flip a single switch:
+
+```ts
+export const PLURAL = false; // false → "XtraPoint" / xtrapoint.com
+                             // true  → "XtraPoints" / xtrapoints.com
+```
+
+Changing it updates: the wordmark in copy, the `<title>`/OG tags, the singular
+vs plural **logo** (header + footer), `sales@…` links, the dashboard mock URL,
+and the site/canonical/sitemap/robots domain (`astro.config.mjs` reads
+`brand.url`). Two things that live **outside** the build must be matched by hand
+when you flip it:
+
+- **Vercel custom domain** must match (xtrapoint.com vs xtrapoints.com).
+- **Web3Forms key** must be created for the matching `sales@…` inbox (the key
+  determines the delivery address — see below).
+
 ## Contact form (Web3Forms)
 
 The form posts client-side to [Web3Forms](https://web3forms.com) and emails

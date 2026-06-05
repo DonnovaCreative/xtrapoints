@@ -3,6 +3,7 @@ import CtaButton from "@/components/CtaButton.astro";
 import StatTrio from "@/components/islands/StatTrio.tsx";
 import PhoneMockup from "@/components/home/PhoneMockup.astro";
 import PlaybookMark from "@/components/PlaybookMark.astro";
+import { brand } from "@/config/brand";
 ---
 
 <section class="relative overflow-hidden bg-ink">
@@ -56,7 +57,7 @@ import PlaybookMark from "@/components/PlaybookMark.astro";
 
       <div class="reveal">
         <p class="mt-6 max-w-xl text-lg leading-relaxed text-white/75">
-          Xtra Points helps athletic departments, alumni associations, and
+          {brand.nameSpaced} helps athletic departments, alumni associations, and
           booster clubs turn everyday spending into recurring donor revenue —
           paired with the marketing tools to grow it. No implementation cost.
           Live in days.

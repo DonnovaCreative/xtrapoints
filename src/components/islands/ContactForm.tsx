@@ -10,8 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { brand } from "@/config/brand";
 
-// Web3Forms access key. Create a key for sales@xtrapoints.com at
+// Web3Forms access key. Create a key for the brand sales inbox (brand.salesEmail) at
 // https://web3forms.com and add it to .env as PUBLIC_WEB3FORMS_KEY.
 const ACCESS_KEY = import.meta.env.PUBLIC_WEB3FORMS_KEY as string | undefined;
 
@@ -82,7 +83,7 @@ export default function ContactForm() {
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
           access_key: ACCESS_KEY,
-          subject: `New XtraPoints inquiry from ${data.organization}`,
+          subject: `New ${brand.name} inquiry from ${data.organization}`,
           from_name: "XtraPoints Website",
           name: data.name,
           email: data.email,
@@ -102,7 +103,7 @@ export default function ContactForm() {
       }
     } catch {
       setStatus("error");
-      setErrorMsg("Network error. Please try again or email sales@xtrapoints.com.");
+      setErrorMsg(`Network error. Please try again or email ${brand.salesEmail}.`);
     }
   }
 
@@ -206,8 +207,8 @@ export default function ContactForm() {
 
       <p className="text-center text-xs text-gray-500">
         Prefer email? Reach us at{" "}
-        <a href="mailto:sales@xtrapoints.com" className="font-semibold text-lime-dark hover:underline">
-          sales@xtrapoints.com
+        <a href={`mailto:${brand.salesEmail}`} className="font-semibold text-lime-dark hover:underline">
+          {brand.salesEmail}
         </a>
       </p>
     </form>

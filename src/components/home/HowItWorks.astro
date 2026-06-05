@@ -1,6 +1,7 @@
 ---
 import Eyebrow from "@/components/Eyebrow.astro";
 import PlaybookMark from "@/components/PlaybookMark.astro";
+import { brand } from "@/config/brand";
 
 const caps = [
   {
@@ -37,7 +38,7 @@ const wide = {
 };
 ---
 
-<section class="relative overflow-hidden bg-white py-20 lg:py-28">
+<section id="how-it-works" class="relative overflow-hidden bg-white py-20 lg:py-28">
   <PlaybookMark mark="o" class="right-[4%] top-[12%] hidden lg:block" width="64px" rotate={14} opacity={0.16} />
 
   <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">
@@ -50,7 +51,7 @@ const wide = {
       </h2>
       <p class="mt-5 text-lg leading-relaxed text-gray-600">
         Boosters, alumni, and fans want to give — they just want it to be easy.
-        Xtra Points captures small recurring gifts you’d otherwise leave on the
+        {brand.nameSpaced} captures small recurring gifts you’d otherwise leave on the
         table, so you spend less time chasing pledges and more time on the
         season ahead.
       </p>
