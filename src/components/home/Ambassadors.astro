@@ -1,6 +1,7 @@
 ---
 import Eyebrow from "@/components/Eyebrow.astro";
 import PlaybookMark from "@/components/PlaybookMark.astro";
+import Lanyard from "@/components/islands/Lanyard.tsx";
 import { brand } from "@/config/brand";
 
 const bullets = [
@@ -42,9 +43,9 @@ const bullets = [
     </div>
 
     <div class="mt-14 grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:gap-12">
-      <!-- ∞ stat panel -->
+      <!-- ambassador badge on a lanyard (3D) -->
       <div
-        class="reveal-left relative flex min-h-[360px] flex-col justify-between overflow-hidden rounded-3xl bg-ink p-10 text-white"
+        class="reveal-left relative flex min-h-[560px] flex-col overflow-hidden rounded-3xl bg-ink p-8 text-white"
       >
         <div class="dot-grid"></div>
         <div
@@ -53,20 +54,23 @@ const bullets = [
           aria-hidden="true"
         >
         </div>
-        <PlaybookMark mark="o" class="bottom-6 right-8 h-20 w-20" rotate={-8} opacity={0.5} />
+        <PlaybookMark mark="o" class="bottom-6 right-8 h-20 w-20" rotate={-8} opacity={0.4} />
+
         <div class="relative">
           <p class="font-mono text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-lime">
             Always-on growth
           </p>
-          <p class="font-display -mt-2 text-[clamp(7rem,14vw,11rem)] leading-[0.85] text-lime">
-            ∞
-          </p>
-          <p class="max-w-sm text-[0.9375rem] leading-relaxed text-white/75">
-            Recruitment that never sleeps — students reach corners of campus and
-            alumni networks your staff simply can’t.
+          <p class="mt-2 max-w-xs text-[0.9375rem] leading-relaxed text-white/75">
+            Recruitment that never sleeps — drag the badge.
           </p>
         </div>
-        <div class="relative mt-8 flex items-center justify-between border-t border-white/10 pt-5">
+
+        <!-- 3D lanyard fills the middle -->
+        <div class="relative -my-4 min-h-[340px] flex-1">
+          <Lanyard client:only="react" position={[0, 0, 14]} fov={20} />
+        </div>
+
+        <div class="relative flex items-center justify-between border-t border-white/10 pt-5">
           <span class="font-mono text-[0.625rem] font-bold uppercase tracking-[0.08em] text-white/50">
             Channels we tap
           </span>
