@@ -1,57 +1,103 @@
 ---
 import CtaButton from "@/components/CtaButton.astro";
-import LiveFeed from "@/components/islands/LiveFeed.tsx";
+import CountUp from "@/components/islands/CountUp.tsx";
+
+// Static feed — matches the live page (fades in once; no cycling/reflow).
+const feed = [
+  { initials: "SK", grad: "linear-gradient(135deg,#76b7fe,#2b8ffc)", name: "Sarah K. · '12", detail: "Round-up · 2s ago", amount: "+$0.43" },
+  { initials: "MT", grad: "linear-gradient(135deg,#abd635,#79a303)", name: "Marcus T. · Booster", detail: "Recurring · 14s ago", amount: "+$25.00" },
+  { initials: "JR", grad: "linear-gradient(135deg,#fdb022,#dc6803)", name: "Jennifer R. · '08", detail: "Game-day match · 38s ago", amount: "+$100.00" },
+  { initials: "DL", grad: "linear-gradient(135deg,#f670c7,#c11574)", name: "David L. · Coach tribute", detail: "In honor of · 1m ago", amount: "+$50.00" },
+];
 ---
 
 <section class="bg-white py-20 lg:py-28">
   <div class="mx-auto max-w-7xl px-6 lg:px-10">
     <div
-      class="relative overflow-hidden rounded-[2rem] bg-ink p-8 sm:p-12 lg:p-16"
+      class="reveal relative isolate grid items-center gap-10 overflow-hidden rounded-[2rem] bg-ink p-8 sm:p-12 lg:grid-cols-[1.05fr_1fr] lg:gap-12 lg:p-16"
     >
-      <div class="dot-grid"></div>
+      <!-- decorative orbital rings + glow -->
       <div
-        class="pointer-events-none absolute -left-20 -top-20 h-80 w-80 rounded-full opacity-40 blur-3xl"
-        style="background: radial-gradient(circle, rgba(170,241,10,0.22) 0%, transparent 65%);"
+        class="pointer-events-none absolute right-[-8%] top-1/2 z-0 h-[700px] w-[700px] -translate-y-1/2"
+        aria-hidden="true"
+      >
+        <div class="orbit-ring" style="inset:0;margin:auto;width:700px;height:700px;border:1px dashed rgba(194,242,86,0.18);animation-duration:80s;"></div>
+        <div class="orbit-ring" style="inset:0;margin:auto;width:540px;height:540px;border:1px dashed rgba(194,242,86,0.12);animation-direction:reverse;animation-duration:100s;"></div>
+        <div class="orbit-ring" style="inset:0;margin:auto;width:380px;height:380px;border:1px dashed rgba(194,242,86,0.08);animation-duration:60s;"></div>
+      </div>
+      <div
+        class="pointer-events-none absolute right-[-200px] top-[-200px] z-0 h-[600px] w-[600px]"
+        style="background:radial-gradient(circle,rgba(194,242,86,0.18) 0%,transparent 60%);"
         aria-hidden="true"
       >
       </div>
-      <!-- giant outlined editorial backdrop -->
-      <span
-        class="backdrop-type"
-        style="bottom:-14%;right:-2%;font-size:clamp(7rem,16vw,16rem);opacity:0.12;"
-        aria-hidden="true">XTRAPOINTS</span
-      >
 
-      <div
-        class="reveal relative grid items-center gap-10 lg:grid-cols-[1.05fr_1fr]"
-      >
-        <div>
-          <span
-            class="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3.5 py-1.5 font-mono text-xs uppercase tracking-[0.06em] text-white/70 backdrop-blur-sm"
-          >
-            <span class="anim-pulse-dot h-1.5 w-1.5 rounded-full bg-lime"></span>
-            Live in days · not quarters
+      <!-- left: copy -->
+      <div class="relative z-10">
+        <span
+          class="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3.5 py-1.5 font-mono text-xs uppercase tracking-[0.06em] text-white/70 backdrop-blur-sm"
+        >
+          <span class="anim-pulse-dot h-1.5 w-1.5 rounded-full bg-lime"></span>
+          Live in days · not quarters
+        </span>
+        <h2
+          class="font-display text-[clamp(2.75rem,5.5vw,5rem)] uppercase leading-[0.95] tracking-[-0.005em] text-white"
+        >
+          Ready to <span class="ed">Launch</span> your program’s giving platform?
+        </h2>
+        <p class="mt-5 max-w-md text-lg leading-relaxed text-white/75">
+          Bring Xtra Points to your athletic department, booster club, or alumni
+          association — and see what a modern supporter experience looks like. No
+          implementation cost. No long contracts.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-4">
+          <CtaButton href="/contact" variant="light">Get Started</CtaButton>
+          <span class="font-mono text-xs uppercase tracking-[0.02em] text-white/55">
+            SOC 2 · PCI DSS certified
           </span>
-          <h2
-            class="font-display text-[clamp(2.5rem,5.5vw,4.5rem)] uppercase leading-[0.95] tracking-tight text-white"
-          >
-            Ready to <span class="ed">Launch</span> your program’s giving platform?
-          </h2>
-          <p class="mt-5 max-w-md text-lg leading-relaxed text-white/75">
-            Bring Xtra Points to your athletic department, booster club, or
-            alumni association — and see what a modern supporter experience looks
-            like. No implementation cost. No long contracts.
-          </p>
-          <div class="mt-8 flex flex-wrap items-center gap-4">
-            <CtaButton href="/contact" variant="light">Get Started</CtaButton>
-            <span class="font-mono text-xs uppercase tracking-[0.02em] text-white/55">
-              SOC 2 · PCI DSS certified
+        </div>
+      </div>
+
+      <!-- right: live donation feed (static graphic) -->
+      <div class="relative z-10 flex justify-center">
+        <div class="w-full max-w-sm rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm">
+          <div class="flex items-center justify-between border-b border-white/12 pb-4">
+            <span class="flex items-center gap-2 text-sm font-semibold text-white">
+              <svg class="h-4 w-4 text-lime" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l2 6 4-12 2 6h6" /></svg>
+              Booster activity
+            </span>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-lime-soft px-2 py-1 font-mono text-[0.625rem] uppercase tracking-[0.08em] text-lime">
+              <span class="anim-pulse-dot h-[5px] w-[5px] rounded-full bg-lime"></span>
+              Live
             </span>
           </div>
-        </div>
 
-        <div>
-          <LiveFeed client:load />
+          <div class="mt-4 flex items-baseline gap-2">
+            <span class="text-[2rem] font-bold leading-none tracking-tight text-white">
+              <CountUp value={2847} prefix="$" client:visible />
+            </span>
+            <span class="font-mono text-[0.625rem] uppercase tracking-[0.06em] text-white/50">
+              in the last hour
+            </span>
+          </div>
+
+          <div class="stagger mt-4 flex flex-col gap-2.5">
+            {feed.map((f) => (
+              <div class="flex items-center gap-3 rounded-[0.625rem] border border-white/8 bg-white/[0.06] px-3 py-2.5">
+                <span
+                  class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[0.6875rem] font-bold text-white"
+                  style={`background:${f.grad}`}
+                >
+                  {f.initials}
+                </span>
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate text-[0.8125rem] font-semibold text-white">{f.name}</span>
+                  <span class="block font-mono text-[0.625rem] tracking-[0.02em] text-white/50">{f.detail}</span>
+                </span>
+                <span class="whitespace-nowrap text-sm font-bold text-lime">{f.amount}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

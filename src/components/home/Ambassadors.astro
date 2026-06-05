@@ -4,14 +4,17 @@ import PlaybookMark from "@/components/PlaybookMark.astro";
 
 const bullets = [
   {
+    icon: `<circle cx="12" cy="12" r="9" /><path d="M9 12l2 2 4-4" />`,
     title: "Real, verified growth.",
     body: "App downloads, verified registrations, and recurring donors you can measure — every signup tied back to the ambassador who drove it.",
   },
   {
+    icon: `<path d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7M5.5 5.5a9 9 0 0 0 0 13M18.5 5.5a9 9 0 0 1 0 13" /><circle cx="12" cy="12" r="1.5" fill="currentColor" />`,
     title: "Reach you can’t buy.",
     body: "Taps audiences staff can’t easily access — Greek life, athletic events, alumni gatherings, the spaces where actual influence lives.",
   },
   {
+    icon: `<circle cx="8" cy="15" r="4" /><path d="M10.8 12.2L20 3M16 7l3 3" />`,
     title: "Turnkey for you.",
     body: "We provide the platform, toolkit, and coaching; your campus brings the energy. No new hires, no new program to build from scratch.",
   },
@@ -23,7 +26,7 @@ const bullets = [
     <div class="reveal max-w-3xl">
       <Eyebrow index="05" label="Student ambassadors" />
       <h2
-        class="font-display mt-4 text-[clamp(2.25rem,5vw,3.5rem)] uppercase leading-[0.95] tracking-tight text-gray-900"
+        class="font-display mt-4 max-w-[18ch] text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900"
       >
         Put your students to <span class="ed ed-dark">Work</span> for your program.
       </h2>
@@ -37,7 +40,7 @@ const bullets = [
       </p>
     </div>
 
-    <div class="mt-14 grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
+    <div class="mt-14 grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:gap-12">
       <!-- ∞ stat panel -->
       <div
         class="reveal-left relative flex min-h-[360px] flex-col justify-between overflow-hidden rounded-3xl bg-ink p-10 text-white"
@@ -74,11 +77,16 @@ const bullets = [
 
       <!-- bullets + CTA -->
       <div class="reveal-right flex flex-col justify-between">
-        <ul class="flex flex-col gap-7">
+        <ul class="stagger flex flex-col gap-4">
           {bullets.map((b) => (
-            <li class="border-l-2 border-lime pl-5">
-              <h3 class="text-lg font-bold tracking-tight text-gray-900">{b.title}</h3>
-              <p class="mt-1.5 leading-relaxed text-gray-600">{b.body}</p>
+            <li class="flex items-start gap-3.5 rounded-xl border border-gray-200 bg-white px-5 py-4">
+              <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
+                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={b.icon} />
+              </span>
+              <span>
+                <strong class="font-semibold text-gray-900">{b.title}</strong>{" "}
+                <span class="text-gray-600">{b.body}</span>
+              </span>
             </li>
           ))}
         </ul>
