@@ -56,7 +56,12 @@ const bullets = [
         </div>
         <PlaybookMark mark="o" class="bottom-6 right-8 h-20 w-20" rotate={-8} opacity={0.4} />
 
-        <div class="relative">
+        <!-- 3D lanyard fills the whole card; the card clips the overflow -->
+        <div class="absolute inset-0 z-0">
+          <Lanyard client:only="react" position={[0, 0, 14]} fov={18} />
+        </div>
+
+        <div class="relative z-10">
           <p class="font-mono text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-lime">
             Always-on growth
           </p>
@@ -65,12 +70,9 @@ const bullets = [
           </p>
         </div>
 
-        <!-- 3D lanyard fills the middle -->
-        <div class="relative -my-4 min-h-[340px] flex-1">
-          <Lanyard client:only="react" position={[0, 0, 14]} fov={20} />
-        </div>
+        <div class="flex-1"></div>
 
-        <div class="relative flex items-center justify-between border-t border-white/10 pt-5">
+        <div class="relative z-10 flex items-center justify-between border-t border-white/10 pt-5">
           <span class="font-mono text-[0.625rem] font-bold uppercase tracking-[0.08em] text-white/50">
             Channels we tap
           </span>

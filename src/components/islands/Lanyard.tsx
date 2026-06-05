@@ -74,75 +74,98 @@ export default function Lanyard({
 function useBadgeTexture() {
   const [tex, setTex] = useState<THREE.Texture | null>(null);
   useEffect(() => {
-    const W = 512;
-    const H = 716; // ~card portrait ratio
+    // The GLB texture is a 1678x1677 atlas. From the card mesh UVs:
+    //   FRONT face (toward camera) → UV 0–0.5 × 0–0.755  → px (0,0)-(839,1267)
+    //   BACK face                  → UV 0.5–1 × 0–0.755  → px (839,0)-(1678,1267)
+    // We composite onto a copy of the atlas (preserving edge shading) and paint
+    // the full ambassador badge into both faces.
+    const W = 1678;
+    const H = 1677;
+    const FRONT = { x: 0, y: 0, w: 839, h: 1267 };
+    const BACK = { x: 839, y: 0, w: 839, h: 1267 };
+
     const c = document.createElement("canvas");
     c.width = W;
     c.height = H;
     const ctx = c.getContext("2d")!;
 
-    const paint = () => {
-      // navy gradient body
-      const g = ctx.createLinearGradient(0, 0, 0, H);
+    const roundRect = (x: number, y: number, w: number, h: number, r: number) => {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    };
+
+    const drawFace = (R: { x: number; y: number; w: number; h: number }, fav: HTMLImageElement | null) => {
+      // navy body — fills the full face
+      const g = ctx.createLinearGradient(R.x, R.y, R.x, R.y + R.h);
       g.addColorStop(0, "#03116d");
       g.addColorStop(1, "#000946");
       ctx.fillStyle = g;
-      ctx.fillRect(0, 0, W, H);
+      ctx.fillRect(R.x, R.y, R.w, R.h);
+
+      ctx.textAlign = "center";
 
       // lime header bar
       ctx.fillStyle = "#aaf10a";
-      ctx.fillRect(0, 0, W, 88);
+      ctx.fillRect(R.x, R.y, R.w, 196);
       ctx.fillStyle = "#03116d";
-      ctx.font = "700 30px Inter, system-ui, sans-serif";
       ctx.textBaseline = "middle";
-      ctx.textAlign = "left";
-      ctx.fillText("AMBASSADOR", 40, 46);
+      ctx.font = "800 96px Inter, system-ui, sans-serif";
+      ctx.fillText("AMBASSADOR", R.x + R.w / 2, R.y + 102);
 
-      // hole punch
-      ctx.fillStyle = "rgba(0,0,0,0.35)";
-      ctx.beginPath();
-      ctx.ellipse(W / 2, 132, 46, 13, 0, 0, Math.PI * 2);
-      ctx.fill();
+      // favicon (XP cube)
+      const fs = R.w * 0.5;
+      if (fav) ctx.drawImage(fav, R.x + (R.w - fs) / 2, R.y + R.h * 0.27, fs, fs);
 
-      // text block
-      ctx.textAlign = "center";
+      ctx.textBaseline = "alphabetic";
       ctx.fillStyle = "#ffffff";
-      ctx.font = "700 40px Inter, system-ui, sans-serif";
-      ctx.fillText("Jordan Rivera", W / 2, 470);
-      ctx.fillStyle = "rgba(255,255,255,0.7)";
-      ctx.font = "500 24px Inter, system-ui, sans-serif";
-      ctx.fillText("Student Ambassador", W / 2, 510);
+      ctx.font = "800 104px Inter, system-ui, sans-serif";
+      ctx.fillText("Jordan Rivera", R.x + R.w / 2, R.y + R.h * 0.78);
+      ctx.fillStyle = "rgba(255,255,255,0.72)";
+      ctx.font = "600 56px Inter, system-ui, sans-serif";
+      ctx.fillText("Student Ambassador", R.x + R.w / 2, R.y + R.h * 0.835);
       ctx.fillStyle = "#aaf10a";
-      ctx.font = "700 18px 'Space Mono', monospace";
-      ctx.fillText("CLASS OF '26 · GREEK LIFE", W / 2, 556);
+      ctx.font = "700 40px monospace";
+      ctx.fillText("CLASS OF '26 · GREEK LIFE", R.x + R.w / 2, R.y + R.h * 0.9);
+      ctx.fillStyle = "rgba(255,255,255,0.5)";
+      ctx.font = "700 34px monospace";
+      ctx.fillText("AMBASSADOR PROGRAM", R.x + R.w / 2, R.y + R.h * 0.955);
+    };
 
-      // footer wordmark
-      ctx.fillStyle = "rgba(255,255,255,0.45)";
-      ctx.font = "700 18px 'Space Mono', monospace";
-      ctx.fillText("XTRAPOINT  AMBASSADOR PROGRAM", W / 2, 670);
-
+    const finish = () => {
       const t = new THREE.CanvasTexture(c);
       t.colorSpace = THREE.SRGBColorSpace;
       t.flipY = false; // glTF UV convention
       t.anisotropy = 16;
+      t.needsUpdate = true;
       setTex(t);
     };
 
-    // draw the favicon (XP cube) in the middle
-    const img = new Image();
-    img.onload = () => {
-      paint();
-      const size = 200;
-      // re-draw favicon on top after paint set base; simplest: draw then refresh
-      ctx.drawImage(img, (W - size) / 2, 190, size, size);
-      const t2 = new THREE.CanvasTexture(c);
-      t2.colorSpace = THREE.SRGBColorSpace;
-      t2.flipY = false;
-      t2.anisotropy = 16;
-      setTex(t2);
+    const atlas = new Image();
+    atlas.onload = () => {
+      ctx.drawImage(atlas, 0, 0, W, H); // keep white card body + edges
+      const fav = new Image();
+      fav.onload = () => {
+        drawFace(FRONT, fav);
+        drawFace(BACK, fav);
+        finish();
+      };
+      fav.onerror = () => {
+        drawFace(FRONT, null);
+        drawFace(BACK, null);
+        finish();
+      };
+      fav.src = "/favicon.svg";
     };
-    img.onerror = paint;
-    img.src = "/favicon.svg";
+    atlas.onerror = () => {
+      drawFace(FRONT, null);
+      finish();
+    };
+    atlas.src = "/assets/lanyard/card-tex.png";
   }, []);
   return tex;
 }
@@ -286,7 +309,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
           </group>
         </RigidBody>
       </group>
-      <mesh ref={band}>
+      <mesh ref={band} frustumCulled={false}>
         <meshLineGeometry />
         <meshLineMaterial
           color="#aaf10a"
