@@ -1,7 +1,7 @@
 ---
 import Eyebrow from "@/components/Eyebrow.astro";
 import PlaybookMark from "@/components/PlaybookMark.astro";
-import Lanyard from "@/components/islands/Lanyard.tsx";
+import LanyardLazy from "@/components/islands/LanyardLazy.tsx";
 import { brand } from "@/config/brand";
 
 const bullets = [
@@ -58,7 +58,7 @@ const bullets = [
 
         <!-- 3D lanyard fills the whole card; the card clips the overflow -->
         <div class="absolute inset-0 z-0">
-          <Lanyard client:only="react" position={[0, 0, 14]} fov={18} />
+          <LanyardLazy client:only="react" position={[0, 0, 14]} fov={18} />
         </div>
 
         <div class="relative z-10">
