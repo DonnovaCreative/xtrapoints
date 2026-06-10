@@ -120,7 +120,24 @@ submissions to **sales@xtrapoints.com**.
 Until a key is set, the form validates but shows a "not configured yet" message
 on submit. Features: required-field + email validation with inline errors,
 inline success/error states (no reload), submit disabled while sending, a hidden
-subject line (`New XtraPoints inquiry from {organization}`), and a honeypot field.
+subject line (`New XtraPoint inquiry from {organization}`), a honeypot field, and
+an **hCaptcha** challenge.
+
+### hCaptcha
+
+The form shows an hCaptcha "I'm human" challenge and sends its token
+(`h-captcha-response`) with the submission. It uses Web3Forms' **free built-in
+hCaptcha** (shared sitekey `50b2fe65-…`), so no hCaptcha account or key is needed.
+
+**➡ One required step:** in the Web3Forms dashboard, **enable hCaptcha** for your
+access key — otherwise the token isn't actually verified and the challenge is
+cosmetic. Notes:
+
+- On `localhost` the widget shows a "localhost detected" warning (the shared
+  sitekey is domain-locked); it works normally on the live domain.
+- The submit button stays blocked with "Please complete the captcha." until it's
+  solved. The honeypot remains as a second, silent layer.
+- Only set `PUBLIC_HCAPTCHA_SITEKEY` if you upgrade to a Web3Forms Pro custom key.
 
 > **Later (not built now):** this can be swapped to an Astro server endpoint +
 > [Resend](https://resend.com) to send from our own domain instead of a

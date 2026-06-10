@@ -1,4 +1,5 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
+import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +16,13 @@ import { brand } from "@/config/brand";
 // Web3Forms access key. Create a key for the brand sales inbox (brand.salesEmail) at
 // https://web3forms.com and add it to .env as PUBLIC_WEB3FORMS_KEY.
 const ACCESS_KEY = import.meta.env.PUBLIC_WEB3FORMS_KEY as string | undefined;
+
+// hCaptcha sitekey — defaults to Web3Forms' free shared key (no hCaptcha account
+// needed; just enable hCaptcha in the Web3Forms dashboard). Override with
+// PUBLIC_HCAPTCHA_SITEKEY only if you move to a Pro custom key.
+const HCAPTCHA_SITEKEY =
+  (import.meta.env.PUBLIC_HCAPTCHA_SITEKEY as string | undefined) ||
+  "50b2fe65-b00b-4b9e-ad62-3ba471098be2";
 
 const ORG_TYPES = [
   "Athletic department",
@@ -36,6 +44,9 @@ export default function ContactForm() {
   const [errors, setErrors] = useState<Errors>({});
   const [orgType, setOrgType] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaError, setCaptchaError] = useState("");
+  const captchaRef = useRef<HCaptcha>(null);
 
   const validate = (data: Record<string, string>): Errors => {
     const e: Errors = {};
@@ -67,6 +78,11 @@ export default function ContactForm() {
     setErrors(e);
     if (Object.keys(e).length) return;
 
+    if (!captchaToken) {
+      setCaptchaError("Please complete the captcha.");
+      return;
+    }
+
     if (!ACCESS_KEY) {
       setStatus("error");
       setErrorMsg(
@@ -90,6 +106,7 @@ export default function ContactForm() {
           organization: data.organization,
           organization_type: orgType,
           message: data.message || "(no message)",
+          "h-captcha-response": captchaToken,
         }),
       });
       const json = await res.json();
@@ -97,6 +114,8 @@ export default function ContactForm() {
         setStatus("success");
         form.reset();
         setOrgType("");
+        captchaRef.current?.resetCaptcha();
+        setCaptchaToken("");
       } else {
         setStatus("error");
         setErrorMsg(json.message || "Something went wrong. Please try again.");
@@ -188,6 +207,23 @@ export default function ContactForm() {
       <div>
         <Label htmlFor="message">Message <span className="text-gray-400">(optional)</span></Label>
         <Textarea id="message" name="message" rows={4} placeholder="Tell us about your program and what you’re hoping to launch." className="mt-1.5" />
+      </div>
+
+      <div>
+        <HCaptcha
+          ref={captchaRef}
+          sitekey={HCAPTCHA_SITEKEY}
+          reCaptchaCompat={false}
+          onVerify={(token) => {
+            setCaptchaToken(token);
+            setCaptchaError("");
+          }}
+          onExpire={() => setCaptchaToken("")}
+          onError={() => setCaptchaToken("")}
+        />
+        {captchaError && (
+          <p className="mt-1.5 text-sm text-error-600">{captchaError}</p>
+        )}
       </div>
 
       {status === "error" && (
