@@ -1,0 +1,230 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Footer from "@/components/Footer.astro";
+import CtaButton from "@/components/CtaButton.astro";
+import Eyebrow from "@/components/Eyebrow.astro";
+import PlaybookMark from "@/components/PlaybookMark.astro";
+import SchoolPhone from "@/components/school/SchoolPhone.astro";
+import DotGrid from "@/components/islands/DotGrid.tsx";
+import StatTrio from "@/components/islands/StatTrio.tsx";
+import DonorDashboard from "@/components/islands/DonorDashboard.tsx";
+import ContactForm from "@/components/islands/ContactForm.tsx";
+import { schools, schoolThemeVars } from "@/data/schools";
+import { brand } from "@/config/brand";
+
+export function getStaticPaths() {
+  return schools.map((school) => ({ params: { school: school.slug }, props: { school } }));
+}
+
+const { school } = Astro.props;
+const t = school.theme;
+const themeStyle = schoolThemeVars(t);
+
+const steps = [
+  { n: "01", title: "Link a card once.", body: `Download the ${brand.name} app, pick the ${school.mascot}, and connect a card. Two minutes, zero cost.` },
+  { n: "02", title: "Spend like normal.", body: "Groceries, gas, game-day coffee — every purchase rounds up to the nearest dollar in the background." },
+  { n: "03", title: "Round-ups become gifts.", body: `Your spare change collects into recurring donations to the ${school.fund} — with optional minimums and multipliers.` },
+];
+
+const marketing = [
+  "Done-for-you campaign templates in your colors.",
+  "One-click social & email sharing for supporters.",
+  "Targeted re-engagement that wins back lapsed donors.",
+];
+---
+
+<Layout
+  title={`${school.short} × ${brand.name} — Round-Up Donor Program`}
+  description={`Round up your everyday spending into recurring gifts for the ${school.fund}. The official ${school.short} donor program, powered by ${brand.name}.`}
+>
+  <div style={themeStyle}>
+    <!-- ===================== CO-BRAND HEADER ===================== -->
+    <header class="relative z-50 bg-ink">
+      <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4 lg:px-10">
+        <div class="flex items-center gap-3">
+          <img src={brand.logo.white} alt={brand.name} width={brand.logo.width} height={brand.logo.height} class="h-[22px] w-auto" />
+          <span class="text-white/30">×</span>
+          {school.logo ? (
+            <img src={school.logo} alt={school.name} class="h-7 w-auto" />
+          ) : (
+            <span class="flex items-center gap-2 text-white">
+              <svg class="h-6 w-6 text-lime" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="12" cy="16" rx="5" ry="4.2"/><circle cx="6.2" cy="10.5" r="2.1"/><circle cx="10" cy="7.2" r="2.1"/><circle cx="14" cy="7.2" r="2.1"/><circle cx="17.8" cy="10.5" r="2.1"/></svg>
+              <span class="text-sm font-bold leading-none tracking-tight">{school.short}<br /><span class="font-mono text-[0.625rem] font-normal uppercase tracking-[0.12em] text-white/55">{school.mascot}</span></span>
+            </span>
+          )}
+        </div>
+        <CtaButton href={brand.appUrl} variant="lime" class="!px-5 !py-2.5 !text-sm">Get the App</CtaButton>
+      </div>
+    </header>
+
+    <main>
+      <!-- ===================== HERO ===================== -->
+      <section class="relative overflow-hidden bg-ink">
+        <div class="absolute inset-0 z-0" aria-hidden="true">
+          <DotGrid client:load dotSize={2} gap={28} baseColor="#4a2d18" activeColor={t.primary} proximity={130} />
+        </div>
+        <div class="dot-grid"></div>
+        <div class="glow anim-float-1" style={`width:460px;height:460px;top:-8%;right:6%;background:radial-gradient(circle,${t.primarySoft} 0%,transparent 65%);opacity:0.9;`} aria-hidden="true"></div>
+        <PlaybookMark mark="x" class="right-6 top-6 h-16 w-16 lg:right-12 lg:top-10 lg:h-24 lg:w-24" rotate={10} opacity={0.9} delay={0.4} />
+
+        <div class="relative z-10 mx-auto grid max-w-7xl gap-12 px-6 pb-20 pt-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:px-10 lg:pb-28 lg:pt-20">
+          <div>
+            <p class="font-mono text-xs uppercase tracking-[0.12em] text-lime">
+              Official donor program · {school.short}
+            </p>
+            <h1 class="font-display mt-4 text-[clamp(3rem,7vw,5.25rem)] uppercase leading-[1.02] tracking-tight text-white">
+              Every purchase, a
+              <span class="font-editorial my-1 block text-[1.1em] leading-[0.9] text-lime [text-transform:none]">small act of support</span>
+              for the {school.mascot}.
+            </h1>
+            <div class="reveal">
+              <p class="mt-6 max-w-xl text-lg leading-relaxed text-white/75">
+                Link a card once and your everyday spending rounds up into
+                recurring gifts to the {school.fund} — powered by {brand.name}.
+                No cost to you. Live in minutes.
+              </p>
+              <div class="mt-8 flex flex-wrap items-center gap-4">
+                <CtaButton href={brand.appUrl} variant="lime">Get the App</CtaButton>
+                <span class="font-mono text-xs uppercase tracking-[0.04em] text-white/50">Free · Round up · Cancel anytime</span>
+              </div>
+              <div class="mt-12 max-w-md"><StatTrio client:visible /></div>
+            </div>
+          </div>
+          <div class="relative reveal-right"><SchoolPhone fund={school.fund} mascot={school.mascot} /></div>
+        </div>
+      </section>
+
+      <!-- ===================== HOW IT WORKS ===================== -->
+      <section class="relative overflow-hidden bg-white py-20 lg:py-28">
+        <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">
+          <div class="reveal max-w-3xl">
+            <Eyebrow index="01" label="How it works" />
+            <h2 class="font-display mt-4 max-w-[18ch] text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900">
+              Spare change, <span class="ed ed-dark">Real impact</span> for your team.
+            </h2>
+            <p class="mt-5 text-lg leading-relaxed text-gray-600">
+              The Round-Up app turns the {school.mascot} fanbase into a steady
+              stream of recurring donors — without asking anyone to change how
+              they already spend.
+            </p>
+          </div>
+          <div class="stagger mt-14 grid gap-6 md:grid-cols-3">
+            {steps.map((s) => (
+              <div class="rounded-2xl border border-gray-200 p-8 transition-colors hover:bg-gray-50">
+                <span class="font-display text-3xl leading-none text-lime-dark">{s.n}</span>
+                <h3 class="mt-4 text-xl font-bold tracking-tight text-gray-900">{s.title}</h3>
+                <p class="mt-3 leading-relaxed text-gray-600">{s.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== DONOR MANAGEMENT ===================== -->
+      <section class="relative overflow-hidden bg-gray-50 py-20 lg:py-28">
+        <div class="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-[1fr_1.2fr] lg:gap-16 lg:px-10">
+          <div class="reveal-left">
+            <Eyebrow index="02" label="Donor management" />
+            <h2 class="font-display mt-4 max-w-[16ch] text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900">
+              One view of every <span class="ed ed-dark">Supporter</span>.
+            </h2>
+            <p class="mt-5 text-lg leading-relaxed text-gray-600">
+              Track every {school.mascot} donor, campaign, and gift in a single
+              dashboard — historical giving, recurring plans, and exactly which
+              initiatives drive lift.
+            </p>
+          </div>
+          <div class="reveal-right"><DonorDashboard client:visible fund={school.fund} /></div>
+        </div>
+      </section>
+
+      <!-- ===================== MARKETING SUPPORT ===================== -->
+      <section class="relative overflow-hidden bg-white py-20 lg:py-28">
+        <div class="relative z-10 mx-auto max-w-3xl px-6 text-center lg:px-10">
+          <div class="reveal">
+            <Eyebrow index="03" label="Marketing support" class="justify-center" />
+            <h2 class="font-display mt-4 text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900">
+              A marketing arm, <span class="ed ed-dark">Without The</span> headcount.
+            </h2>
+            <p class="mt-5 text-lg leading-relaxed text-gray-600">
+              {brand.name} brings the campaigns that grow your donor base — so
+              {" "}{school.short} reaches supporters like a program with a full agency.
+            </p>
+          </div>
+          <ul class="stagger mx-auto mt-10 flex max-w-xl flex-col gap-3 text-left">
+            {marketing.map((m) => (
+              <li class="flex items-center gap-3.5 rounded-xl border border-gray-200 bg-white px-5 py-4">
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-lime-soft text-lime-dark">
+                  <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
+                </span>
+                <span class="font-medium text-gray-900">{m}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <!-- ===================== AMBASSADOR PROGRAM ===================== -->
+      <section class="relative overflow-hidden bg-ink py-20 text-white lg:py-28">
+        <div class="dot-grid"></div>
+        <PlaybookMark mark="o" class="left-[5%] top-[16%] hidden h-16 w-16 lg:block" rotate={-8} opacity={0.18} />
+        <div class="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16 lg:px-10">
+          <div class="reveal-left">
+            <Eyebrow index="04" label="Ambassador program" dark />
+            <h2 class="font-display mt-4 text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-white">
+              Put your students <span class="ed">To Work</span>.
+            </h2>
+            <p class="mt-5 max-w-xl text-lg leading-relaxed text-white/75">
+              A student-powered growth engine that recruits micro-donors through
+              the channels staff can't reach — Greek life, tailgates, orientation,
+              alumni weekends. Low-cost, always-on, and built for the {school.mascot}.
+            </p>
+            <a href={`mailto:${brand.salesEmail}`} class="mt-8 inline-flex w-fit items-center gap-2.5 rounded-full bg-lime px-6 py-3.5 text-[0.9375rem] font-bold text-ink transition-all duration-300 hover:bg-lime-deep hover:-translate-y-0.5">
+              Learn about the Ambassador Program
+              <svg class="h-4 w-4" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>
+          <div class="reveal-right flex min-h-[300px] flex-col justify-between rounded-3xl bg-white/[0.04] p-10 ring-1 ring-white/10">
+            <p class="font-mono text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-lime">Always-on growth</p>
+            <p class="font-display text-[clamp(6rem,12vw,9rem)] leading-[0.85] text-lime">∞</p>
+            <div class="flex items-center justify-between border-t border-white/10 pt-5">
+              <span class="font-mono text-[0.625rem] font-bold uppercase tracking-[0.08em] text-white/50">Channels we tap</span>
+              <span class="text-[0.8125rem] font-semibold text-white">Greek · Athletics · Alumni</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== FINAL CTA + FORM ===================== -->
+      <section id="start" class="relative overflow-hidden bg-white py-20 lg:py-28">
+        <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">
+          <div class="grid items-center gap-12 lg:grid-cols-[1fr_1fr] lg:gap-16">
+            <div class="reveal-left">
+              <Eyebrow index="05" label="Get started" />
+              <h2 class="font-display mt-4 text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900">
+                Bring the round-up to the <span class="ed ed-dark">{school.mascot}</span>.
+              </h2>
+              <p class="mt-5 max-w-md text-lg leading-relaxed text-gray-600">
+                Want to launch or grow the {school.short} donor program? Tell us a
+                little about your goals and our team will reach out — usually
+                within one business day.
+              </p>
+              <ul class="mt-8 flex flex-col gap-3 text-gray-700">
+                <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>No implementation cost · live in days</li>
+                <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>Co-branded to {school.short}</li>
+                <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>SOC 2 Type II · PCI DSS certified</li>
+              </ul>
+            </div>
+            <div class="reveal-right rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-gray-200 sm:p-8 lg:p-10">
+              <h3 class="text-2xl font-bold tracking-tight text-gray-900">Request a walkthrough</h3>
+              <p class="mt-2 text-gray-600">No commitment — just a conversation.</p>
+              <div class="mt-7"><ContactForm client:load school={school.name} /></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+</Layout>

@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 4321
+    },
+    {
+      "name": "tesouro-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "/Users/coreydonovan/Code/tesouro-redesign", "--", "--port", "4322"],
+      "port": 4322
     }
   ]
 }

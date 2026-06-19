@@ -18,7 +18,7 @@ const months = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
 
 const tabs = ["Overview", "Donors", "Campaigns"];
 
-export default function DonorDashboard() {
+export default function DonorDashboard({ fund = "Bobcat Athletics Fund" }: { fund?: string } = {}) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-12% 0px" });
 
@@ -46,7 +46,7 @@ export default function DonorDashboard() {
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary-800 to-primary-600 text-xs font-bold text-white">
               B
             </span>
-            Bobcat Athletics Fund
+            {fund}
           </div>
         </div>
         <div className="mt-4 flex gap-5 border-b border-gray-100">

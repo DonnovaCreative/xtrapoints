@@ -39,7 +39,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 type Status = "idle" | "submitting" | "success" | "error";
 type Errors = Partial<Record<"name" | "email" | "organization" | "orgType", string>>;
 
-export default function ContactForm() {
+export default function ContactForm({ school }: { school?: string } = {}) {
   const [status, setStatus] = useState<Status>("idle");
   const [errors, setErrors] = useState<Errors>({});
   const [orgType, setOrgType] = useState("");
@@ -99,8 +99,11 @@ export default function ContactForm() {
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
           access_key: ACCESS_KEY,
-          subject: `New ${brand.name} inquiry from ${data.organization}`,
-          from_name: "XtraPoints Website",
+          subject: school
+            ? `New ${brand.name} inquiry — ${school} — from ${data.organization}`
+            : `New ${brand.name} inquiry from ${data.organization}`,
+          school: school ?? "",
+          from_name: `${brand.name} Website`,
           name: data.name,
           email: data.email,
           organization: data.organization,
