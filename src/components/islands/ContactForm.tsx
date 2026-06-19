@@ -39,7 +39,17 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 type Status = "idle" | "submitting" | "success" | "error";
 type Errors = Partial<Record<"name" | "email" | "organization" | "orgType", string>>;
 
-export default function ContactForm({ school }: { school?: string } = {}) {
+export default function ContactForm({
+  school,
+  orgPlaceholder = "Bobcat Athletics Fund",
+  variant = "contact",
+}: {
+  school?: string;
+  orgPlaceholder?: string;
+  /** "contact" → B2B inquiry (default). "signup" → consumer get-the-app capture. */
+  variant?: "contact" | "signup";
+} = {}) {
+  const isSignup = variant === "signup";
   const [status, setStatus] = useState<Status>("idle");
   const [errors, setErrors] = useState<Errors>({});
   const [orgType, setOrgType] = useState("");
@@ -51,11 +61,14 @@ export default function ContactForm({ school }: { school?: string } = {}) {
   const validate = (data: Record<string, string>): Errors => {
     const e: Errors = {};
     if (!data.name?.trim()) e.name = "Please enter your full name.";
-    if (!data.email?.trim()) e.email = "Please enter your work email.";
+    if (!data.email?.trim())
+      e.email = isSignup ? "Please enter your email." : "Please enter your work email.";
     else if (!EMAIL_RE.test(data.email)) e.email = "Enter a valid email address.";
-    if (!data.organization?.trim())
-      e.organization = "Please enter your organization or program name.";
-    if (!orgType) e.orgType = "Please select an organization type.";
+    if (!isSignup) {
+      if (!data.organization?.trim())
+        e.organization = "Please enter your organization or program name.";
+      if (!orgType) e.orgType = "Please select an organization type.";
+    }
     return e;
   };
 
@@ -70,6 +83,7 @@ export default function ContactForm({ school }: { school?: string } = {}) {
     const data = {
       name: (fd.get("name") as string) ?? "",
       email: (fd.get("email") as string) ?? "",
+      phone: (fd.get("phone") as string) ?? "",
       organization: (fd.get("organization") as string) ?? "",
       message: (fd.get("message") as string) ?? "",
     };
@@ -99,16 +113,22 @@ export default function ContactForm({ school }: { school?: string } = {}) {
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
           access_key: ACCESS_KEY,
-          subject: school
-            ? `New ${brand.name} inquiry — ${school} — from ${data.organization}`
-            : `New ${brand.name} inquiry from ${data.organization}`,
+          subject: isSignup
+            ? `New ${brand.name} app sign-up${school ? ` — ${school}` : ""} — ${data.name}`
+            : school
+              ? `New ${brand.name} inquiry — ${school} — from ${data.organization}`
+              : `New ${brand.name} inquiry from ${data.organization}`,
           school: school ?? "",
           from_name: `${brand.name} Website`,
           name: data.name,
           email: data.email,
-          organization: data.organization,
-          organization_type: orgType,
-          message: data.message || "(no message)",
+          ...(isSignup
+            ? { phone: data.phone || "(not provided)", type: "App sign-up" }
+            : {
+                organization: data.organization,
+                organization_type: orgType,
+                message: data.message || "(no message)",
+              }),
           "h-captcha-response": captchaToken,
         }),
       });
@@ -140,16 +160,20 @@ export default function ContactForm({ school }: { school?: string } = {}) {
             <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
-        <h3 className="text-xl font-bold tracking-tight text-gray-900">Thanks — we’ll be in touch.</h3>
+        <h3 className="text-xl font-bold tracking-tight text-gray-900">
+          {isSignup ? "You’re all set!" : "Thanks — we’ll be in touch."}
+        </h3>
         <p className="mt-2 text-gray-600">
-          Your inquiry is on its way to our team. Expect a reply within one business day.
+          {isSignup
+            ? "We’ll email your app download link shortly — keep an eye on your inbox."
+            : "Your inquiry is on its way to our team. Expect a reply within one business day."}
         </p>
         <button
           type="button"
           onClick={() => setStatus("idle")}
           className="mt-5 text-sm font-semibold text-lime-dark underline-offset-4 hover:underline"
         >
-          Send another message
+          {isSignup ? "Sign up another" : "Send another message"}
         </button>
       </div>
     );
@@ -179,38 +203,49 @@ export default function ContactForm({ school }: { school?: string } = {}) {
       </div>
 
       <div>
-        <Label htmlFor="email">Work email <span className="text-error-500">*</span></Label>
-        <Input id="email" name="email" type="email" autoComplete="email" placeholder="you@program.edu" aria-invalid={!!errors.email} className="mt-1.5" />
+        <Label htmlFor="email">
+          {isSignup ? "Email" : "Work email"} <span className="text-error-500">*</span>
+        </Label>
+        <Input id="email" name="email" type="email" autoComplete="email" placeholder={isSignup ? "you@email.com" : "you@program.edu"} aria-invalid={!!errors.email} className="mt-1.5" />
         {err("email")}
       </div>
 
-      <div>
-        <Label htmlFor="organization">
-          Organization / program name <span className="text-error-500">*</span>
-        </Label>
-        <Input id="organization" name="organization" placeholder="Bobcat Athletics Fund" aria-invalid={!!errors.organization} className="mt-1.5" />
-        {err("organization")}
-      </div>
+      {isSignup ? (
+        <div>
+          <Label htmlFor="phone">Mobile <span className="text-gray-400">(optional)</span></Label>
+          <Input id="phone" name="phone" type="tel" autoComplete="tel" inputMode="tel" placeholder="(555) 123-4567" className="mt-1.5" />
+        </div>
+      ) : (
+        <>
+          <div>
+            <Label htmlFor="organization">
+              Organization / program name <span className="text-error-500">*</span>
+            </Label>
+            <Input id="organization" name="organization" placeholder={orgPlaceholder} aria-invalid={!!errors.organization} className="mt-1.5" />
+            {err("organization")}
+          </div>
 
-      <div>
-        <Label htmlFor="orgType">Organization type <span className="text-error-500">*</span></Label>
-        <Select value={orgType} onValueChange={(v) => { setOrgType(v); setErrors((p) => ({ ...p, orgType: undefined })); }}>
-          <SelectTrigger id="orgType" aria-invalid={!!errors.orgType} className="mt-1.5 w-full">
-            <SelectValue placeholder="Select organization type" />
-          </SelectTrigger>
-          <SelectContent>
-            {ORG_TYPES.map((t) => (
-              <SelectItem key={t} value={t}>{t}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {err("orgType")}
-      </div>
+          <div>
+            <Label htmlFor="orgType">Organization type <span className="text-error-500">*</span></Label>
+            <Select value={orgType} onValueChange={(v) => { setOrgType(v); setErrors((p) => ({ ...p, orgType: undefined })); }}>
+              <SelectTrigger id="orgType" aria-invalid={!!errors.orgType} className="mt-1.5 w-full">
+                <SelectValue placeholder="Select organization type" />
+              </SelectTrigger>
+              <SelectContent>
+                {ORG_TYPES.map((t) => (
+                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {err("orgType")}
+          </div>
 
-      <div>
-        <Label htmlFor="message">Message <span className="text-gray-400">(optional)</span></Label>
-        <Textarea id="message" name="message" rows={4} placeholder="Tell us about your program and what you’re hoping to launch." className="mt-1.5" />
-      </div>
+          <div>
+            <Label htmlFor="message">Message <span className="text-gray-400">(optional)</span></Label>
+            <Textarea id="message" name="message" rows={4} placeholder="Tell us about your program and what you’re hoping to launch." className="mt-1.5" />
+          </div>
+        </>
+      )}
 
       <div>
         <HCaptcha
@@ -241,11 +276,15 @@ export default function ContactForm({ school }: { school?: string } = {}) {
         size="lg"
         className="rounded-full bg-lime text-ink hover:bg-lime-deep disabled:opacity-60"
       >
-        {status === "submitting" ? "Sending…" : "Get Started"}
+        {status === "submitting"
+          ? "Sending…"
+          : isSignup
+            ? "Send me the app link"
+            : "Get Started"}
       </Button>
 
       <p className="text-center text-xs text-gray-500">
-        Prefer email? Reach us at{" "}
+        {isSignup ? "Questions? Reach us at" : "Prefer email? Reach us at"}{" "}
         <a href={`mailto:${brand.salesEmail}`} className="font-semibold text-lime-dark hover:underline">
           {brand.salesEmail}
         </a>

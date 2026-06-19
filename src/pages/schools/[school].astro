@@ -20,6 +20,9 @@ const { school } = Astro.props;
 const t = school.theme;
 const themeStyle = schoolThemeVars(t);
 
+// Mock dashboard URL slug, derived from the fund (e.g. "bearkat-athletics").
+const fundSlug = school.fund.toLowerCase().replace(/\s*fund\s*$/, "").replace(/\s+/g, "-");
+
 const steps = [
   { n: "01", title: "Link a card once.", body: `Download the ${brand.name} app, pick the ${school.mascot}, and connect a card. Two minutes, zero cost.` },
   { n: "02", title: "Spend like normal.", body: "Groceries, gas, game-day coffee — every purchase rounds up to the nearest dollar in the background." },
@@ -53,7 +56,7 @@ const marketing = [
             </span>
           )}
         </div>
-        <CtaButton href={brand.appUrl} variant="lime" class="!px-5 !py-2.5 !text-sm">Get the App</CtaButton>
+        <CtaButton href={brand.appUrl} variant="lime" glow={false} class="!px-5 !py-2.5 !text-sm">Get the App</CtaButton>
       </div>
     </header>
 
@@ -61,7 +64,7 @@ const marketing = [
       <!-- ===================== HERO ===================== -->
       <section class="relative overflow-hidden bg-ink">
         <div class="absolute inset-0 z-0" aria-hidden="true">
-          <DotGrid client:load dotSize={2} gap={28} baseColor="#4a2d18" activeColor={t.primary} proximity={130} />
+          <DotGrid client:load dotSize={2} gap={28} baseColor="#3a3942" activeColor={t.primary} proximity={130} />
         </div>
         <div class="dot-grid"></div>
         <div class="glow anim-float-1" style={`width:460px;height:460px;top:-8%;right:6%;background:radial-gradient(circle,${t.primarySoft} 0%,transparent 65%);opacity:0.9;`} aria-hidden="true"></div>
@@ -84,13 +87,13 @@ const marketing = [
                 No cost to you. Live in minutes.
               </p>
               <div class="mt-8 flex flex-wrap items-center gap-4">
-                <CtaButton href={brand.appUrl} variant="lime">Get the App</CtaButton>
+                <CtaButton href={brand.appUrl} variant="lime" glow={false}>Get the App</CtaButton>
                 <span class="font-mono text-xs uppercase tracking-[0.04em] text-white/50">Free · Round up · Cancel anytime</span>
               </div>
               <div class="mt-12 max-w-md"><StatTrio client:visible /></div>
             </div>
           </div>
-          <div class="relative reveal-right"><SchoolPhone fund={school.fund} mascot={school.mascot} /></div>
+          <div class="relative reveal-right"><SchoolPhone fund={school.fund} mascot={school.mascot} mark={school.mark} /></div>
         </div>
       </section>
 
@@ -134,7 +137,7 @@ const marketing = [
               initiatives drive lift.
             </p>
           </div>
-          <div class="reveal-right"><DonorDashboard client:visible fund={school.fund} /></div>
+          <div class="reveal-right"><DonorDashboard client:visible fund={school.fund} slug={fundSlug} /></div>
         </div>
       </section>
 
@@ -200,25 +203,26 @@ const marketing = [
         <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">
           <div class="grid items-center gap-12 lg:grid-cols-[1fr_1fr] lg:gap-16">
             <div class="reveal-left">
-              <Eyebrow index="05" label="Get started" />
+              <Eyebrow index="05" label="Get the app" />
               <h2 class="font-display mt-4 text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900">
-                Bring the round-up to the <span class="ed ed-dark">{school.mascot}</span>.
+                Back the <span class="ed ed-dark">{school.mascot}</span> in seconds.
               </h2>
               <p class="mt-5 max-w-md text-lg leading-relaxed text-gray-600">
-                Want to launch or grow the {school.short} donor program? Tell us a
-                little about your goals and our team will reach out — usually
-                within one business day.
+                Link a card once and your spare change starts supporting the
+                {" "}{school.fund} automatically. It's free, takes two minutes,
+                and you can cancel anytime. Drop your info and we'll send you the
+                app download link.
               </p>
               <ul class="mt-8 flex flex-col gap-3 text-gray-700">
-                <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>No implementation cost · live in days</li>
-                <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>Co-branded to {school.short}</li>
-                <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>SOC 2 Type II · PCI DSS certified</li>
+                <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>Free — you choose how much you round up</li>
+                <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>Set it once · cancel anytime</li>
+                <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>Bank-level security · PCI DSS certified</li>
               </ul>
             </div>
             <div class="reveal-right rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-gray-200 sm:p-8 lg:p-10">
-              <h3 class="text-2xl font-bold tracking-tight text-gray-900">Request a walkthrough</h3>
-              <p class="mt-2 text-gray-600">No commitment — just a conversation.</p>
-              <div class="mt-7"><ContactForm client:load school={school.name} /></div>
+              <h3 class="text-2xl font-bold tracking-tight text-gray-900">Get the {brand.name} app</h3>
+              <p class="mt-2 text-gray-600">Enter your details and we'll send the download link.</p>
+              <div class="mt-7"><ContactForm client:load school={school.name} variant="signup" /></div>
             </div>
           </div>
         </div>

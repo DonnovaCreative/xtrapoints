@@ -8,14 +8,16 @@ export interface Props {
   href: string;
   /** lime: primary action · light: white pill for dark sections · ghost: text+border */
   variant?: "lime" | "light" | "ghost";
+  /** The lime variant's glow shadow — turn off on co-branded pages (false). */
+  glow?: boolean;
   class?: string;
 }
-const { href, variant = "lime", class: className = "" } = Astro.props;
+const { href, variant = "lime", glow = true, class: className = "" } = Astro.props;
 
 const base =
   "group inline-flex items-center justify-center gap-2.5 rounded-full font-semibold transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] px-7 py-3.5 text-[1.0625rem]";
 const variants = {
-  lime: "bg-lime text-ink border border-lime hover:bg-lime-deep hover:-translate-y-0.5 shadow-[0_12px_32px_-8px_rgba(170,241,10,0.35)]",
+  lime: `bg-lime text-ink border border-lime hover:bg-lime-deep hover:-translate-y-0.5${glow ? " shadow-[0_12px_32px_-8px_rgba(170,241,10,0.35)]" : ""}`,
   light:
     "bg-white text-ink border border-white hover:bg-gray-50 hover:-translate-y-0.5 shadow-[0_12px_32px_-8px_rgba(0,0,0,0.3)]",
   ghost:

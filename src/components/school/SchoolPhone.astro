@@ -1,81 +1,151 @@
 ---
-// Co-branded round-up app mockup (zero JS; CSS-only progress fill).
-// Colors come from the page's overridden tokens, so it re-skins per school.
+// Co-branded round-up app mockup — same treatment as the homepage hero phone
+// (dashed orbit rings, glows, dynamic island, floating chips), but skinned to
+// the school's accent. Colors come from the page's overridden lime/ink tokens,
+// so it re-skins per school. Zero JS; only motion is CSS.
 export interface Props {
   fund: string;
   mascot: string;
+  /** Optional single-color mark (e.g. paw); tinted with the accent via CSS mask. */
+  mark?: string;
 }
-const { fund, mascot } = Astro.props;
-const quick = ["$5", "$25", "$50", "$100"];
+const { fund, mascot, mark } = Astro.props;
+const quickAmounts = [
+  { v: "$5", on: false },
+  { v: "$25", on: true },
+  { v: "$50", on: false },
+  { v: "$100", on: false },
+];
+const maskStyle = mark
+  ? `mask:url(${mark}) center/contain no-repeat;-webkit-mask:url(${mark}) center/contain no-repeat;background:var(--color-lime);`
+  : "";
 ---
 
-<div class="relative mx-auto w-full max-w-[300px]">
-  <!-- floating round-up chip -->
+<div class="relative mx-auto flex h-[560px] w-full max-w-[440px] items-center justify-center sm:h-[600px]">
+  <!-- accent glows behind phone -->
+  <div class="glow" style="width:300px;height:300px;top:6%;left:10%;background:radial-gradient(circle,var(--color-lime) 0%,transparent 65%);opacity:0.45;animation:xpDrift1 14s ease-in-out infinite;" aria-hidden="true"></div>
+  <div class="glow" style="width:280px;height:280px;bottom:4%;right:6%;background:radial-gradient(circle,#ffd9c2 0%,transparent 65%);opacity:0.5;animation:xpDrift2 16s ease-in-out infinite;" aria-hidden="true"></div>
+  <div class="glow" style="width:240px;height:240px;top:40%;right:18%;background:radial-gradient(circle,var(--color-lime) 0%,transparent 65%);opacity:0.3;animation:xpDrift3 18s ease-in-out infinite;" aria-hidden="true"></div>
+
+  <!-- dashed orbit rings -->
+  <div class="orbit" aria-hidden="true">
+    <div class="orbit-ring" style="width:480px;height:480px;border:1px dashed var(--color-lime);opacity:0.45;"></div>
+    <div class="orbit-ring" style="width:360px;height:360px;border:1px dashed var(--color-lime);opacity:0.3;animation-direction:reverse;animation-duration:80s;"></div>
+  </div>
+
+  <!-- floating chips -->
   <div
-    class="anim-float-1 absolute -right-4 top-20 z-20 hidden items-center gap-2.5 rounded-xl border border-gray-100 bg-white px-3.5 py-2.5 shadow-xl sm:flex"
+    class="anim-float-1 absolute right-0 top-10 z-20 hidden rounded-xl border border-gray-200 bg-white px-4 py-3.5 shadow-[0_24px_60px_-20px_rgba(16,24,40,0.18)] sm:block"
   >
-    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-lime-soft text-lime-dark">
-      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </span>
-    <span>
-      <span class="block font-mono text-[10px] uppercase tracking-[0.06em] text-gray-500">Round-up</span>
-      <span class="block text-base font-bold tracking-tight text-gray-900">$0.43</span>
-    </span>
+    <div class="flex items-center gap-3">
+      <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-lime-soft text-lime-dark">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="flex flex-col">
+        <span class="font-mono text-[10px] uppercase tracking-[0.06em] text-gray-500">Round-up</span>
+        <span class="text-base font-bold tracking-tight text-gray-900">$0.43</span>
+      </span>
+    </div>
+  </div>
+  <div
+    class="anim-float-2 absolute bottom-16 left-0 z-20 hidden rounded-xl border border-gray-200 bg-white px-4 py-3.5 shadow-[0_24px_60px_-20px_rgba(16,24,40,0.18)] sm:block"
+  >
+    <div class="flex items-center gap-3">
+      <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-lime-soft text-lime-dark">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="flex flex-col">
+        <span class="font-mono text-[10px] uppercase tracking-[0.06em] text-gray-500">Recurring</span>
+        <span class="text-base font-bold tracking-tight text-gray-900">Monthly</span>
+      </span>
+    </div>
   </div>
 
   <!-- device -->
-  <div class="relative z-10 overflow-hidden rounded-[2.25rem] border-[6px] border-gray-900 bg-white shadow-[0_40px_80px_-30px_rgba(0,0,0,0.55)]">
-    <!-- status bar -->
-    <div class="flex items-center justify-between px-6 pb-2 pt-4 text-xs font-semibold text-gray-900">
-      <span>9:41</span>
-      <span class="flex items-center gap-1 text-gray-400">●&nbsp;▪&nbsp;▮</span>
-    </div>
+  <div
+    class="relative z-10 h-[560px] w-[280px] rounded-[44px] bg-gray-900 p-2 shadow-[0_50px_100px_-30px_rgba(0,0,0,0.45),0_30px_60px_-30px_rgba(0,0,0,0.3)] sm:h-[580px] sm:w-[290px]"
+    style="transform:rotate(-3deg)"
+  >
+    <!-- dynamic island -->
+    <div class="absolute left-1/2 top-3.5 z-20 h-6 w-[90px] -translate-x-1/2 rounded-full bg-gray-900"></div>
 
-    <!-- orange app header w/ paw -->
-    <div class="flex items-center justify-between bg-lime px-5 py-3.5">
-      <span class="flex items-center gap-2 text-ink">
-        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="12" cy="16" rx="5" ry="4.2"/><circle cx="6.2" cy="10.5" r="2.1"/><circle cx="10" cy="7.2" r="2.1"/><circle cx="14" cy="7.2" r="2.1"/><circle cx="17.8" cy="10.5" r="2.1"/></svg>
-        <span class="text-[0.8125rem] font-bold tracking-tight">{fund}</span>
-      </span>
-      <svg class="h-4 w-4 text-ink/80" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-    </div>
-
-    <div class="flex flex-col gap-3 p-4">
-      <!-- donation card -->
-      <div class="rounded-2xl bg-gray-50 p-4 text-center">
-        <p class="font-mono text-[10px] uppercase tracking-[0.06em] text-gray-500">Next minimum donation</p>
-        <p class="mt-1 text-[2.25rem] font-bold leading-none tracking-tight text-gray-900">$15.00</p>
-        <p class="mt-1 font-mono text-[10px] text-gray-500">10 / 31 / 2026</p>
-        <div class="mx-auto mt-3 h-1.5 w-full overflow-hidden rounded-full bg-gray-200">
-          <div class="xp-fill h-full rounded-full bg-lime"></div>
-        </div>
-        <div class="mt-3 rounded-lg bg-ink py-2.5 text-xs font-semibold text-white">+ Add another card</div>
-      </div>
-
-      <!-- quick give (accent panel) -->
-      <div class="rounded-2xl bg-lime p-4 text-center">
-        <p class="mb-3 text-xs font-bold text-ink">Looking to give a little extra?</p>
-        <div class="grid grid-cols-4 overflow-hidden rounded-full bg-ink/15">
-          {quick.map((a, i) => (
-            <span class={`py-1.5 text-xs font-bold ${i === 0 ? "rounded-full bg-white text-lime-dark" : "text-ink"}`}>{a}</span>
-          ))}
-        </div>
-        <div class="mt-3 rounded-lg bg-ink/85 py-2.5 text-xs font-bold text-white">Give a one-time donation</div>
-      </div>
-
-      <!-- share -->
-      <div class="rounded-2xl bg-gray-50 p-4 text-center">
-        <span class="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-lime text-ink">
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+    <!-- screen -->
+    <div class="relative flex h-full w-full flex-col overflow-hidden rounded-[36px] bg-white">
+      <!-- status bar -->
+      <div class="flex items-center justify-between px-6 pb-2.5 pt-[18px] text-xs font-semibold text-gray-900">
+        <span>9:41</span>
+        <span class="flex items-center gap-1.5 text-gray-900">
+          <svg class="h-3 w-3.5" viewBox="0 0 18 12" fill="currentColor" aria-hidden="true"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/></svg>
+          <svg class="h-3 w-3.5" viewBox="0 0 16 12" fill="currentColor" aria-hidden="true"><path d="M8 10.5a1.5 1.5 0 1 0 0-.01zM8 2C4.7 2 1.8 3.4 0 5.6l1.5 1.4C3 5.2 5.4 4 8 4s5 1.2 6.5 3L16 5.6C14.2 3.4 11.3 2 8 2z"/></svg>
+          <svg class="h-3 w-5" viewBox="0 0 26 12" fill="none" aria-hidden="true"><rect x="1" y="1" width="21" height="10" rx="2.5" stroke="currentColor"/><rect x="3" y="3" width="15" height="6" rx="1" fill="currentColor"/><rect x="23" y="4" width="2" height="4" rx="1" fill="currentColor"/></svg>
         </span>
-        <p class="text-[10px] leading-snug text-gray-600">Tell others, so they can donate to the {mascot} too!</p>
+      </div>
+
+      <div class="flex flex-col gap-3.5 px-5 pb-5">
+        <!-- org -->
+        <div class="flex items-center gap-3 border-b border-gray-200 pb-4">
+          {mark ? (
+            <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-lime-soft">
+              <span class="h-4 w-4" style={maskStyle}></span>
+            </span>
+          ) : (
+            <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-lime text-sm font-bold text-ink">{fund.charAt(0)}</span>
+          )}
+          <span class="text-xs font-medium text-gray-900">{fund}</span>
+        </div>
+
+        <!-- donation card -->
+        <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5">
+          <p class="mb-2 font-mono text-[10px] uppercase tracking-[0.06em] text-gray-500">Next minimum donation</p>
+          <p class="mb-1 text-[2.25rem] font-bold leading-none tracking-tight text-gray-900">$15.00</p>
+          <p class="mb-4 font-mono text-[10px] text-gray-500">10 / 31 / 2026</p>
+          <div class="mb-4 h-1 w-full overflow-hidden rounded-full bg-gray-200">
+            <div class="xp-fill h-full rounded-full bg-lime"></div>
+          </div>
+          <div class="flex items-center justify-center gap-2 rounded-lg bg-ink py-2.5 text-xs font-semibold text-white">
+            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Add another card
+          </div>
+        </div>
+
+        <!-- quick give -->
+        <div class="rounded-2xl border border-gray-200 bg-white p-4">
+          <p class="mb-3 text-center text-[10px] text-gray-600">Looking to give a little extra?</p>
+          <div class="grid grid-cols-4 gap-1">
+            {quickAmounts.map((a) => (
+              <span
+                class={`rounded-full py-2 text-center text-xs font-semibold ${a.on ? "bg-ink text-white" : "border border-gray-200 text-gray-600"}`}
+              >{a.v}</span>
+            ))}
+          </div>
+        </div>
+
+        <!-- give cta -->
+        <div class="rounded-lg bg-lime py-2.5 text-center text-xs font-bold text-ink">
+          Give a one-time donation
+        </div>
+
+        <!-- share prompt -->
+        <p class="text-center text-[10px] leading-snug text-gray-500">Tell others, so they can donate to the {mascot} too!</p>
       </div>
     </div>
   </div>
 </div>
 
 <style>
-  .xp-fill { width: 0; animation: xpFill 2s 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-  @keyframes xpFill { to { width: 72%; } }
-  @media (prefers-reduced-motion: reduce) { .xp-fill { width: 72%; animation: none; } }
+  .xp-fill {
+    width: 0;
+    animation: xpFill 2s 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+  @keyframes xpFill {
+    to {
+      width: 68%;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .xp-fill {
+      width: 68%;
+      animation: none;
+    }
+  }
 </style>

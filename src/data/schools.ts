@@ -31,6 +31,8 @@ export interface School {
   state: string;
   /** Mono/white logo for the dark co-brand header. Empty → styled wordmark. */
   logo?: string;
+  /** Small square mark (e.g. paw) tinted with the accent; used in the app mockup. */
+  mark?: string;
   theme: SchoolTheme;
 }
 
@@ -43,14 +45,14 @@ export const schools: School[] = [
     fund: "Bearkat Athletics Fund",
     city: "Huntsville",
     state: "TX",
-    // ⚠ Drop the official Bearkat paw/wordmark SVG here to replace the text lockup:
-    // logo: "/assets/schools/sam-houston/logo-white.svg",
+    logo: "/assets/schools/sam-houston/logo-white.svg", // white Bearkat mascot
+    mark: "/assets/schools/sam-houston/paw.svg", // paw (inherits accent)
     theme: {
-      primary: "#F26426", // Bearkat Orange (sampled from the SHSU app mockup)
-      primaryDeep: "#DD511B",
-      primaryDark: "#B8430F",
-      primarySoft: "rgba(242, 100, 38, 0.12)",
-      ink: "#17120E", // warm near-black for dark sections
+      primary: "#ff5200", // Bearkat Orange (official SHSU brand)
+      primaryDeep: "#e64a00",
+      primaryDark: "#cc4200", // darker for text/icons on light backgrounds
+      primarySoft: "rgba(255, 82, 0, 0.12)",
+      ink: "#1e1d23", // official SHSU navy grey for dark sections
     },
   },
 ];
@@ -66,4 +68,9 @@ export const schoolThemeVars = (t: SchoolTheme): string =>
     `--color-lime-dark:${t.primaryDark}`,
     `--color-lime-soft:${t.primarySoft}`,
     `--color-ink:${t.ink}`,
+    // Re-skin the few shared components that use the blue "primary" scale
+    // (Eyebrow label, DonorDashboard monogram) to the school accent.
+    `--color-primary-500:${t.primary}`,
+    `--color-primary-600:${t.primaryDeep}`,
+    `--color-primary-800:${t.primaryDark}`,
   ].join(";") + ";";

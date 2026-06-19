@@ -18,7 +18,10 @@ const months = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
 
 const tabs = ["Overview", "Donors", "Campaigns"];
 
-export default function DonorDashboard({ fund = "Bobcat Athletics Fund" }: { fund?: string } = {}) {
+export default function DonorDashboard({
+  fund = "Bobcat Athletics Fund",
+  slug = "bobcat-athletics",
+}: { fund?: string; slug?: string } = {}) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-12% 0px" });
 
@@ -35,7 +38,7 @@ export default function DonorDashboard({ fund = "Bobcat Athletics Fund" }: { fun
           <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
         </span>
         <span className="ml-2 truncate font-mono text-[11px] text-gray-400">
-          {brand.appHost} / bobcat-athletics / overview
+          {brand.appHost} / {slug} / overview
         </span>
       </div>
 
@@ -44,7 +47,7 @@ export default function DonorDashboard({ fund = "Bobcat Athletics Fund" }: { fun
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm font-bold tracking-tight text-gray-900">
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary-800 to-primary-600 text-xs font-bold text-white">
-              B
+              {fund.charAt(0)}
             </span>
             {fund}
           </div>
