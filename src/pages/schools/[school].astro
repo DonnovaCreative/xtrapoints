@@ -1,15 +1,15 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import SchoolHeader from "@/components/school/SchoolHeader.astro";
+import SchoolPhotoBand from "@/components/school/SchoolPhotoBand.astro";
 import Footer from "@/components/Footer.astro";
 import CtaButton from "@/components/CtaButton.astro";
 import Eyebrow from "@/components/Eyebrow.astro";
 import PlaybookMark from "@/components/PlaybookMark.astro";
 import SchoolPhone from "@/components/school/SchoolPhone.astro";
-import DotGrid from "@/components/islands/DotGrid.tsx";
-import StatTrio from "@/components/islands/StatTrio.tsx";
-import DonorDashboard from "@/components/islands/DonorDashboard.tsx";
+import DotField from "@/components/islands/DotField.tsx";
 import ContactForm from "@/components/islands/ContactForm.tsx";
-import { schools, schoolThemeVars } from "@/data/schools";
+import { schools, schoolThemeVars, hexToRgba } from "@/data/schools";
 import { brand } from "@/config/brand";
 
 export function getStaticPaths() {
@@ -19,52 +19,49 @@ export function getStaticPaths() {
 const { school } = Astro.props;
 const t = school.theme;
 const themeStyle = schoolThemeVars(t);
+const ambassadorUrl = `/schools/${school.slug}/ambassadors`;
 
-// Mock dashboard URL slug, derived from the fund (e.g. "bearkat-athletics").
-const fundSlug = school.fund.toLowerCase().replace(/\s*fund\s*$/, "").replace(/\s+/g, "-");
-
+// Simple, donor-facing "how to sign up" steps (the step-by-step the page should push).
 const steps = [
-  { n: "01", title: "Link a card once.", body: `Download the ${brand.name} app, pick the ${school.mascot}, and connect a card. Two minutes, zero cost.` },
-  { n: "02", title: "Spend like normal.", body: "Groceries, gas, game-day coffee — every purchase rounds up to the nearest dollar in the background." },
-  { n: "03", title: "Round-ups become gifts.", body: `Your spare change collects into recurring donations to the ${school.fund} — with optional minimums and multipliers.` },
+  { n: "01", title: "Download the app.", body: `Get the ${brand.name} app, free, and pick the ${school.mascot}. (Coming soon to the App Store & Google Play.)` },
+  { n: "02", title: "Link a card securely.", body: "Connect a card in seconds — verified in real time by Plaid. Your bank login is never shared with us." },
+  { n: "03", title: "Round up for the team.", body: `Every purchase rounds up to the nearest dollar, and your spare change becomes a gift to the ${school.fund}.` },
 ];
 
-const marketing = [
-  "Done-for-you campaign templates in your colors.",
-  "One-click social & email sharing for supporters.",
-  "Targeted re-engagement that wins back lapsed donors.",
+// Donor-facing advantages.
+const advantages = [
+  { title: "Effortless", body: "Round-ups happen automatically in the background. Set it once and forget it." },
+  { title: "Free to give", body: "No fees to participate — you decide how much you round up each month." },
+  { title: "It adds up", body: `Spare change from everyday spending becomes steady, recurring support for the ${school.fund}.` },
+  { title: "Bank-level security", body: "Card connections are verified and protected by Plaid. Your details stay safe." },
+  { title: "Cancel anytime", body: "Pause or stop whenever you like — right from the app, no questions asked." },
+  { title: "Anyone can join", body: "Students, alumni, family, friends, and local fans can all pitch in for the team." },
 ];
 ---
 
 <Layout
-  title={`${school.short} × ${brand.name} — Round-Up Donor Program`}
-  description={`Round up your everyday spending into recurring gifts for the ${school.fund}. The official ${school.short} donor program, powered by ${brand.name}.`}
+  title={`${school.short} × ${brand.name} — Round-Up Giving`}
+  description={`Turn your everyday spending into support for the ${school.fund}. Round-up giving for ${school.short} fans, students, and alumni — powered by ${brand.name}. Launching soon.`}
 >
   <div style={themeStyle}>
-    <!-- ===================== CO-BRAND HEADER ===================== -->
-    <header class="relative z-50 bg-ink">
-      <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4 lg:px-10">
-        <div class="flex items-center gap-3">
-          <img src={brand.logo.white} alt={brand.name} width={brand.logo.width} height={brand.logo.height} class="h-[22px] w-auto" />
-          <span class="text-white/30">×</span>
-          {school.logo ? (
-            <img src={school.logo} alt={school.name} class="h-7 w-auto" />
-          ) : (
-            <span class="flex items-center gap-2 text-white">
-              <svg class="h-6 w-6 text-lime" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="12" cy="16" rx="5" ry="4.2"/><circle cx="6.2" cy="10.5" r="2.1"/><circle cx="10" cy="7.2" r="2.1"/><circle cx="14" cy="7.2" r="2.1"/><circle cx="17.8" cy="10.5" r="2.1"/></svg>
-              <span class="text-sm font-bold leading-none tracking-tight">{school.short}<br /><span class="font-mono text-[0.625rem] font-normal uppercase tracking-[0.12em] text-white/55">{school.mascot}</span></span>
-            </span>
-          )}
-        </div>
-        <CtaButton href={brand.appUrl} variant="lime" glow={false} class="!px-5 !py-2.5 !text-sm">Get the App</CtaButton>
-      </div>
-    </header>
+    <SchoolHeader
+      school={school}
+      nav={{ label: "Become an Ambassador", href: ambassadorUrl }}
+      cta={{ label: "Get early access", href: "#start" }}
+    />
 
     <main>
       <!-- ===================== HERO ===================== -->
       <section class="relative overflow-hidden bg-ink">
+        {school.photos?.team && (
+          <div class="absolute inset-0 z-0" aria-hidden="true">
+            <img src={school.photos.team} alt="" class="h-full w-full object-cover object-[center_22%] opacity-30" />
+            <div class="absolute inset-0 bg-gradient-to-r from-ink via-ink/90 to-ink/55"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-transparent"></div>
+          </div>
+        )}
         <div class="absolute inset-0 z-0" aria-hidden="true">
-          <DotGrid client:load dotSize={2} gap={28} baseColor="#3a3942" activeColor={t.primary} proximity={130} />
+          <DotField client:load dotSpacing={26} dotRadius={2} bulgeStrength={60} glowRadius={200} gradientFrom={hexToRgba(t.primary, 0.5)} gradientTo={hexToRgba(t.primary, 0.18)} glowColor={hexToRgba(t.primary, 0.5)} />
         </div>
         <div class="dot-grid"></div>
         <div class="glow anim-float-1" style={`width:460px;height:460px;top:-8%;right:6%;background:radial-gradient(circle,${t.primarySoft} 0%,transparent 65%);opacity:0.9;`} aria-hidden="true"></div>
@@ -72,8 +69,8 @@ const marketing = [
 
         <div class="relative z-10 mx-auto grid max-w-7xl gap-12 px-6 pb-20 pt-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:px-10 lg:pb-28 lg:pt-20">
           <div>
-            <p class="font-mono text-xs uppercase tracking-[0.12em] text-lime">
-              Official donor program · {school.short}
+            <p class="inline-flex items-center gap-2 rounded-full bg-lime-soft px-3 py-1 font-mono text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-lime">
+              <span class="h-1.5 w-1.5 rounded-full bg-lime"></span>Launching soon · {school.short}
             </p>
             <h1 class="font-display mt-4 text-[clamp(3rem,7vw,5.25rem)] uppercase leading-[1.02] tracking-tight text-white">
               Every purchase, a
@@ -82,15 +79,14 @@ const marketing = [
             </h1>
             <div class="reveal">
               <p class="mt-6 max-w-xl text-lg leading-relaxed text-white/75">
-                Link a card once and your everyday spending rounds up into
-                recurring gifts to the {school.fund} — powered by {brand.name}.
-                No cost to you. Live in minutes.
+                Soon you'll link a card once and your everyday spending will round
+                up into automatic gifts for the {school.fund} — powered by
+                {" "}{brand.name}. No cost to you, and it takes about two minutes.
               </p>
               <div class="mt-8 flex flex-wrap items-center gap-4">
-                <CtaButton href={brand.appUrl} variant="lime" glow={false}>Get the App</CtaButton>
+                <CtaButton href="#start" variant="lime" glow={false}>Get early access</CtaButton>
                 <span class="font-mono text-xs uppercase tracking-[0.04em] text-white/50">Free · Round up · Cancel anytime</span>
               </div>
-              <div class="mt-12 max-w-md"><StatTrio client:visible /></div>
             </div>
           </div>
           <div class="relative reveal-right"><SchoolPhone fund={school.fund} mascot={school.mascot} mark={school.mark} /></div>
@@ -103,12 +99,11 @@ const marketing = [
           <div class="reveal max-w-3xl">
             <Eyebrow index="01" label="How it works" />
             <h2 class="font-display mt-4 max-w-[18ch] text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900">
-              Spare change, <span class="ed ed-dark">Real impact</span> for your team.
+              Signing up is <span class="ed ed-dark">Simple</span>.
             </h2>
             <p class="mt-5 text-lg leading-relaxed text-gray-600">
-              The Round-Up app turns the {school.mascot} fanbase into a steady
-              stream of recurring donors — without asking anyone to change how
-              they already spend.
+              Three quick steps and your spare change starts supporting the
+              {" "}{school.mascot} — without changing how you already spend.
             </p>
           </div>
           <div class="stagger mt-14 grid gap-6 md:grid-cols-3">
@@ -123,106 +118,109 @@ const marketing = [
         </div>
       </section>
 
-      <!-- ===================== DONOR MANAGEMENT ===================== -->
+      <!-- ===================== SPIRIT BAND ===================== -->
+      {school.photos?.celebrate && (
+        <SchoolPhotoBand src={school.photos.celebrate} position="center 28%">
+          <p class="font-mono text-xs font-bold uppercase tracking-[0.16em] text-lime">Eat 'em up, Kats</p>
+          <h2 class="font-display mt-4 text-[clamp(2.5rem,6vw,4.5rem)] uppercase leading-[0.95] tracking-tight text-white">
+            From the stands to the <span class="ed">scoreboard</span>.
+          </h2>
+          <p class="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-white/80">
+            Every {school.mascot} fan can fuel the program — turning everyday
+            spending into real support for the team you love.
+          </p>
+        </SchoolPhotoBand>
+      )}
+
+      <!-- ===================== WHY GIVE / ADVANTAGES ===================== -->
       <section class="relative overflow-hidden bg-gray-50 py-20 lg:py-28">
-        <div class="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-[1fr_1.2fr] lg:gap-16 lg:px-10">
-          <div class="reveal-left">
-            <Eyebrow index="02" label="Donor management" />
-            <h2 class="font-display mt-4 max-w-[16ch] text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900">
-              One view of every <span class="ed ed-dark">Supporter</span>.
+        <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">
+          <div class="reveal max-w-3xl">
+            <Eyebrow index="02" label="Why give this way" />
+            <h2 class="font-display mt-4 max-w-[20ch] text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900">
+              Tiny change, <span class="ed ed-dark">Real impact</span>.
             </h2>
             <p class="mt-5 text-lg leading-relaxed text-gray-600">
-              Track every {school.mascot} donor, campaign, and gift in a single
-              dashboard — historical giving, recurring plans, and exactly which
-              initiatives drive lift.
+              Round-up giving turns the everyday into something the {school.mascot}
+              feel all season long.
             </p>
           </div>
-          <div class="reveal-right"><DonorDashboard client:visible fund={school.fund} slug={fundSlug} /></div>
-        </div>
-      </section>
-
-      <!-- ===================== MARKETING SUPPORT ===================== -->
-      <section class="relative overflow-hidden bg-white py-20 lg:py-28">
-        <div class="relative z-10 mx-auto max-w-3xl px-6 text-center lg:px-10">
-          <div class="reveal">
-            <Eyebrow index="03" label="Marketing support" class="justify-center" />
-            <h2 class="font-display mt-4 text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900">
-              A marketing arm, <span class="ed ed-dark">Without The</span> headcount.
-            </h2>
-            <p class="mt-5 text-lg leading-relaxed text-gray-600">
-              {brand.name} brings the campaigns that grow your donor base — so
-              {" "}{school.short} reaches supporters like a program with a full agency.
-            </p>
-          </div>
-          <ul class="stagger mx-auto mt-10 flex max-w-xl flex-col gap-3 text-left">
-            {marketing.map((m) => (
-              <li class="flex items-center gap-3.5 rounded-xl border border-gray-200 bg-white px-5 py-4">
-                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-lime-soft text-lime-dark">
-                  <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
+          <div class="stagger mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {advantages.map((a) => (
+              <div class="rounded-2xl border border-gray-200 bg-white p-7">
+                <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-lime-soft text-lime-dark">
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
                 </span>
-                <span class="font-medium text-gray-900">{m}</span>
-              </li>
+                <h3 class="mt-4 text-lg font-bold tracking-tight text-gray-900">{a.title}</h3>
+                <p class="mt-2 leading-relaxed text-gray-600">{a.body}</p>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       </section>
 
-      <!-- ===================== AMBASSADOR PROGRAM ===================== -->
+      <!-- ===================== AMBASSADOR CALLOUT ===================== -->
       <section class="relative overflow-hidden bg-ink py-20 text-white lg:py-28">
         <div class="dot-grid"></div>
         <PlaybookMark mark="o" class="left-[5%] top-[16%] hidden h-16 w-16 lg:block" rotate={-8} opacity={0.18} />
         <div class="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16 lg:px-10">
           <div class="reveal-left">
-            <Eyebrow index="04" label="Ambassador program" dark />
+            <Eyebrow index="03" label="For students" dark />
             <h2 class="font-display mt-4 text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-white">
-              Put your students <span class="ed">To Work</span>.
+              Become a {school.short} <span class="ed">Ambassador</span>.
             </h2>
             <p class="mt-5 max-w-xl text-lg leading-relaxed text-white/75">
-              A student-powered growth engine that recruits micro-donors through
-              the channels staff can't reach — Greek life, tailgates, orientation,
-              alumni weekends. Low-cost, always-on, and built for the {school.mascot}.
+              Are you a {school.short} student? Lead the movement on campus —
+              spread the word, sign up donors, and earn swag, gift cards, VIP
+              experiences, and leadership recognition as you climb from Bronze to
+              Gold.
             </p>
-            <a href={`mailto:${brand.salesEmail}`} class="mt-8 inline-flex w-fit items-center gap-2.5 rounded-full bg-lime px-6 py-3.5 text-[0.9375rem] font-bold text-ink transition-all duration-300 hover:bg-lime-deep hover:-translate-y-0.5">
-              Learn about the Ambassador Program
+            <a href={ambassadorUrl} class="mt-8 inline-flex w-fit items-center gap-2.5 rounded-full bg-lime px-6 py-3.5 text-[0.9375rem] font-bold text-ink transition-all duration-300 hover:bg-lime-deep hover:-translate-y-0.5">
+              Explore the Ambassador Program
               <svg class="h-4 w-4" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </a>
           </div>
-          <div class="reveal-right flex min-h-[300px] flex-col justify-between rounded-3xl bg-white/[0.04] p-10 ring-1 ring-white/10">
-            <p class="font-mono text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-lime">Always-on growth</p>
-            <p class="font-display text-[clamp(6rem,12vw,9rem)] leading-[0.85] text-lime">∞</p>
-            <div class="flex items-center justify-between border-t border-white/10 pt-5">
-              <span class="font-mono text-[0.625rem] font-bold uppercase tracking-[0.08em] text-white/50">Channels we tap</span>
-              <span class="text-[0.8125rem] font-semibold text-white">Greek · Athletics · Alumni</span>
-            </div>
+          <div class="reveal-right">
+            {school.photos?.fans ? (
+              <img src={school.photos.fans} alt={`${school.short} students in the stands`} loading="lazy" class="aspect-[4/3] w-full rounded-3xl object-cover shadow-2xl ring-1 ring-white/10" />
+            ) : (
+              <div class="grid grid-cols-3 gap-3">
+                {["Bronze", "Silver", "Gold"].map((tier, i) => (
+                  <div class={`flex flex-col items-center justify-center gap-2 rounded-2xl p-5 text-center ring-1 ring-white/10 ${i === 2 ? "bg-lime text-ink" : "bg-white/[0.04] text-white"}`}>
+                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5"/><path d="M9 12.5L7 22l5-3 5 3-2-9.5"/></svg>
+                    <span class="font-mono text-[0.625rem] font-bold uppercase tracking-[0.08em]">{tier}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>
 
-      <!-- ===================== FINAL CTA + FORM ===================== -->
+      <!-- ===================== INTEREST / GET EARLY ACCESS ===================== -->
       <section id="start" class="relative overflow-hidden bg-white py-20 lg:py-28">
         <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">
           <div class="grid items-center gap-12 lg:grid-cols-[1fr_1fr] lg:gap-16">
             <div class="reveal-left">
-              <Eyebrow index="05" label="Get the app" />
+              <Eyebrow index="04" label="Get early access" />
               <h2 class="font-display mt-4 text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900">
-                Back the <span class="ed ed-dark">{school.mascot}</span> in seconds.
+                Be first to back the <span class="ed ed-dark">{school.mascot}</span>.
               </h2>
               <p class="mt-5 max-w-md text-lg leading-relaxed text-gray-600">
-                Link a card once and your spare change starts supporting the
-                {" "}{school.fund} automatically. It's free, takes two minutes,
-                and you can cancel anytime. Drop your info and we'll send you the
-                app download link.
+                Round-up giving for the {school.fund} is almost here. Join the
+                waitlist and we'll tell you the moment it goes live — so you can be
+                among the first {school.mascot} fans to start giving.
               </p>
               <ul class="mt-8 flex flex-col gap-3 text-gray-700">
-                <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>Free — you choose how much you round up</li>
+                <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>Free to join · you choose how much you round up</li>
                 <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>Set it once · cancel anytime</li>
-                <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>Bank-level security · PCI DSS certified</li>
+                <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>Card connections secured by Plaid</li>
               </ul>
             </div>
             <div class="reveal-right rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-gray-200 sm:p-8 lg:p-10">
-              <h3 class="text-2xl font-bold tracking-tight text-gray-900">Get the {brand.name} app</h3>
-              <p class="mt-2 text-gray-600">Enter your details and we'll send the download link.</p>
-              <div class="mt-7"><ContactForm client:load school={school.name} variant="signup" /></div>
+              <h3 class="text-2xl font-bold tracking-tight text-gray-900">Join the waitlist</h3>
+              <p class="mt-2 text-gray-600">No spam — just a heads-up the day we launch.</p>
+              <div class="mt-7"><ContactForm client:load school={school.name} variant="interest" /></div>
             </div>
           </div>
         </div>

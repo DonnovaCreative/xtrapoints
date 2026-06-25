@@ -33,6 +33,14 @@ export interface School {
   logo?: string;
   /** Small square mark (e.g. paw) tinted with the accent; used in the app mockup. */
   mark?: string;
+  /** Real game-day photography — adds school spirit across the pages. */
+  photos?: {
+    team?: string; // team in uniform (hero atmosphere)
+    fans?: string; // student / fan crowd
+    celebrate?: string; // player celebration
+    mascot?: string; // mascot
+    action?: string; // extra action / celebration shot
+  };
   theme: SchoolTheme;
 }
 
@@ -47,6 +55,13 @@ export const schools: School[] = [
     state: "TX",
     logo: "/assets/schools/sam-houston/logo-white.svg", // white Bearkat mascot
     mark: "/assets/schools/sam-houston/paw.svg", // paw (inherits accent)
+    photos: {
+      team: "/assets/schools/sam-houston/team.webp",
+      fans: "/assets/schools/sam-houston/fans.jpg",
+      celebrate: "/assets/schools/sam-houston/celebrate.jpg",
+      mascot: "/assets/schools/sam-houston/mascot.jpg",
+      action: "/assets/schools/sam-houston/action.jpg",
+    },
     theme: {
       primary: "#ff5200", // Bearkat Orange (official SHSU brand)
       primaryDeep: "#e64a00",
@@ -59,6 +74,14 @@ export const schools: School[] = [
 
 export const getSchool = (slug: string): School | undefined =>
   schools.find((s) => s.slug === slug);
+
+/** Convert a #rrggbb hex to an rgba() string at the given alpha. */
+export const hexToRgba = (hex: string, alpha: number): string => {
+  const [r, g, b] = (hex.replace("#", "").match(/.{2}/g) ?? ["00", "00", "00"]).map(
+    (h) => parseInt(h, 16),
+  );
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
 
 /** Inline CSS that re-maps the global accent/ink tokens to a school's palette. */
 export const schoolThemeVars = (t: SchoolTheme): string =>

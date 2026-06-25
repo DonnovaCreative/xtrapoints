@@ -46,10 +46,16 @@ export default function ContactForm({
 }: {
   school?: string;
   orgPlaceholder?: string;
-  /** "contact" → B2B inquiry (default). "signup" → consumer get-the-app capture. */
-  variant?: "contact" | "signup";
+  /**
+   * "contact" → B2B inquiry (default).
+   * "signup"  → consumer get-the-app capture (name + email + phone).
+   * "interest" → pre-launch interest list (name + email only).
+   */
+  variant?: "contact" | "signup" | "interest";
 } = {}) {
   const isSignup = variant === "signup";
+  const isInterest = variant === "interest";
+  const isConsumer = isSignup || isInterest;
   const [status, setStatus] = useState<Status>("idle");
   const [errors, setErrors] = useState<Errors>({});
   const [orgType, setOrgType] = useState("");
@@ -62,9 +68,9 @@ export default function ContactForm({
     const e: Errors = {};
     if (!data.name?.trim()) e.name = "Please enter your full name.";
     if (!data.email?.trim())
-      e.email = isSignup ? "Please enter your email." : "Please enter your work email.";
+      e.email = isConsumer ? "Please enter your email." : "Please enter your work email.";
     else if (!EMAIL_RE.test(data.email)) e.email = "Enter a valid email address.";
-    if (!isSignup) {
+    if (!isConsumer) {
       if (!data.organization?.trim())
         e.organization = "Please enter your organization or program name.";
       if (!orgType) e.orgType = "Please select an organization type.";
@@ -113,22 +119,26 @@ export default function ContactForm({
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
           access_key: ACCESS_KEY,
-          subject: isSignup
-            ? `New ${brand.name} app sign-up${school ? ` — ${school}` : ""} — ${data.name}`
-            : school
-              ? `New ${brand.name} inquiry — ${school} — from ${data.organization}`
-              : `New ${brand.name} inquiry from ${data.organization}`,
+          subject: isInterest
+            ? `New ${brand.name} interest${school ? ` — ${school}` : ""} — ${data.name}`
+            : isSignup
+              ? `New ${brand.name} app sign-up${school ? ` — ${school}` : ""} — ${data.name}`
+              : school
+                ? `New ${brand.name} inquiry — ${school} — from ${data.organization}`
+                : `New ${brand.name} inquiry from ${data.organization}`,
           school: school ?? "",
           from_name: `${brand.name} Website`,
           name: data.name,
           email: data.email,
-          ...(isSignup
-            ? { phone: data.phone || "(not provided)", type: "App sign-up" }
-            : {
-                organization: data.organization,
-                organization_type: orgType,
-                message: data.message || "(no message)",
-              }),
+          ...(isInterest
+            ? { phone: data.phone || "(not provided)", type: "Waitlist (pre-launch)" }
+            : isSignup
+              ? { phone: data.phone || "(not provided)", type: "App sign-up" }
+              : {
+                  organization: data.organization,
+                  organization_type: orgType,
+                  message: data.message || "(no message)",
+                }),
           "h-captcha-response": captchaToken,
         }),
       });
@@ -161,19 +171,25 @@ export default function ContactForm({
           </svg>
         </div>
         <h3 className="text-xl font-bold tracking-tight text-gray-900">
-          {isSignup ? "You’re all set!" : "Thanks — we’ll be in touch."}
+          {isInterest
+            ? "You’re on the list!"
+            : isSignup
+              ? "You’re all set!"
+              : "Thanks — we’ll be in touch."}
         </h3>
         <p className="mt-2 text-gray-600">
-          {isSignup
-            ? "We’ll email your app download link shortly — keep an eye on your inbox."
-            : "Your inquiry is on its way to our team. Expect a reply within one business day."}
+          {isInterest
+            ? "We’ll email you the moment round-up giving goes live. Thanks for being early."
+            : isSignup
+              ? "We’ll email your app download link shortly — keep an eye on your inbox."
+              : "Your inquiry is on its way to our team. Expect a reply within one business day."}
         </p>
         <button
           type="button"
           onClick={() => setStatus("idle")}
           className="mt-5 text-sm font-semibold text-lime-dark underline-offset-4 hover:underline"
         >
-          {isSignup ? "Sign up another" : "Send another message"}
+          {isConsumer ? "Add another" : "Send another message"}
         </button>
       </div>
     );
@@ -197,25 +213,27 @@ export default function ContactForm({
       />
 
       <div>
-        <Label htmlFor="name">Full name <span className="text-error-500">*</span></Label>
-        <Input id="name" name="name" autoComplete="name" placeholder="Jordan Rivera" aria-invalid={!!errors.name} className="mt-1.5" />
+        <Label htmlFor="name">{isConsumer ? "First name" : "Full name"} <span className="text-error-500">*</span></Label>
+        <Input id="name" name="name" autoComplete={isConsumer ? "given-name" : "name"} placeholder={isConsumer ? "Jordan" : "Jordan Rivera"} aria-invalid={!!errors.name} className="mt-1.5" />
         {err("name")}
       </div>
 
       <div>
         <Label htmlFor="email">
-          {isSignup ? "Email" : "Work email"} <span className="text-error-500">*</span>
+          {isConsumer ? "Email" : "Work email"} <span className="text-error-500">*</span>
         </Label>
-        <Input id="email" name="email" type="email" autoComplete="email" placeholder={isSignup ? "you@email.com" : "you@program.edu"} aria-invalid={!!errors.email} className="mt-1.5" />
+        <Input id="email" name="email" type="email" autoComplete="email" placeholder={isConsumer ? "you@email.com" : "you@program.edu"} aria-invalid={!!errors.email} className="mt-1.5" />
         {err("email")}
       </div>
 
-      {isSignup ? (
+      {isConsumer && (
         <div>
           <Label htmlFor="phone">Mobile <span className="text-gray-400">(optional)</span></Label>
           <Input id="phone" name="phone" type="tel" autoComplete="tel" inputMode="tel" placeholder="(555) 123-4567" className="mt-1.5" />
         </div>
-      ) : (
+      )}
+
+      {!isConsumer && (
         <>
           <div>
             <Label htmlFor="organization">
@@ -278,13 +296,15 @@ export default function ContactForm({
       >
         {status === "submitting"
           ? "Sending…"
-          : isSignup
-            ? "Send me the app link"
-            : "Get Started"}
+          : isInterest
+            ? "Notify me at launch"
+            : isSignup
+              ? "Send me the app link"
+              : "Get Started"}
       </Button>
 
       <p className="text-center text-xs text-gray-500">
-        {isSignup ? "Questions? Reach us at" : "Prefer email? Reach us at"}{" "}
+        {isConsumer ? "Questions? Reach us at" : "Prefer email? Reach us at"}{" "}
         <a href={`mailto:${brand.salesEmail}`} className="font-semibold text-lime-dark hover:underline">
           {brand.salesEmail}
         </a>
