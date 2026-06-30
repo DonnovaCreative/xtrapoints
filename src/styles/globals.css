@@ -21,6 +21,11 @@
   --color-lime-soft: rgba(194, 242, 86, 0.12);
   --color-gold: #f5b921;
 
+  /* Text color that sits ON the accent (lime) background — e.g. button labels.
+     Defaults to ink (dark text on bright lime). Schools with a mid/dark accent
+     (e.g. red) override this to white via schoolThemeVars / theme.onAccent. */
+  --color-on-accent: var(--color-ink);
+
   /* --- Brand: ink / dark sections (navy charcoal) -------------------------- */
   --color-ink: #03116d;       /* primary900 */
   --color-ink-soft: #020b3c;  /* footer container */

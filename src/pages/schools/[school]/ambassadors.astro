@@ -227,18 +227,18 @@ const recognition = [
           </div>
           <div class="stagger mt-14 grid gap-6 lg:grid-cols-3">
             {tiers.map((tier) => (
-              <div class={`flex flex-col rounded-3xl p-8 ring-1 ${tier.highlight ? "bg-lime text-ink ring-lime" : "bg-white/[0.04] text-white ring-white/10"}`}>
+              <div class={`flex flex-col rounded-3xl p-8 ring-1 ${tier.highlight ? "bg-lime text-on-accent ring-lime" : "bg-white/[0.04] text-white ring-white/10"}`}>
                 <div class="flex items-center justify-between">
                   <span class="font-display text-2xl uppercase tracking-tight">{tier.name}</span>
                   <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5"/><path d="M9 12.5L7 22l5-3 5 3-2-9.5"/></svg>
                 </div>
-                <p class={`mt-1 font-mono text-[0.6875rem] font-bold uppercase tracking-[0.1em] ${tier.highlight ? "text-ink/70" : "text-lime"}`}>{tier.role}</p>
-                <p class={`mt-4 text-sm font-semibold ${tier.highlight ? "text-ink/80" : "text-white/60"}`}>{tier.time}</p>
+                <p class={`mt-1 font-mono text-[0.6875rem] font-bold uppercase tracking-[0.1em] ${tier.highlight ? "text-on-accent/70" : "text-lime"}`}>{tier.role}</p>
+                <p class={`mt-4 text-sm font-semibold ${tier.highlight ? "text-on-accent/80" : "text-white/60"}`}>{tier.time}</p>
                 <ul class="mt-5 flex flex-col gap-2.5">
                   {tier.perks.map((p) => (
                     <li class="flex items-start gap-2.5 text-[0.9375rem]">
-                      <svg class={`mt-0.5 h-4 w-4 shrink-0 ${tier.highlight ? "text-ink" : "text-lime"}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
-                      <span class={tier.highlight ? "text-ink/90" : "text-white/85"}>{p}</span>
+                      <svg class={`mt-0.5 h-4 w-4 shrink-0 ${tier.highlight ? "text-on-accent" : "text-lime"}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
+                      <span class={tier.highlight ? "text-on-accent/90" : "text-white/85"}>{p}</span>
                     </li>
                   ))}
                 </ul>

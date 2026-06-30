@@ -110,7 +110,7 @@ export default function WaitlistForm({
         <Button
           type="submit"
           disabled={status === "submitting"}
-          className="h-12 shrink-0 rounded-full bg-lime px-6 font-bold text-ink hover:bg-lime-deep disabled:opacity-60"
+          className="h-12 shrink-0 rounded-full bg-lime px-6 font-bold text-on-accent hover:bg-lime-deep disabled:opacity-60"
         >
           {status === "submitting" ? "Joining…" : buttonLabel}
         </Button>

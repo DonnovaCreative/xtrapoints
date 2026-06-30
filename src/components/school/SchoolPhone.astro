@@ -8,8 +8,10 @@ export interface Props {
   mascot: string;
   /** Optional single-color mark (e.g. paw); tinted with the accent via CSS mask. */
   mark?: string;
+  /** Optional full-color logo for the app avatar (takes priority over `mark`). */
+  avatar?: string;
 }
-const { fund, mascot, mark } = Astro.props;
+const { fund, mascot, mark, avatar } = Astro.props;
 const quickAmounts = [
   { v: "$5", on: false },
   { v: "$25", on: true },
@@ -84,12 +86,16 @@ const maskStyle = mark
       <div class="flex flex-col gap-3.5 px-5 pb-5">
         <!-- org -->
         <div class="flex items-center gap-3 border-b border-gray-200 pb-4">
-          {mark ? (
+          {avatar ? (
+            <span class="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-gray-200">
+              <img src={avatar} alt="" class="h-6 w-6 object-contain" />
+            </span>
+          ) : mark ? (
             <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-lime-soft">
               <span class="h-4 w-4" style={maskStyle}></span>
             </span>
           ) : (
-            <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-lime text-sm font-bold text-ink">{fund.charAt(0)}</span>
+            <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-lime text-sm font-bold text-on-accent">{fund.charAt(0)}</span>
           )}
           <span class="text-xs font-medium text-gray-900">{fund}</span>
         </div>
@@ -121,7 +127,7 @@ const maskStyle = mark
         </div>
 
         <!-- give cta -->
-        <div class="rounded-lg bg-lime py-2.5 text-center text-xs font-bold text-ink">
+        <div class="rounded-lg bg-lime py-2.5 text-center text-xs font-bold text-on-accent">
           Give a one-time donation
         </div>
 

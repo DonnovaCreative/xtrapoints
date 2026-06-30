@@ -17,8 +17,11 @@ export interface SchoolTheme {
   primaryDark: string;
   /** Translucent accent for soft fills (rgba). */
   primarySoft: string;
-  /** Dark section background + button text color. */
+  /** Dark section background. */
   ink: string;
+  /** Text/icon color ON the accent (button labels). Defaults to ink — set to
+   *  white for mid/dark accents (e.g. red) where dark text wouldn't read. */
+  onAccent?: string;
 }
 
 export interface School {
@@ -31,8 +34,15 @@ export interface School {
   state: string;
   /** Mono/white logo for the dark co-brand header. Empty → styled wordmark. */
   logo?: string;
+  /** Set true for a COLORED logo (e.g. dark-maned) — renders it on a white
+   *  badge so it stays visible on the dark header. Omit for white/mono logos. */
+  logoBadge?: boolean;
+  /** Header logo sizing classes. Default "h-7 w-auto"; bump for wide wordmarks. */
+  logoClass?: string;
   /** Small square mark (e.g. paw) tinted with the accent; used in the app mockup. */
   mark?: string;
+  /** Full-color square logo for the app mockup avatar (takes priority over `mark`). */
+  avatar?: string;
   /** Real game-day photography — adds school spirit across the pages. */
   photos?: {
     team?: string; // team in uniform (hero atmosphere)
@@ -70,6 +80,33 @@ export const schools: School[] = [
       ink: "#1e1d23", // official SHSU navy grey for dark sections
     },
   },
+  {
+    slug: "westminster",
+    name: "Westminster Academy",
+    short: "Westminster Academy",
+    mascot: "Lions",
+    fund: "Lions Athletics Fund",
+    city: "Fort Lauderdale",
+    state: "FL",
+    logo: "/assets/schools/westminster/logo-white.png", // white wide crest + wordmark lockup
+    logoClass: "h-8 w-auto", // wide horizontal lockup
+    avatar: "/assets/schools/westminster/avatar.png", // color Lions head (app mockup)
+    photos: {
+      team: "/assets/schools/westminster/team.jpg",
+      fans: "/assets/schools/westminster/fans.jpg",
+      celebrate: "/assets/schools/westminster/celebrate.webp",
+      mascot: "/assets/schools/westminster/mascot.jpg",
+      action: "/assets/schools/westminster/action.jpg",
+    },
+    theme: {
+      primary: "#e51937", // Westminster red (official brand)
+      primaryDeep: "#cc1431",
+      primaryDark: "#b3122b", // darker red for text/icons on white (contrast)
+      primarySoft: "rgba(229, 25, 55, 0.12)",
+      ink: "#002a5c", // Westminster navy for dark sections
+      onAccent: "#ffffff", // white reads on the red accent (navy would be muddy)
+    },
+  },
 ];
 
 export const getSchool = (slug: string): School | undefined =>
@@ -91,6 +128,7 @@ export const schoolThemeVars = (t: SchoolTheme): string =>
     `--color-lime-dark:${t.primaryDark}`,
     `--color-lime-soft:${t.primarySoft}`,
     `--color-ink:${t.ink}`,
+    `--color-on-accent:${t.onAccent ?? t.ink}`,
     // Re-skin the few shared components that use the blue "primary" scale
     // (Eyebrow label, DonorDashboard monogram) to the school accent.
     `--color-primary-500:${t.primary}`,

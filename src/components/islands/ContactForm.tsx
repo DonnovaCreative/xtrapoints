@@ -165,7 +165,7 @@ export default function ContactForm({
         role="status"
         className="rounded-2xl border border-success-500/40 bg-success-50 p-8 text-center"
       >
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-lime text-ink">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-lime text-on-accent">
           <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -292,7 +292,7 @@ export default function ContactForm({
         type="submit"
         disabled={status === "submitting"}
         size="lg"
-        className="rounded-full bg-lime text-ink hover:bg-lime-deep disabled:opacity-60"
+        className="rounded-full bg-lime text-on-accent hover:bg-lime-deep disabled:opacity-60"
       >
         {status === "submitting"
           ? "Sending…"
