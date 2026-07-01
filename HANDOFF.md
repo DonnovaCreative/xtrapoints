@@ -3,109 +3,122 @@
 Pick-up notes for continuing in a fresh chat. Start a new chat **in this project**
 and say: _"Read HANDOFF.md and README.md, then let's continue."_
 
-> Deep details (run/build, brand toggle, contact form, deploy/domain) live in
-> [README.md](README.md). This file is the **current state + open items**.
+> Reference docs: [README.md](README.md) (run/build, brand toggle, contact form),
+> [ADDING-A-SCHOOL.md](ADDING-A-SCHOOL.md) (the co-branded school pages),
+> [docs/deploys-and-indexing.md](docs/deploys-and-indexing.md) (envs + SEO),
+> [DECISIONS.md](DECISIONS.md) (why). This file is **current state + open items**.
+
+_Last updated: 2026-07-01._
 
 ---
 
-## Where things stand (git)
+## Where things stand (git / deploy)
 
-- Branch: **`main`**. Working tree clean.
-- **`origin/main` is live on Vercel** and includes everything through the
-  hCaptcha work (hero DotGrid, brand toggle, redesigned footer, favicon, all
-  home sections + refinements, lanyard + lazy-load, hCaptcha on the contact form).
-- **Local `main` is 1 commit ahead and NOT pushed** — `c16e776` (the SHSU school
-  template). So **SHSU is not live yet**. Push with `git push origin main` when ready.
-- `staging` exists but is behind; the staging→main flow is already merged. Ignore it
-  unless you deliberately want a review branch.
-- **Pushing**: the `gh`/git account here (`coreyfromtesouro`) is **read-only** on
-  `DonnovaCreative/xtrapoints` — Corey pushes from his authorized account. Claude
-  commits locally; Corey runs `git push`.
+- **`main` and `staging` are in sync** (both at `1580836`) and both are **live**:
+  - **Production** = `xtrapoint.com` (apex → `www` redirect), builds from **`main`**.
+  - **Staging** = `staging.xtrapoint.com`, builds from the **`staging`** branch.
+- Everything below is deployed to **both**. School pages render on production.
+- **Pushing**: the CLI `git`/`gh` account here (`coreyfromtesouro`) is **read-only**
+  on `DonnovaCreative/xtrapoints`. Claude commits locally and hands over exact
+  commands; **Corey pushes from his authorized account**. Do NOT push/deploy for him.
+- **Promotion flow**: production ships only by merging `staging` → `main`
+  (`git checkout main && git merge --ff-only staging && git push origin main`).
+  New routes 404 on prod until they're on `main` (Astro generates static routes at
+  build; prod builds from `main`).
 
 ## Stack / how to run
 
 Astro 6 (static) + React islands + Tailwind v4 + shadcn/ui + Framer Motion +
-GSAP (DotGrid) + Three.js/R3F/Rapier (lanyard). Deploy: Vercel.
+GSAP + Three.js/R3F/Rapier (homepage lanyard). Deploy: Vercel (`@astrojs/vercel`).
 
 ```sh
 npm install
 npm run dev      # http://localhost:4321
-npm run build    # static build (source of truth for "is it broken")
+npm run build    # static build — the source of truth for "is it broken"
 ```
 
 ## Architecture worth knowing
 
 - **Brand toggle** — `src/config/brand.ts`. One `PLURAL` switch controls name,
-  domain, emails, and which logo art renders. Currently **`false` → "XtraPoint" /
-  xtrapoint.com**. `astro.config.mjs` reads `brand.url`.
-- **Design tokens** — `src/styles/globals.css` `@theme`. Brand color = lime
-  `#aaf10a`, ink navy `#03116d`, fonts Anton / Permanent Marker / Space Mono / Inter.
+  domain, emails, logo art. Currently **`false` → "XtraPoint" / xtrapoint.com**.
+  `astro.config.mjs` reads `brand.url`.
+- **Design tokens** — `src/styles/globals.css` `@theme`. Brand lime `#aaf10a`,
+  ink `#03116d`, `--color-on-accent` (text on accent buttons; defaults to ink),
+  fonts Anton / Permanent Marker / Space Mono / Inter.
 - **Editorial accents** — `.ed` (handwritten Permanent Marker accent word inside
   Anton headings); `.ed-dark` for light sections.
-- **Motion** — scroll-reveal system (`.reveal` / `.reveal-left/right` / `.stagger`
-  + IntersectionObserver in `Layout.astro`); `PlaybookMark.astro` (lime ✕/◯/arrow);
-  drifting `.glow`, `.dot-grid`, `.backdrop-type`.
-- **Islands** — `src/components/islands/`: CountUp, StatTrio, DonorDashboard
-  (accepts `fund`), LiveFeed→(removed; final CTA feed is static now), ContactForm
-  (accepts `school`), DotGrid (hero bg), Lanyard + LanyardLazy (scroll-gated).
+- **Motion** — scroll-reveal (`.reveal` / `.reveal-left/right` / `.stagger` +
+  IntersectionObserver in `Layout.astro`); `PlaybookMark.astro`; `.glow`,
+  `.dot-grid`, `.backdrop-type`.
 
-## Contact form (important runtime facts)
+## 🎓 Co-branded school pages (the big system — read ADDING-A-SCHOOL.md)
 
-- Posts to **Web3Forms** → delivers to **`sales@xtrapoint.com`**.
-- Key in `.env` as `PUBLIC_WEB3FORMS_KEY` (also set in Vercel for Production).
-- **hCaptcha** is on — uses Web3Forms' free built-in (shared sitekey, no account).
-  ⚠ **Must be enabled in the Web3Forms dashboard** for the key, or it isn't verified.
-  Shows a "localhost detected" warning in dev (normal); works on the live domain.
-- ⚠ Open item (from the meeting): the **xtrapoint.com domain needs the Web3Forms
-  verification click** (Jeff set up the domain). Until verified + a key exists for
-  that inbox, test submissions won't land.
+Two pages per school, **generated entirely from one registry entry** in
+`src/data/schools.ts`: `/schools/[slug]` (donor) and `/schools/[slug]/ambassadors`.
+Theming re-skins the whole design by overriding global tokens per page
+(`schoolThemeVars`). **Two schools live: `sam-houston`, `westminster`.**
 
-## 🎯 ACTIVE WORK: SHSU school template (the current focus)
+- **Registry fields** (`School`): name/short/mascot/fund/city/state; `theme`
+  (primary/primaryDeep/primaryDark/primarySoft/ink + optional `onAccent`);
+  optional `logo` (+ `logoBadge`, `logoClass`), `mark` (accent-tinted icon),
+  `avatar` (full-color app-mockup logo), `photos` (team/fans/celebrate/mascot/action).
+- **Components** (`src/components/school/`): `SchoolHeader`, `SchoolPhone`
+  (app mockup), `SchoolPhotoBand` (full-bleed spirit band). Islands used:
+  `DotField` (hero bg, ReactBits — replaced the old DotGrid on school heroes),
+  `DonorDashboard`, `ContactForm`, `WaitlistForm`.
+- **Donor page = pre-launch WAITLIST** (the app isn't live yet; Plaid finalizing
+  min fields, ETA ~early July). Donor page collects name+email+phone via
+  `ContactForm variant="interest"`; university portal/dashboard sections were
+  removed (they were org-facing). Copy is consumer/excitement-focused.
+- **Ambassador page** — separate: what it is / how it works / criteria /
+  incentives (Bronze/Silver/Gold) / enroll. Enroll is a **placeholder inline
+  `WaitlistForm`** (real application pending, must be university-approved).
 
-New this session, **committed locally but not pushed**. Corey said it's a great
-first run and **has changes coming** (next chat).
+## Forms (Web3Forms)
 
-- **Reusable co-branded template**: `src/pages/schools/[school].astro`, driven by
-  the registry `src/data/schools.ts`. **Adding a school = one registry entry**
-  (name, mascot, fund, brand colors, optional logo). Theming works by overriding
-  the global accent/ink tokens per page (`schoolThemeVars`), so the whole design
-  re-skins to the partner color with no per-section work.
-- **SHSU live at `/schools/sam-houston`** in **Bearkat Orange `#F26426`**
-  (sampled from the SHSU app mockup at `public/assets/schools/sam-houston/shsu-mockup.png`).
-  Sections: co-brand header (XtraPoint × Sam Houston State), round-up hero (themed
-  DotGrid + `SchoolPhone.astro` app mockup), how-it-works, donor dashboard
-  ("Bearkat Athletics Fund"), marketing, ambassador program, get-started form
-  (tagged with the school), footer.
-- Goal/context (from Corey's meeting transcript): migrate SHSU off lpt.io onto the
-  XP site, **refocused on the Round-Up donation app** (not payments/cards), add
-  **ambassador program + donor management + marketing support**, **co-branded &
-  swappable** per school. The old lpt.io/partners/shsu page was NOT matched —
-  rebuilt fresh in the XP style on purpose.
+- All forms post to **Web3Forms** with the single `PUBLIC_WEB3FORMS_KEY`
+  (`.env` + Vercel) → one inbox (`sales@xtrapoint.com`). Variants tag submissions
+  by `type` + subject (App sign-up / Waitlist / Ambassador waitlist / inquiry).
+- **hCaptcha** on the full ContactForm (shared free sitekey; must be enabled in
+  the Web3Forms dashboard). The compact `WaitlistForm` uses honeypot only.
+- ⚠ Ambassador submissions should eventually route to a **dedicated inbox**
+  (`enrollment@` / `ambassadorprogram@xtrapoint.com`) — needs a separate Web3Forms
+  key (concept: a `PUBLIC_WEB3FORMS_KEY_AMBASSADOR` env var). Not implemented yet.
 
-### SHSU items to confirm / finish (likely the next chat)
-1. **Official Bearkat logo** — currently a text/paw **wordmark placeholder**. Drop
-   the real SVG at `public/assets/schools/sam-houston/logo-white.svg` and set the
-   `logo:` field in the registry (one line). The old page had no clean logo asset.
-2. **Confirm orange `#F26426`** and **fund name** ("Bearkat Athletics Fund" vs the
-   old "NIL Donor Program").
-3. Cosmetic XtraPoint-isms still on the SHSU page: DonorDashboard mock URL slug
-   ("bobcat-athletics") and the ContactForm org placeholder ("Bobcat Athletics
-   Fund"). Trivial to parameterize/tidy.
-4. Decide push timing (hold for real logo vs soft-launch the wordmark version).
+## Environments & SEO indexing (done — see docs/deploys-and-indexing.md)
 
-## Flagged-but-not-blocking (whole site)
+- **Staging/preview are de-indexed; production is indexable.** Keyed on
+  `VERCEL_ENV` at build time via `src/config/site-env.ts`
+  (`shouldNoindex = Boolean(VERCEL_ENV) && VERCEL_ENV !== "production"` — an
+  allowlist so **production can never be accidentally noindexed**).
+- Three layers: dynamic `robots.txt` (`src/pages/robots.txt.ts`), `<meta robots>`
+  in `Layout.astro`, and an `X-Robots-Tag` header via `vercel.json` (matched by
+  **hostname** — staging + `*.vercel.app`, never production hosts).
+- ⚠ `vercel.json` only allows known keys (no `comment`/arbitrary props).
 
-- §06 "Why it works" + §02 background use **Pexels stock photos**
-  (`public/images/why-0{1,2}-stock.jpg`) — replace with owned imagery.
-- Footer Terms/Privacy point to `lpt.io` (parent) until XtraPoint has its own.
-- `npm audit` high finding is build-time only (`path-to-regexp` via the Vercel
-  adapter), not shipped to browsers.
+## Open items / follow-ups
 
-## Dev gotchas (so the next session doesn't get confused)
+1. **Vercel Deployment Protection** (password/SSO) on staging/preview — dashboard
+   toggle; the stronger lock on public staging access (de-indexing ≠ private).
+2. **Ambassador waitlist inbox** — route to a dedicated Web3Forms key (above).
+3. **Shared Footer is B2B-flavored** on the consumer school pages ("recurring
+   donor revenue… for the team behind the team", links to removed sections).
+   Decide: lighter consumer footer on school pages, or leave.
+4. **Homepage stock photos** — §06 uses Pexels (`public/images/why-0{1,2}-stock.jpg`);
+   replace with owned imagery. Footer Terms/Privacy still point to `lpt.io`.
+5. **Westminster crest wordmark** asset exists if you ever want it beyond the header.
+6. `npm audit` high finding is build-time only (`path-to-regexp` via the Vercel
+   adapter), not shipped to browsers.
 
-- The preview screenshot races CSS `scroll-behavior: smooth`. To screenshot a
-  lower section, scroll with `behavior:'instant'` then screenshot.
-- After installing big deps, the dev server spews Vite "Failed to fetch
-  dynamically imported module" / re-optimize errors — **dev-only noise**, gone
-  after a clean restart. The **production build is the source of truth**.
-- R3F/Three components don't hot-reload cleanly; do a full reload.
+## Dev gotchas
+
+- **React/Three islands don't hot-reload cleanly.** After changing an island or a
+  CSS `@theme` token, restart the dev server and clear the cache:
+  `rm -rf node_modules/.vite .astro` then restart. The **production build is the
+  source of truth**.
+- **zsh doesn't treat `#` as a comment interactively** — pasted commands with
+  trailing `# notes` pass the note as args (breaks `head`/`grep`/`curl`). Strip
+  comments or `setopt interactive_comments`.
+- Preview screenshots race `scroll-behavior: smooth`; scroll with
+  `behavior:'instant'` first. The screenshot tool also struggles with very
+  deep-scrolled sections — verify those via DOM/computed-style checks instead.
