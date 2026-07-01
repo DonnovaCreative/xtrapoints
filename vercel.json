@@ -1,6 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "comment": "X-Robots-Tag noindex is applied ONLY to non-production hosts (the staging subdomain and *.vercel.app preview deploys). Production hosts (xtrapoint.com / www.xtrapoint.com) are deliberately absent from every match, so they can NEVER receive noindex. Build-time robots.txt + <meta robots> (keyed on VERCEL_ENV) are the primary de-index; this header is defense-in-depth.",
   "headers": [
     {
       "source": "/(.*)",
