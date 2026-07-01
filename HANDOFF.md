@@ -18,13 +18,10 @@ _Last updated: 2026-07-01._
   - **Production** = `xtrapoint.com` (apex → `www` redirect), builds from **`main`**.
   - **Staging** = `staging.xtrapoint.com`, builds from the **`staging`** branch.
 - Everything below is deployed to **both**. School pages render on production.
-- **Pushing**: the CLI `git`/`gh` account here (`coreyfromtesouro`) is **read-only**
-  on `DonnovaCreative/xtrapoints`. Claude commits locally and hands over exact
-  commands; **Corey pushes from his authorized account**. Do NOT push/deploy for him.
-- **Promotion flow**: production ships only by merging `staging` → `main`
+- **Promotion flow**: production ships by merging `staging` → `main`
   (`git checkout main && git merge --ff-only staging && git push origin main`).
-  New routes 404 on prod until they're on `main` (Astro generates static routes at
-  build; prod builds from `main`).
+  New routes 404 on prod until they're on `main` (prod builds from `main`; Astro
+  generates static routes at build).
 
 ## Stack / how to run
 
