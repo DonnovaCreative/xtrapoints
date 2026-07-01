@@ -70,6 +70,10 @@ Theming re-skins the whole design by overriding global tokens per page
 - **Ambassador page** — separate: what it is / how it works / criteria /
   incentives (Bronze/Silver/Gold) / enroll. Enroll is a **placeholder inline
   `WaitlistForm`** (real application pending, must be university-approved).
+- **Auto OG cards** — each school emits a 1200×630 share image at
+  `/schools/<slug>/og.png` (build-time; satori + `@resvg/resvg-js`), wired into
+  both pages' `og:image`/`twitter:image`. Mirrors the hero from `logo` + `theme`;
+  no per-school work. Generator: `src/og/renderSchoolOg.ts` (fonts in `src/og/fonts/`).
 
 ## Forms (Web3Forms)
 

@@ -120,6 +120,23 @@ monogram, and dot-field-only heroes.
 
 ---
 
+## Social share image (auto-generated)
+
+Each school automatically gets a **1200×630 Open Graph card** at
+`/schools/<slug>/og.png`, wired into both pages' `<head>` (`og:image` /
+`twitter:image`). It's rendered at **build time** from the registry entry —
+dark `ink` background, the XtraPoint × school logo lockup, and the Anton +
+Permanent Marker headline in the school's `primary` color, mirroring the donor
+hero. **No action needed per school** — it just works from `logo` + `theme`.
+
+- Generator: [`src/og/renderSchoolOg.ts`](src/og/renderSchoolOg.ts)
+  (satori → SVG, `@resvg/resvg-js` → PNG). Fonts bundled in `src/og/fonts/`.
+- Endpoint: [`src/pages/schools/[school]/og.png.ts`](src/pages/schools/[school]/og.png.ts).
+- To preview a card, run `npm run build` and open `dist/schools/<slug>/og.png`,
+  or paste the live URL into a social-card validator.
+- `logo` (a white/mono SVG or PNG) makes the best lockup; `logoBadge: true`
+  puts a colored logo on a white chip, same as the header.
+
 ## What you do NOT edit
 
 - The page templates (`src/pages/schools/…`) — shared by every school.
