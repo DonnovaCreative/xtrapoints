@@ -1,6 +1,7 @@
 ---
 import "@/styles/globals.css";
 import { brand } from "@/config/brand";
+import { shouldNoindex } from "@/config/site-env";
 
 export interface Props {
   title: string;
@@ -29,6 +30,10 @@ const ogImageUrl = new URL(ogImage, Astro.site).href;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
+
+    {/* Non-production (staging / preview) builds only — keeps them out of search.
+        Production (VERCEL_ENV="production") never renders this. */}
+    {shouldNoindex && <meta name="robots" content="noindex, nofollow" />}
 
     <title>{title}</title>
     <meta name="description" content={description} />
