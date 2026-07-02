@@ -36,9 +36,9 @@ For a batch you already have data for. From `studio/`:
 
 ```sh
 # drafts (review in the Studio before they go live):
-IMPORT_FILE=../import/schools.json npm run import
+IMPORT_FILE=import/schools.json npm run import
 # or straight to live:
-IMPORT_FILE=../import/schools.json PUBLISH=1 npm run import
+IMPORT_FILE=import/schools.json PUBLISH=1 npm run import
 ```
 
 The manifest is a JSON array; see [`studio/import/example.json`](studio/import/example.json).
@@ -54,7 +54,7 @@ Pulls most of a **college's** data from public sources so onboarding becomes
 
 ```sh
 COLLEGE="Sam Houston State" npm run seed:college          # one
-IMPORT_FILE=../import/colleges.txt npm run seed:college    # one name per line
+IMPORT_FILE=import/colleges.txt npm run seed:college    # one name per line
 ```
 
 It fetches the **mascot, primary color, and a logo preview** from ESPN's public
