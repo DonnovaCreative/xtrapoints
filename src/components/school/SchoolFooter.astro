@@ -1,0 +1,72 @@
+---
+// Footer for the co-branded school pages (replaces the B2B site footer). Black
+// fill, the XtraPoint mark, a CTA inviting other schools to get involved, the
+// standard legal links, and a CMS-driven legal-copy strip at the very bottom.
+// Rendered inside the page's themed wrapper, so `lime` = the school's accent.
+import CtaButton from "@/components/CtaButton.astro";
+import { brand } from "@/config/brand";
+
+export interface Props {
+  /** Small legal/disclaimer text from Sanity site settings (optional). */
+  legalCopy?: string;
+}
+const { legalCopy } = Astro.props;
+
+const LPT = "https://www.lpt.io";
+const year = new Date().getFullYear();
+const linkClass = "text-sm text-white/70 transition-colors hover:text-lime";
+---
+
+<footer class="bg-black text-white">
+  <div class="mx-auto max-w-7xl px-6 py-14 lg:px-10 lg:py-16">
+    <!-- brand + CTA -->
+    <div class="flex flex-col gap-8 border-b border-white/10 pb-10 md:flex-row md:items-center md:justify-between">
+      <div class="flex flex-col gap-4">
+        <img
+          src={brand.logo.white}
+          alt={brand.name}
+          width={brand.logo.width}
+          height={brand.logo.height}
+          class="h-7 w-auto self-start"
+        />
+        <p class="max-w-md text-sm leading-relaxed text-white/65">
+          Want round-up giving for your school? Bring {brand.name} to your team
+          and turn everyday spending into recurring support for the program.
+        </p>
+      </div>
+      <CtaButton href="/contact" variant="lime" glow={false} class="!px-6 !py-3 !text-sm">
+        Get your school involved
+      </CtaButton>
+    </div>
+
+    <!-- copyright + links -->
+    <div class="mt-8 flex flex-col gap-4 text-sm text-white/50 sm:flex-row sm:items-center sm:justify-between">
+      <p>
+        © {year} LaCore Payments Technologies, Inc. ·
+        <span class="text-white/40">{brand.name} is a DBA of LaCore Payments Technologies.</span>
+      </p>
+      <div class="flex items-center gap-6">
+        <a href={`${LPT}/terms`} class={linkClass}>Terms</a>
+        <a href={`${LPT}/privacy-policy`} class={linkClass}>Privacy</a>
+        <a
+          href="https://www.linkedin.com/company/lpt-io/"
+          class="text-white/60 transition-colors hover:text-lime"
+          aria-label="LinkedIn"
+        >
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM10 9h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.4c0-1.3 0-2.96-1.8-2.96-1.8 0-2.08 1.4-2.08 2.86V21h-4z" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- CMS-driven legal strip -->
+  {legalCopy && (
+    <div class="border-t border-white/10">
+      <div class="mx-auto max-w-7xl px-6 py-5 lg:px-10">
+        <p class="text-[0.6875rem] leading-relaxed text-white/35">{legalCopy}</p>
+      </div>
+    </div>
+  )}
+</footer>

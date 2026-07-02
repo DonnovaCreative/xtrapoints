@@ -119,3 +119,14 @@ export async function getSchool(slug: string): Promise<School | undefined> {
   );
   return doc ? toSchool(doc) : undefined;
 }
+
+/** Site-wide settings singleton (shared across all school pages). */
+export interface SiteSettings {
+  legalCopy?: string;
+}
+export async function getSiteSettings(): Promise<SiteSettings> {
+  const s = await sanityClient.fetch<{ legalCopy?: string } | null>(
+    `*[_id == "siteSettings"][0]{ legalCopy }`,
+  );
+  return { legalCopy: s?.legalCopy || undefined };
+}

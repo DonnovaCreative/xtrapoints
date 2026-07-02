@@ -2,14 +2,14 @@
 import Layout from "@/layouts/Layout.astro";
 import SchoolHeader from "@/components/school/SchoolHeader.astro";
 import SchoolPhotoBand from "@/components/school/SchoolPhotoBand.astro";
-import Footer from "@/components/Footer.astro";
+import SchoolFooter from "@/components/school/SchoolFooter.astro";
 import CtaButton from "@/components/CtaButton.astro";
 import Eyebrow from "@/components/Eyebrow.astro";
 import PlaybookMark from "@/components/PlaybookMark.astro";
 import DotField from "@/components/islands/DotField.tsx";
 import WaitlistForm from "@/components/islands/WaitlistForm.tsx";
 import { schoolThemeVars, hexToRgba } from "@/data/schools";
-import { getSchools } from "@/data/schoolsSource";
+import { getSchools, getSiteSettings } from "@/data/schoolsSource";
 import { brand } from "@/config/brand";
 
 export async function getStaticPaths() {
@@ -18,6 +18,7 @@ export async function getStaticPaths() {
 }
 
 const { school } = Astro.props;
+const settings = await getSiteSettings();
 const t = school.theme;
 const themeStyle = schoolThemeVars(t);
 const donorUrl = `/schools/${school.slug}`;
@@ -286,6 +287,6 @@ const recognition = [
       </section>
     </main>
 
-    <Footer />
+    <SchoolFooter legalCopy={settings.legalCopy} />
   </div>
 </Layout>

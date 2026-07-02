@@ -10,7 +10,35 @@ export default defineConfig({
   projectId: "xjhhxbqk",
   dataset: "production",
 
-  plugins: [structureTool(), visionTool()],
+  plugins: [
+    structureTool({
+      // Schools as a list + Site settings as a single (singleton) document.
+      structure: (S) =>
+        S.list()
+          .title("Content")
+          .items([
+            S.documentTypeListItem("school").title("Schools"),
+            S.divider(),
+            S.listItem()
+              .title("Site settings")
+              .id("siteSettings")
+              .child(
+                S.document()
+                  .schemaType("siteSettings")
+                  .documentId("siteSettings"),
+              ),
+          ]),
+    }),
+    visionTool(),
+  ],
+
+  // Keep the singleton out of the global "create new" menu.
+  document: {
+    newDocumentOptions: (prev, { creationContext }) =>
+      creationContext.type === "global"
+        ? prev.filter((t) => t.templateId !== "siteSettings")
+        : prev,
+  },
 
   schema: {
     types: schemaTypes,
