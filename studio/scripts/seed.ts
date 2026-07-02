@@ -14,9 +14,16 @@
 // Idempotent: deterministic _ids (`school.<slug>`) + createOrReplace, so
 // re-running updates the docs. NOTE it re-uploads image assets each run — don't
 // loop it.
-import { getCliClient } from "sanity/cli";
 import { readFile, access } from "node:fs/promises";
 import path from "node:path";
+import { createRequire } from "node:module";
+
+// `sanity/cli` is CommonJS; under Node's type-stripping ESM loader a named
+// `import { getCliClient }` fails ("does not provide an export named ..."), so
+// load it through require for reliable CJS interop. --with-user-token still
+// supplies the auth via getCliClient().
+const require = createRequire(import.meta.url);
+const { getCliClient } = require("sanity/cli");
 
 interface SeedSchool {
   slug: string;
