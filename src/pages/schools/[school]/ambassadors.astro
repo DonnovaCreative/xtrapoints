@@ -8,10 +8,12 @@ import Eyebrow from "@/components/Eyebrow.astro";
 import PlaybookMark from "@/components/PlaybookMark.astro";
 import DotField from "@/components/islands/DotField.tsx";
 import WaitlistForm from "@/components/islands/WaitlistForm.tsx";
-import { schools, schoolThemeVars, hexToRgba } from "@/data/schools";
+import { schoolThemeVars, hexToRgba } from "@/data/schools";
+import { getSchools } from "@/data/schoolsSource";
 import { brand } from "@/config/brand";
 
-export function getStaticPaths() {
+export async function getStaticPaths() {
+  const schools = await getSchools();
   return schools.map((school) => ({ params: { school: school.slug }, props: { school } }));
 }
 

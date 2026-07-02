@@ -109,9 +109,6 @@ export const schools: School[] = [
   },
 ];
 
-export const getSchool = (slug: string): School | undefined =>
-  schools.find((s) => s.slug === slug);
-
 /** Convert a #rrggbb hex to an rgba() string at the given alpha. */
 export const hexToRgba = (hex: string, alpha: number): string => {
   const [r, g, b] = (hex.replace("#", "").match(/.{2}/g) ?? ["00", "00", "00"]).map(

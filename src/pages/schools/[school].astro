@@ -9,10 +9,12 @@ import PlaybookMark from "@/components/PlaybookMark.astro";
 import SchoolPhone from "@/components/school/SchoolPhone.astro";
 import DotField from "@/components/islands/DotField.tsx";
 import ContactForm from "@/components/islands/ContactForm.tsx";
-import { schools, schoolThemeVars, hexToRgba } from "@/data/schools";
+import { schoolThemeVars, hexToRgba } from "@/data/schools";
+import { getSchools } from "@/data/schoolsSource";
 import { brand } from "@/config/brand";
 
-export function getStaticPaths() {
+export async function getStaticPaths() {
+  const schools = await getSchools();
   return schools.map((school) => ({ params: { school: school.slug }, props: { school } }));
 }
 
