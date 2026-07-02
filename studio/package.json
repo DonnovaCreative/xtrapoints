@@ -13,7 +13,6 @@
     "seed:college": "sanity exec scripts/seed-college.ts --with-user-token"
   },
   "dependencies": {
-    "@sanity/color-input": "^3",
     "@sanity/vision": "^3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

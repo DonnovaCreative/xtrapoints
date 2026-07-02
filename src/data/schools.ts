@@ -75,27 +75,35 @@ export const darken = (hex: string, amount: number): string => {
   return `#${parts.join("")}`;
 };
 
+/** XtraPoint brand defaults (see globals.css) — used when a school leaves a
+ *  color empty. Lime accent + navy ink. */
+export const BRAND_PRIMARY = "#aaf10a";
+export const BRAND_INK = "#03116d";
+
 /**
  * Build a full SchoolTheme from just `primary` + `ink` (the CMS inputs), deriving
  * the hover/darker/soft accent shades. Matches the hand-tuned values the two
  * launch schools shipped with (deep ≈ 10% darker, dark ≈ 22% darker for
- * on-white contrast). `primaryDark` and `onAccent` can be overridden — set
- * `primaryDark` for very bright accents where the derived shade isn't dark
- * enough to read on white.
+ * on-white contrast). Empty `primary`/`ink` fall back to the XtraPoint brand.
+ * `primaryDark` and `onAccent` can be overridden — set `primaryDark` for very
+ * bright accents where the derived shade isn't dark enough to read on white.
  */
 export const deriveSchoolTheme = (input: {
-  primary: string;
-  ink: string;
+  primary?: string;
+  ink?: string;
   onAccent?: string;
   primaryDark?: string;
-}): SchoolTheme => ({
-  primary: input.primary,
-  primaryDeep: darken(input.primary, 0.1),
-  primaryDark: input.primaryDark ?? darken(input.primary, 0.22),
-  primarySoft: hexToRgba(input.primary, 0.12),
-  ink: input.ink,
-  ...(input.onAccent ? { onAccent: input.onAccent } : {}),
-});
+}): SchoolTheme => {
+  const primary = input.primary || BRAND_PRIMARY;
+  return {
+    primary,
+    primaryDeep: darken(primary, 0.1),
+    primaryDark: input.primaryDark || darken(primary, 0.22),
+    primarySoft: hexToRgba(primary, 0.12),
+    ink: input.ink || BRAND_INK,
+    ...(input.onAccent ? { onAccent: input.onAccent } : {}),
+  };
+};
 
 /** Inline CSS that re-maps the global accent/ink tokens to a school's palette. */
 export const schoolThemeVars = (t: SchoolTheme): string =>

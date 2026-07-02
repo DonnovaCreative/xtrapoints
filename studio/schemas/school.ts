@@ -1,4 +1,9 @@
 import { defineType, defineField } from "sanity";
+import { ColorInput } from "../components/ColorInput";
+import { FundInput } from "../components/FundInput";
+
+const HEX_RULE = (r: import("sanity").StringRule) =>
+  r.regex(/^#[0-9a-fA-F]{6}$/, { name: "hex color (e.g. #aaf10a)" });
 
 // One document = one co-branded school. Mirrors the fields the Astro templates
 // consume (see src/data/schools.ts `School`). The hover/darker/soft accent
@@ -55,8 +60,9 @@ export default defineType({
       title: "Fund name",
       type: "string",
       group: "details",
+      components: { input: FundInput },
       description:
-        'The fund supporters give to, e.g. "Bearkat Athletics Fund".',
+        'The fund supporters give to, e.g. "Bearkat Athletics Fund". Use “Generate” to build it from the mascot.',
       validation: (r) => r.required(),
     }),
     defineField({
@@ -64,13 +70,16 @@ export default defineType({
       title: "City",
       type: "string",
       group: "details",
+      description:
+        "Not currently shown on the pages and not required — metadata only.",
     }),
     defineField({
       name: "state",
       title: "State",
       type: "string",
       group: "details",
-      description: 'Two-letter state code, e.g. "TX".',
+      description:
+        "Not currently shown on the pages and not required — metadata only (2-letter code, e.g. “TX”).",
     }),
 
     // ── Logos & marks ────────────────────────────────────────────────────────
@@ -93,12 +102,22 @@ export default defineType({
       initialValue: false,
     }),
     defineField({
-      name: "logoClass",
-      title: "Header logo size (advanced)",
+      name: "logoSize",
+      title: "Header logo size",
       type: "string",
       group: "branding",
       description:
-        'Optional sizing, default "h-7 w-auto". Bump for wide crest/wordmark lockups, e.g. "h-8 w-auto".',
+        "How big the logo appears in the header. Bump it up for wide crest/wordmark lockups.",
+      options: {
+        list: [
+          { title: "Small", value: "sm" },
+          { title: "Medium (default)", value: "md" },
+          { title: "Large", value: "lg" },
+          { title: "X-Large", value: "xl" },
+        ],
+        layout: "radio",
+      },
+      initialValue: "md",
     }),
     defineField({
       name: "mark",
@@ -168,42 +187,44 @@ export default defineType({
       type: "object",
       group: "theme",
       description:
-        "Pick the school's primary accent and dark section color. The hover, darker-for-text, and soft-fill shades are derived automatically.",
+        "Set the school's primary accent and dark section color. The hover, darker-for-text, and soft-fill shades are derived automatically. Leave any color empty to fall back to the standard XtraPoint brand colors.",
       options: { columns: 2 },
       fields: [
         defineField({
           name: "primary",
           title: "Primary accent",
-          type: "color",
-          options: { disableAlpha: true },
+          type: "string",
+          components: { input: ColorInput },
+          validation: HEX_RULE,
           description:
-            "The school's main brand color (replaces the XtraPoint lime) — buttons, accents, dots.",
-          validation: (r) => r.required(),
+            "The school's main brand color (replaces the XtraPoint lime) — buttons, accents, dots. Empty → XtraPoint lime.",
         }),
         defineField({
           name: "ink",
           title: "Dark section color",
-          type: "color",
-          options: { disableAlpha: true },
+          type: "string",
+          components: { input: ColorInput },
+          validation: HEX_RULE,
           description:
-            "Dark brand color for dark sections and the header. Needs white text to be legible on it.",
-          validation: (r) => r.required(),
+            "Dark brand color for dark sections and the header (needs white text to read on it). Empty → XtraPoint navy.",
         }),
         defineField({
           name: "onAccent",
           title: "Text on accent (optional)",
-          type: "color",
-          options: { disableAlpha: true },
+          type: "string",
+          components: { input: ColorInput },
+          validation: HEX_RULE,
           description:
-            "Text/icon color ON the accent (button labels). Defaults to the dark color — set to white for mid/dark accents like red.",
+            "Text/icon color ON the accent (button labels). Empty → the dark color; set to white for mid/dark accents like red.",
         }),
         defineField({
           name: "primaryDarkOverride",
           title: "Dark accent for text on white (advanced)",
-          type: "color",
-          options: { disableAlpha: true },
+          type: "string",
+          components: { input: ColorInput },
+          validation: HEX_RULE,
           description:
-            "Only needed if the auto-derived shade isn't dark enough to read on white (e.g. a very bright yellow/orange). Overrides the derived value.",
+            "Only if the auto-derived shade isn't dark enough to read on white (e.g. a very bright yellow/orange). Overrides the derived value.",
         }),
       ],
     }),

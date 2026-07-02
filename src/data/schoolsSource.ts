@@ -20,7 +20,7 @@ interface SchoolDoc {
   state: string | null;
   logo: string | null;
   logoBadge: boolean | null;
-  logoClass: string | null;
+  logoSize: "sm" | "md" | "lg" | "xl" | null;
   mark: string | null;
   avatar: string | null;
   photos: Partial<
@@ -34,13 +34,13 @@ interface SchoolDoc {
   } | null;
 }
 
-// Only schools complete enough to render (have a slug + required theme colors).
-const VALID = `_type == "school" && defined(slug.current) && defined(theme.primary.hex) && defined(theme.ink.hex)`;
+// Any school with a slug renders — colors default to the XtraPoint brand.
+const VALID = `_type == "school" && defined(slug.current)`;
 
 const PROJECTION = `{
   "slug": slug.current,
   name, short, mascot, fund, city, state,
-  logoBadge, logoClass,
+  logoBadge, logoSize,
   "logo": logo.asset->url,
   "mark": mark.asset->url,
   "avatar": avatar.asset->url,
@@ -52,12 +52,20 @@ const PROJECTION = `{
     "action": photos.action.asset->url
   },
   "theme": {
-    "primary": theme.primary.hex,
-    "ink": theme.ink.hex,
-    "onAccent": theme.onAccent.hex,
-    "primaryDarkOverride": theme.primaryDarkOverride.hex
+    "primary": theme.primary,
+    "ink": theme.ink,
+    "onAccent": theme.onAccent,
+    "primaryDarkOverride": theme.primaryDarkOverride
   }
 }`;
+
+// Header logo size preset → Tailwind class (see SchoolHeader).
+const LOGO_SIZE: Record<string, string> = {
+  sm: "h-6 w-auto",
+  md: "h-7 w-auto",
+  lg: "h-8 w-auto",
+  xl: "h-10 w-auto",
+};
 
 /** Drop null/empty photo entries so `school.photos?.team` behaves like before. */
 const mapPhotos = (photos: SchoolDoc["photos"]): School["photos"] => {
@@ -81,15 +89,15 @@ const toSchool = (doc: SchoolDoc): School => ({
   state: doc.state ?? "",
   ...(doc.logo ? { logo: doc.logo } : {}),
   ...(doc.logoBadge ? { logoBadge: true } : {}),
-  ...(doc.logoClass ? { logoClass: doc.logoClass } : {}),
+  logoClass: LOGO_SIZE[doc.logoSize ?? "md"] ?? LOGO_SIZE.md,
   ...(doc.mark ? { mark: doc.mark } : {}),
   ...(doc.avatar ? { avatar: doc.avatar } : {}),
   ...(mapPhotos(doc.photos) ? { photos: mapPhotos(doc.photos) } : {}),
   theme: deriveSchoolTheme({
-    primary: doc.theme!.primary!,
-    ink: doc.theme!.ink!,
-    onAccent: doc.theme!.onAccent ?? undefined,
-    primaryDark: doc.theme!.primaryDarkOverride ?? undefined,
+    primary: doc.theme?.primary ?? undefined,
+    ink: doc.theme?.ink ?? undefined,
+    onAccent: doc.theme?.onAccent ?? undefined,
+    primaryDark: doc.theme?.primaryDarkOverride ?? undefined,
   }),
 });
 
