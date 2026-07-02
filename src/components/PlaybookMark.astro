@@ -14,6 +14,9 @@ export interface Props {
   rotate?: number;
   opacity?: number;
   delay?: number; // seconds, for the staggered fade-in
+  /** Override the mark color (default: the lime/primary token). Pass a CSS
+   *  value, e.g. "var(--color-accent-2)" for the school secondary accent. */
+  color?: string;
 }
 const {
   mark,
@@ -22,6 +25,7 @@ const {
   rotate = 0,
   opacity = 1,
   delay = 0,
+  color,
 } = Astro.props;
 
 const file = { x: "ex", o: "oh", arrow: "arrow", underline: "underline" }[mark];
@@ -33,7 +37,8 @@ const url = `/assets/${file}.svg`;
 // Only constrain width + aspect-ratio when a width is given; otherwise the
 // caller's w-/h- classes drive the size.
 const sizing = width ? `width:${width};aspect-ratio:${ratio};` : "";
-const style = `-webkit-mask-image:url('${url}');mask-image:url('${url}');${sizing}--rot:${rotate}deg;--mark-opacity:${opacity};animation-delay:${delay}s;transform:rotate(${rotate}deg);opacity:${opacity};`;
+const colorStyle = color ? `background-color:${color};` : "";
+const style = `-webkit-mask-image:url('${url}');mask-image:url('${url}');${sizing}${colorStyle}--rot:${rotate}deg;--mark-opacity:${opacity};animation-delay:${delay}s;transform:rotate(${rotate}deg);opacity:${opacity};`;
 ---
 
 <span
