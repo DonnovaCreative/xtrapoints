@@ -78,11 +78,18 @@ Theming re-skins the whole design by overriding global tokens per page
   once, then it's CDN-cached (build time no longer scales with school count).
   Fonts + co-brand logos are bundled into the function via `includeFiles` in
   `astro.config.mjs` (logo list derived from the registry).
-- **Content source is decoupled** — page templates + the OG endpoint read schools
-  only through `src/data/schoolsSource.ts` (`getSchools()` / `getSchool()`), not
-  the raw array. Phase-1 groundwork so the planned move to Sanity (see the
-  scaling plan) is a body-only edit in that one module. `src/data/schools.ts`
-  still holds the actual data for now.
+- **Content comes from Sanity (staging)** — `src/data/schoolsSource.ts`
+  (`getSchools()`/`getSchool()`) queries Sanity via GROQ; page templates + the OG
+  endpoint read only through it. Client: `src/config/sanity.ts` (project
+  `xjhhxbqk` / `production`, `SANITY_READ_TOKEN` server-side — Vercel
+  Production+Preview + local `.env`; the token is required, the dataset's public
+  toggle does not grant anonymous doc reads). Studio (schema + editor) lives in
+  `studio/`, hosted at **https://xtrapoint.sanity.studio**. Editors set only
+  `primary` + `ink`; the deep/dark/soft shades are derived (`deriveSchoolTheme`
+  in `src/data/schools.ts`). School logos/photos are served from the Sanity CDN;
+  the OG function fetches the logo from there at runtime. The in-repo `schools`
+  array is now unused (reference only — prune later). **On staging only; not yet
+  promoted to prod.** Remaining: a Sanity publish → Vercel Deploy Hook webhook.
 
 ## Forms (Web3Forms)
 
