@@ -34,6 +34,26 @@ async function espnTeams(): Promise<EspnTeam[]> {
   return data.sports[0].leagues[0].teams.map((t: { team: EspnTeam }) => t.team);
 }
 
+// Normalize for fuzzy matching: drop punctuation and filler words like
+// "University of" so "University of Oregon" matches ESPN's "Oregon".
+const norm = (s: string): string =>
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, " ")
+    .replace(/\b(university|univ|of|the|at)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+function findMatches(teams: EspnTeam[], query: string): EspnTeam[] {
+  const nq = norm(query);
+  if (!nq) return [];
+  return teams.filter((t) => {
+    const nd = norm(t.displayName);
+    const nl = norm(t.location);
+    return nd.includes(nq) || nl.includes(nq) || nq.includes(nl);
+  });
+}
+
 /** Optional: official name/city/state from College Scorecard (needs a key). */
 async function scorecard(name: string) {
   const key = process.env.DATAGOV_API_KEY;
@@ -52,19 +72,16 @@ async function scorecard(name: string) {
 }
 
 async function seedOne(teams: EspnTeam[], query: string) {
-  const q = query.toLowerCase();
-  const matches = teams.filter(
-    (t) =>
-      t.displayName.toLowerCase().includes(q) ||
-      t.location.toLowerCase().includes(q),
-  );
+  const matches = findMatches(teams, query);
   if (matches.length === 0) {
-    console.log(`  ✗ "${query}": no ESPN match (K-12 / non-football? add via Studio or import).`);
+    console.log(
+      `  ✗ "${query}": no ESPN match. Try SEARCH="${query}" npm run seed:college to look up ESPN's exact name (K-12 / non-football schools aren't in ESPN — add via Studio or import).`,
+    );
     return;
   }
   if (matches.length > 1) {
-    console.log(`  ! "${query}": ${matches.length} matches — narrow the name:`);
-    matches.slice(0, 8).forEach((m) => console.log(`      • ${m.displayName}`));
+    console.log(`  ! "${query}": ${matches.length} matches — re-run with the exact name:`);
+    matches.slice(0, 10).forEach((m) => console.log(`      • ${m.displayName}`));
     return;
   }
 
@@ -99,6 +116,22 @@ async function seedOne(teams: EspnTeam[], query: string) {
 }
 
 async function run() {
+  // Lookup mode: list ESPN's exact names for a search term (no writes).
+  const search = process.env.SEARCH;
+  if (search) {
+    const teams = await espnTeams();
+    const matches = findMatches(teams, search);
+    if (!matches.length) {
+      console.log(`No ESPN college-football team matches "${search}".`);
+      return;
+    }
+    console.log(`ESPN matches for "${search}" — use one of these as COLLEGE=:`);
+    matches
+      .slice(0, 20)
+      .forEach((m) => console.log(`  • ${m.displayName}   (mascot: ${m.name})`));
+    return;
+  }
+
   const single = process.env.COLLEGE;
   const file = process.env.IMPORT_FILE;
   let names: string[];

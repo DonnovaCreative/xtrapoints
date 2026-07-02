@@ -53,9 +53,14 @@ Pulls most of a **college's** data from public sources so onboarding becomes
 "confirm + upload the approved logo." From `studio/`:
 
 ```sh
-COLLEGE="Sam Houston State" npm run seed:college          # one
+SEARCH="oregon" npm run seed:college                    # look up ESPN's exact names (no writes)
+COLLEGE="Oregon Ducks" npm run seed:college             # one
 IMPORT_FILE=import/colleges.txt npm run seed:college    # one name per line
 ```
+
+ESPN lists schools by their **team name** (e.g. "Oregon Ducks", not "University
+of Oregon"). If a name doesn't match, use `SEARCH=` to find the exact one, or
+the tool will list close matches for you to pick from.
 
 It fetches the **mascot, primary color, and a logo preview** from ESPN's public
 API and creates a **draft** (never live). Then in the Studio you confirm the
