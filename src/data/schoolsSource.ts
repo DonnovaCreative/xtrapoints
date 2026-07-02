@@ -29,6 +29,7 @@ interface SchoolDoc {
   > | null;
   theme: {
     primary: string | null;
+    secondary: string | null;
     ink: string | null;
     onAccent: string | null;
     primaryDarkOverride: string | null;
@@ -54,6 +55,7 @@ const PROJECTION = `{
   },
   "theme": {
     "primary": theme.primary,
+    "secondary": theme.secondary,
     "ink": theme.ink,
     "onAccent": theme.onAccent,
     "primaryDarkOverride": theme.primaryDarkOverride
@@ -97,6 +99,7 @@ const toSchool = (doc: SchoolDoc): School => ({
   ...(mapPhotos(doc.photos) ? { photos: mapPhotos(doc.photos) } : {}),
   theme: deriveSchoolTheme({
     primary: doc.theme?.primary ?? undefined,
+    secondary: doc.theme?.secondary ?? undefined,
     ink: doc.theme?.ink ?? undefined,
     onAccent: doc.theme?.onAccent ?? undefined,
     primaryDark: doc.theme?.primaryDarkOverride ?? undefined,

@@ -21,6 +21,12 @@
   --color-lime-soft: rgba(194, 242, 86, 0.12);
   --color-gold: #f5b921;
 
+  /* Secondary accent for atmospheric depth (glows, gradients). Per-school it's a
+     real secondary brand color or a lighter tint of primary (see schoolThemeVars);
+     the site default is a lighter lime tint. */
+  --color-accent-2: #ccf76c;
+  --color-accent-2-soft: rgba(204, 247, 108, 0.14);
+
   /* Text color that sits ON the accent (lime) background — e.g. button labels.
      Defaults to ink (dark text on bright lime). Schools with a mid/dark accent
      (e.g. red) override this to white via schoolThemeVars / theme.onAccent. */

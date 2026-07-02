@@ -21,8 +21,17 @@ interface EspnTeam {
   name: string; // mascot, e.g. "Bearkats"
   location: string; // e.g. "Sam Houston"
   color?: string;
+  alternateColor?: string;
   logos?: { href: string }[];
 }
+
+// ESPN's alternateColor is often just white/black — only use it as a real
+// secondary brand color.
+const usableSecondary = (hex?: string): string | undefined => {
+  const h = hex?.toLowerCase().replace(/^#/, "");
+  if (!h || !/^[0-9a-f]{6}$/.test(h)) return undefined;
+  return ["ffffff", "000000", "fefefe", "010101"].includes(h) ? undefined : `#${h}`;
+};
 
 const client = getClient();
 
@@ -123,14 +132,18 @@ async function seedOne(teams: EspnTeam[], query: string) {
     ...(logo ? { logo } : {}),
     theme: {
       primary: color(t.color) ?? "#000000",
+      ...(usableSecondary(t.alternateColor)
+        ? { secondary: usableSecondary(t.alternateColor) }
+        : {}),
       ink: "#111827", // placeholder — set the school's dark brand color
     },
   };
 
   await writeSchool(client, slug, body, false); // always a draft
   const loc = enriched?.city ? ` city=${enriched.city}, ${enriched.state}` : "";
+  const sec = usableSecondary(t.alternateColor);
   console.log(
-    `  ✓ ${slug} (draft) — mascot="${mascot}" primary=#${t.color ?? "?"}${loc} logo=${logoUrl ? "preview" : "none"}`,
+    `  ✓ ${slug} (draft) — mascot="${mascot}" primary=#${t.color ?? "?"}${sec ? ` secondary=${sec}` : ""}${loc} logo=${logoUrl ? "preview" : "none"}`,
   );
 }
 

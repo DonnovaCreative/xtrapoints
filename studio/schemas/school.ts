@@ -209,6 +209,15 @@ export default defineType({
             "The school's main brand color (replaces the XtraPoint lime) — buttons, accents, dots. Empty → XtraPoint lime.",
         }),
         defineField({
+          name: "secondary",
+          title: "Secondary accent (optional)",
+          type: "string",
+          components: { input: ColorInput },
+          validation: HEX_RULE,
+          description:
+            "A second brand color, used for atmospheric depth (glows, gradients, soft accents) alongside the primary. Leave empty for single-color brands — the page uses a lighter tint of the primary instead.",
+        }),
+        defineField({
           name: "ink",
           title: "Dark section color",
           type: "string",

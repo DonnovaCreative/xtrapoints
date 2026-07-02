@@ -19,6 +19,11 @@ export interface SchoolTheme {
   primaryDark: string;
   /** Translucent accent for soft fills (rgba). */
   primarySoft: string;
+  /** Secondary accent for atmospheric depth (glows, gradients, soft fills).
+   *  A real secondary brand color, or a lighter tint of primary if none. */
+  secondary: string;
+  /** Translucent secondary for soft fills (rgba). */
+  secondarySoft: string;
   /** Dark section background. */
   ink: string;
   /** Text/icon color ON the accent (button labels). Defaults to ink — set to
@@ -77,6 +82,17 @@ export const darken = (hex: string, amount: number): string => {
   return `#${parts.join("")}`;
 };
 
+/** Lighten a #rrggbb hex toward white by `amount` (0–1). */
+export const lighten = (hex: string, amount: number): string => {
+  const parts = (hex.replace("#", "").match(/.{2}/g) ?? ["00", "00", "00"]).map((h) => {
+    const v = parseInt(h, 16);
+    return Math.max(0, Math.min(255, Math.round(v + (255 - v) * amount)))
+      .toString(16)
+      .padStart(2, "0");
+  });
+  return `#${parts.join("")}`;
+};
+
 /** XtraPoint brand defaults (see globals.css) — used when a school leaves a
  *  color empty. Lime accent + navy ink. */
 export const BRAND_PRIMARY = "#aaf10a";
@@ -92,6 +108,7 @@ export const BRAND_INK = "#03116d";
  */
 export const deriveSchoolTheme = (input: {
   primary?: string;
+  secondary?: string;
   ink?: string;
   onAccent?: string;
   primaryDark?: string;
@@ -101,11 +118,16 @@ export const deriveSchoolTheme = (input: {
   const hex = (v: unknown): string | undefined =>
     typeof v === "string" && /^#[0-9a-fA-F]{6}$/.test(v) ? v : undefined;
   const primary = hex(input.primary) ?? BRAND_PRIMARY;
+  // Two-color brand → use the real secondary; single-color → a lighter same-hue
+  // tint of primary, so atmospheric layers get depth without a second color.
+  const secondary = hex(input.secondary) ?? lighten(primary, 0.4);
   return {
     primary,
     primaryDeep: darken(primary, 0.1),
     primaryDark: hex(input.primaryDark) ?? darken(primary, 0.22),
     primarySoft: hexToRgba(primary, 0.12),
+    secondary,
+    secondarySoft: hexToRgba(secondary, 0.14),
     ink: hex(input.ink) ?? BRAND_INK,
     ...(hex(input.onAccent) ? { onAccent: hex(input.onAccent) } : {}),
   };
@@ -118,6 +140,8 @@ export const schoolThemeVars = (t: SchoolTheme): string =>
     `--color-lime-deep:${t.primaryDeep}`,
     `--color-lime-dark:${t.primaryDark}`,
     `--color-lime-soft:${t.primarySoft}`,
+    `--color-accent-2:${t.secondary}`,
+    `--color-accent-2-soft:${t.secondarySoft}`,
     `--color-ink:${t.ink}`,
     `--color-on-accent:${t.onAccent ?? t.ink}`,
     // Re-skin the few shared components that use the blue "primary" scale

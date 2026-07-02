@@ -153,6 +153,19 @@ export async function renderSchoolOg(school: School): Promise<Buffer> {
         backgroundImage: `radial-gradient(circle, ${hexToRgba(t.primary, 0.45)} 0%, ${hexToRgba(t.primary, 0)} 65%)`,
       },
     }),
+    // Secondary-color glow, lower-left — two-tone depth (a lighter tint of the
+    // primary for single-color brands).
+    h("div", {
+      style: {
+        position: "absolute",
+        bottom: -240,
+        left: -180,
+        width: 560,
+        height: 560,
+        borderRadius: 560,
+        backgroundImage: `radial-gradient(circle, ${hexToRgba(t.secondary, 0.28)} 0%, ${hexToRgba(t.secondary, 0)} 65%)`,
+      },
+    }),
 
     // ── Top: co-brand lockup ────────────────────────────────────────────────
     h(

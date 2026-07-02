@@ -96,12 +96,17 @@ officially-approved file**, and Publish.
 | `avatar` | image | Optional full-color square logo for the app avatar (beats `mark`). |
 | `photos.*` | images | `team` / `celebrate` / `fans` / `action` / `mascot` — each optional; pages degrade gracefully. |
 
-### Brand colors — just two
+### Brand colors
 
 Editors set **`primary`** (the accent, replaces the XtraPoint lime) and **`ink`**
 (the dark section/header color). The hover, darker-for-text, and soft-fill shades
 are **derived automatically** (`deriveSchoolTheme` in `src/data/schools.ts`).
 
+- `secondary` (optional): a **second brand color** used for atmospheric depth —
+  the hero/phone glows and the DotField gradient (buttons/links/editorial stay
+  primary). **Leave it empty for single-color brands** and the page uses a
+  lighter tint of the primary instead, so it still has depth. Auto-seed fills it
+  from ESPN's alternate color when there's a real one.
 - `onAccent` (optional): text color **on** the accent — defaults to the dark
   color; set to white for mid/dark accents like red.
 - `primaryDarkOverride` (optional): only for very bright accents where the
