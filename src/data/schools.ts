@@ -39,6 +39,8 @@ export interface School {
   /** Set true for a COLORED logo (e.g. dark-maned) — renders it on a white
    *  badge so it stays visible on the dark header. Omit for white/mono logos. */
   logoBadge?: boolean;
+  /** Fill the header bar white (for colored logos with no white/mono version). */
+  whiteHeader?: boolean;
   /** Header logo sizing classes. Default "h-7 w-auto"; bump for wide wordmarks. */
   logoClass?: string;
   /** Small square mark (e.g. paw) tinted with the accent; used in the app mockup. */

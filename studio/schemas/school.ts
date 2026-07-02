@@ -102,6 +102,15 @@ export default defineType({
       initialValue: false,
     }),
     defineField({
+      name: "whiteHeader",
+      title: "White header bar",
+      type: "boolean",
+      group: "branding",
+      description:
+        "Fill the top header bar white instead of dark. Use when you only have a COLORED logo (no white/mono version) so it reads against a light bar.",
+      initialValue: false,
+    }),
+    defineField({
       name: "logoSize",
       title: "Header logo size",
       type: "string",

@@ -20,6 +20,7 @@ interface SchoolDoc {
   state: string | null;
   logo: string | null;
   logoBadge: boolean | null;
+  whiteHeader: boolean | null;
   logoSize: "sm" | "md" | "lg" | "xl" | null;
   mark: string | null;
   avatar: string | null;
@@ -40,7 +41,7 @@ const VALID = `_type == "school" && defined(slug.current)`;
 const PROJECTION = `{
   "slug": slug.current,
   name, short, mascot, fund, city, state,
-  logoBadge, logoSize,
+  logoBadge, whiteHeader, logoSize,
   "logo": logo.asset->url,
   "mark": mark.asset->url,
   "avatar": avatar.asset->url,
@@ -89,6 +90,7 @@ const toSchool = (doc: SchoolDoc): School => ({
   state: doc.state ?? "",
   ...(doc.logo ? { logo: doc.logo } : {}),
   ...(doc.logoBadge ? { logoBadge: true } : {}),
+  ...(doc.whiteHeader ? { whiteHeader: true } : {}),
   logoClass: LOGO_SIZE[doc.logoSize ?? "md"] ?? LOGO_SIZE.md,
   ...(doc.mark ? { mark: doc.mark } : {}),
   ...(doc.avatar ? { avatar: doc.avatar } : {}),

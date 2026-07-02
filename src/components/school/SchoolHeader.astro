@@ -1,8 +1,8 @@
 ---
-// Shared co-brand header for school pages (XtraPoint × School lockup + optional
-// nav link and CTA). Used by the donor landing page and the ambassador page.
+// Co-brand header for school pages: the school's logo (or a text wordmark),
+// an optional nav link, and a CTA. Supports a white header bar (school.whiteHeader)
+// for colored logos that need a light background.
 import CtaButton from "@/components/CtaButton.astro";
-import { brand } from "@/config/brand";
 import type { School } from "@/data/schools";
 
 export interface Props {
@@ -13,13 +13,19 @@ export interface Props {
   nav?: { label: string; href: string };
 }
 const { school, cta, nav } = Astro.props;
+
+const white = school.whiteHeader ?? false;
+const headerClass = white ? "bg-white border-b border-gray-200" : "bg-ink";
+const navClass = white
+  ? "text-gray-600 hover:text-gray-900"
+  : "text-white/80 hover:text-white";
+const wordName = white ? "text-gray-900" : "text-white";
+const wordMascot = white ? "text-gray-500" : "text-white/55";
 ---
 
-<header class="relative z-50 bg-ink">
+<header class={`relative z-50 ${headerClass}`}>
   <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4 lg:px-10">
-    <a href={`/schools/${school.slug}`} class="flex items-center gap-3" aria-label={`${brand.name} × ${school.short}`}>
-      <img src={brand.logo.white} alt={brand.name} width={brand.logo.width} height={brand.logo.height} class="h-[22px] w-auto" />
-      <span class="text-white/30">×</span>
+    <a href={`/schools/${school.slug}`} class="flex items-center" aria-label={school.short}>
       {school.logo ? (
         school.logoBadge ? (
           <span class="flex items-center justify-center rounded-lg bg-white px-2.5 py-1.5">
@@ -29,15 +35,15 @@ const { school, cta, nav } = Astro.props;
           <img src={school.logo} alt={school.name} class={school.logoClass ?? "h-7 w-auto"} />
         )
       ) : (
-        <span class="flex items-center gap-2 text-white">
+        <span class={`flex items-center gap-2 ${wordName}`}>
           <svg class="h-6 w-6 text-lime" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="12" cy="16" rx="5" ry="4.2"/><circle cx="6.2" cy="10.5" r="2.1"/><circle cx="10" cy="7.2" r="2.1"/><circle cx="14" cy="7.2" r="2.1"/><circle cx="17.8" cy="10.5" r="2.1"/></svg>
-          <span class="text-sm font-bold leading-none tracking-tight">{school.short}<br /><span class="font-mono text-[0.625rem] font-normal uppercase tracking-[0.12em] text-white/55">{school.mascot}</span></span>
+          <span class="text-sm font-bold leading-none tracking-tight">{school.short}<br /><span class={`font-mono text-[0.625rem] font-normal uppercase tracking-[0.12em] ${wordMascot}`}>{school.mascot}</span></span>
         </span>
       )}
     </a>
     <div class="flex items-center gap-5">
       {nav && (
-        <a href={nav.href} class="hidden text-sm font-semibold text-white/80 transition-colors hover:text-white sm:inline">{nav.label}</a>
+        <a href={nav.href} class={`hidden text-sm font-semibold transition-colors sm:inline ${navClass}`}>{nav.label}</a>
       )}
       {cta && (
         <CtaButton href={cta.href} variant="lime" glow={false} class="!px-5 !py-2.5 !text-sm">{cta.label}</CtaButton>
