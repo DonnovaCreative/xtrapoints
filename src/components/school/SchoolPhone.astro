@@ -18,9 +18,22 @@ const quickAmounts = [
   { v: "$50", on: false },
   { v: "$100", on: false },
 ];
-const maskStyle = mark
-  ? `mask:url(${mark}) center/contain no-repeat;-webkit-mask:url(${mark}) center/contain no-repeat;background:var(--color-lime);`
-  : "";
+// The mark is tinted to the accent via a CSS mask. Browsers won't apply a
+// CROSS-ORIGIN mask image (the mark now lives on the Sanity CDN), so fetch the
+// SVG at build and inline it as a same-origin data URI.
+let maskStyle = "";
+if (mark) {
+  let maskSrc = mark;
+  if (/^https?:\/\//.test(mark)) {
+    try {
+      const svg = await fetch(mark).then((r) => r.text());
+      maskSrc = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+    } catch {
+      maskSrc = mark; // fall back to the URL rather than nothing
+    }
+  }
+  maskStyle = `mask:url("${maskSrc}") center/contain no-repeat;-webkit-mask:url("${maskSrc}") center/contain no-repeat;background:var(--color-lime);`;
+}
 ---
 
 <div class="relative mx-auto flex h-[560px] w-full max-w-[440px] items-center justify-center sm:h-[600px]">
