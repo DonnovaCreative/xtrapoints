@@ -50,24 +50,30 @@ interface LogoImage {
 }
 
 /**
- * Load a logo as a data URI sized to `targetHeight` px.
+ * Load a logo as a data URI sized to `targetHeight` px. Handles both the local
+ * XtraPoint mark (a /public path) and remote school logos (Sanity CDN URLs).
  * - SVG sources are rasterized to PNG via resvg (crisp, keeps aspect ratio).
  * - PNG sources are embedded directly (already raster) with computed width.
  */
-const loadLogo = (url: string, targetHeight: number): LogoImage => {
-  const abs = publicPath(url);
-  if (url.toLowerCase().endsWith(".svg")) {
-    const svg = fs.readFileSync(abs, "utf8");
-    const r = new Resvg(svg, { fitTo: { mode: "height", value: targetHeight } });
+const loadLogo = async (src: string, targetHeight: number): Promise<LogoImage> => {
+  const isRemote = /^https?:\/\//.test(src);
+  const buf = isRemote
+    ? Buffer.from(await (await fetch(src)).arrayBuffer())
+    : fs.readFileSync(publicPath(src));
+
+  // Strip any query string (Sanity URLs can carry params) before checking type.
+  const isSvg = src.split("?")[0].toLowerCase().endsWith(".svg");
+  if (isSvg) {
+    const r = new Resvg(buf.toString("utf8"), {
+      fitTo: { mode: "height", value: targetHeight },
+    });
     const png = r.render();
-    const buf = png.asPng();
     return {
-      src: `data:image/png;base64,${buf.toString("base64")}`,
+      src: `data:image/png;base64,${png.asPng().toString("base64")}`,
       width: png.width,
       height: png.height,
     };
   }
-  const buf = fs.readFileSync(abs);
   const { width, height } = pngSize(buf);
   return {
     src: `data:image/png;base64,${buf.toString("base64")}`,
@@ -85,8 +91,10 @@ const h = (type: string, props: Record<string, unknown>, ...children: unknown[])
 
 export async function renderSchoolOg(school: School): Promise<Buffer> {
   const t = school.theme;
-  const xp = loadLogo(brand.logo.white, 44);
-  const schoolLogo = loadLogo(school.logo ?? brand.logo.white, 52);
+  const [xp, schoolLogo] = await Promise.all([
+    loadLogo(brand.logo.white, 44),
+    loadLogo(school.logo ?? brand.logo.white, 52),
+  ]);
 
   const logoImg = (img: LogoImage) =>
     h("img", { src: img.src, width: img.width, height: img.height, style: { display: "flex" } });

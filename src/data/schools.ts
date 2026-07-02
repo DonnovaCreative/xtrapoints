@@ -117,6 +117,39 @@ export const hexToRgba = (hex: string, alpha: number): string => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
+/** Darken a #rrggbb hex toward black by `amount` (0–1). */
+export const darken = (hex: string, amount: number): string => {
+  const f = 1 - amount;
+  const parts = (hex.replace("#", "").match(/.{2}/g) ?? ["00", "00", "00"]).map((h) =>
+    Math.max(0, Math.min(255, Math.round(parseInt(h, 16) * f)))
+      .toString(16)
+      .padStart(2, "0"),
+  );
+  return `#${parts.join("")}`;
+};
+
+/**
+ * Build a full SchoolTheme from just `primary` + `ink` (the CMS inputs), deriving
+ * the hover/darker/soft accent shades. Matches the hand-tuned values the two
+ * launch schools shipped with (deep ≈ 10% darker, dark ≈ 22% darker for
+ * on-white contrast). `primaryDark` and `onAccent` can be overridden — set
+ * `primaryDark` for very bright accents where the derived shade isn't dark
+ * enough to read on white.
+ */
+export const deriveSchoolTheme = (input: {
+  primary: string;
+  ink: string;
+  onAccent?: string;
+  primaryDark?: string;
+}): SchoolTheme => ({
+  primary: input.primary,
+  primaryDeep: darken(input.primary, 0.1),
+  primaryDark: input.primaryDark ?? darken(input.primary, 0.22),
+  primarySoft: hexToRgba(input.primary, 0.12),
+  ink: input.ink,
+  ...(input.onAccent ? { onAccent: input.onAccent } : {}),
+});
+
 /** Inline CSS that re-maps the global accent/ink tokens to a school's palette. */
 export const schoolThemeVars = (t: SchoolTheme): string =>
   [

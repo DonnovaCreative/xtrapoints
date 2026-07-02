@@ -1,22 +1,111 @@
 // =============================================================================
-// SCHOOL CONTENT SOURCE — the single swap-point for WHERE co-branded school
-// data comes from. Page templates and the OG endpoint only ever call
-// getSchools()/getSchool(); they never import the raw data directly.
+// SCHOOL CONTENT SOURCE — reads co-branded school content from Sanity at build
+// time (and in the on-demand OG function). Page templates and the OG endpoint
+// only ever call getSchools()/getSchool(); they never touch the CMS directly.
 //
-// Phase 1 (now): reads the in-repo `schools` array from ./schools.ts.
-// Phase 2:       replace these two function bodies with GROQ queries against
-//                Sanity — no page template or endpoint needs to change.
-//
-// The functions are async on purpose so the Sanity swap is a body-only edit.
+// Image fields are resolved to their Sanity CDN URLs in GROQ (asset->url), and
+// the brand theme is derived from primary + ink (see deriveSchoolTheme).
 // =============================================================================
-import { schools, type School } from "@/data/schools";
+import { sanityClient } from "@/config/sanity";
+import { deriveSchoolTheme, type School } from "@/data/schools";
 
-/** All schools, in registry order. */
+// Shape returned by the GROQ projection below (before mapping to `School`).
+interface SchoolDoc {
+  slug: string | null;
+  name: string | null;
+  short: string | null;
+  mascot: string | null;
+  fund: string | null;
+  city: string | null;
+  state: string | null;
+  logo: string | null;
+  logoBadge: boolean | null;
+  logoClass: string | null;
+  mark: string | null;
+  avatar: string | null;
+  photos: Partial<
+    Record<"team" | "fans" | "celebrate" | "mascot" | "action", string | null>
+  > | null;
+  theme: {
+    primary: string | null;
+    ink: string | null;
+    onAccent: string | null;
+    primaryDarkOverride: string | null;
+  } | null;
+}
+
+// Only schools complete enough to render (have a slug + required theme colors).
+const VALID = `_type == "school" && defined(slug.current) && defined(theme.primary.hex) && defined(theme.ink.hex)`;
+
+const PROJECTION = `{
+  "slug": slug.current,
+  name, short, mascot, fund, city, state,
+  logoBadge, logoClass,
+  "logo": logo.asset->url,
+  "mark": mark.asset->url,
+  "avatar": avatar.asset->url,
+  "photos": {
+    "team": photos.team.asset->url,
+    "fans": photos.fans.asset->url,
+    "celebrate": photos.celebrate.asset->url,
+    "mascot": photos.mascot.asset->url,
+    "action": photos.action.asset->url
+  },
+  "theme": {
+    "primary": theme.primary.hex,
+    "ink": theme.ink.hex,
+    "onAccent": theme.onAccent.hex,
+    "primaryDarkOverride": theme.primaryDarkOverride.hex
+  }
+}`;
+
+/** Drop null/empty photo entries so `school.photos?.team` behaves like before. */
+const mapPhotos = (photos: SchoolDoc["photos"]): School["photos"] => {
+  if (!photos) return undefined;
+  const entries = Object.entries(photos).filter(([, v]) => Boolean(v)) as [
+    keyof NonNullable<School["photos"]>,
+    string,
+  ][];
+  return entries.length
+    ? Object.fromEntries(entries)
+    : undefined;
+};
+
+const toSchool = (doc: SchoolDoc): School => ({
+  slug: doc.slug!,
+  name: doc.name ?? "",
+  short: doc.short ?? "",
+  mascot: doc.mascot ?? "",
+  fund: doc.fund ?? "",
+  city: doc.city ?? "",
+  state: doc.state ?? "",
+  ...(doc.logo ? { logo: doc.logo } : {}),
+  ...(doc.logoBadge ? { logoBadge: true } : {}),
+  ...(doc.logoClass ? { logoClass: doc.logoClass } : {}),
+  ...(doc.mark ? { mark: doc.mark } : {}),
+  ...(doc.avatar ? { avatar: doc.avatar } : {}),
+  ...(mapPhotos(doc.photos) ? { photos: mapPhotos(doc.photos) } : {}),
+  theme: deriveSchoolTheme({
+    primary: doc.theme!.primary!,
+    ink: doc.theme!.ink!,
+    onAccent: doc.theme!.onAccent ?? undefined,
+    primaryDark: doc.theme!.primaryDarkOverride ?? undefined,
+  }),
+});
+
+/** All schools, ordered by name. */
 export async function getSchools(): Promise<School[]> {
-  return schools;
+  const docs = await sanityClient.fetch<SchoolDoc[]>(
+    `*[${VALID}]${PROJECTION} | order(name asc)`,
+  );
+  return docs.map(toSchool);
 }
 
 /** One school by slug, or undefined if there's no match. */
 export async function getSchool(slug: string): Promise<School | undefined> {
-  return schools.find((s) => s.slug === slug);
+  const doc = await sanityClient.fetch<SchoolDoc | null>(
+    `*[${VALID} && slug.current == $slug]${PROJECTION}[0]`,
+    { slug },
+  );
+  return doc ? toSchool(doc) : undefined;
 }
