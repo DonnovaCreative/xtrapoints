@@ -88,8 +88,10 @@ Theming re-skins the whole design by overriding global tokens per page
   `primary` + `ink`; the deep/dark/soft shades are derived (`deriveSchoolTheme`
   in `src/data/schools.ts`). School logos/photos are served from the Sanity CDN;
   the OG function fetches the logo from there at runtime. The in-repo `schools`
-  array is now unused (reference only — prune later). **On staging only; not yet
-  promoted to prod.** Remaining: a Sanity publish → Vercel Deploy Hook webhook.
+  array is now unused (reference only — prune later). **Live on production**
+  (main + staging both Sanity-backed). Publishing a school in the Studio triggers
+  a rebuild via a Sanity webhook → Vercel Deploy Hook (staging wired; prod hook
+  set up during promotion). Adding school #N is now a Studio form entry, not code.
 
 ## Forms (Web3Forms)
 
