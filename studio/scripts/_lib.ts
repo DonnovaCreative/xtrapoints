@@ -5,8 +5,23 @@
 // sanity/cli is CommonJS; under Node's type-stripping ESM loader a named import
 // fails, so load getCliClient through createRequire (see the seed history).
 import { readFile } from "node:fs/promises";
+import { readFileSync, existsSync } from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
+
+// Load the site repo's .env (one level up from studio/) so scripts can read
+// keys like DATAGOV_API_KEY without exporting them each run. Inline env vars
+// still win (we only fill what isn't already set). sanity exec doesn't do this.
+(function loadEnv() {
+  const p = path.resolve(process.cwd(), "..", ".env");
+  if (!existsSync(p)) return;
+  for (const line of readFileSync(p, "utf8").split("\n")) {
+    const m = line.match(/^\s*([A-Za-z0-9_]+)\s*=\s*(.*?)\s*$/);
+    if (m && process.env[m[1]] === undefined) {
+      process.env[m[1]] = m[2].replace(/^['"]|['"]$/g, "");
+    }
+  }
+})();
 
 const require = createRequire(import.meta.url);
 const { getCliClient } = require("sanity/cli");

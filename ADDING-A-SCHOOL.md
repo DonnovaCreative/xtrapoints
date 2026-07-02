@@ -71,8 +71,11 @@ officially-approved file**, and Publish.
 - **ESPN colors are approximate** — verify against the official brand hex.
 - **The auto-pulled logo is an unverified preview** — school logos are
   trademarked, so a co-branded page needs the partner's approved logo + sign-off.
-- Optional: set `DATAGOV_API_KEY` (free from api.data.gov) to also fill the
-  official name/city/state from College Scorecard.
+- Optional: add `DATAGOV_API_KEY=<key>` to the repo-root `.env` (free key from
+  api.data.gov/signup — local only, not needed in Vercel) to also fill the
+  official name + city/state from College Scorecard. It searches by the team's
+  location and prefers the exact institutional match ("Oregon" → "University of
+  Oregon"), so review city/state on the draft — they're best-effort.
 
 ---
 

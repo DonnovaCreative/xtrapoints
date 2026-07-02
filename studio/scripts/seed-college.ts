@@ -54,21 +54,39 @@ function findMatches(teams: EspnTeam[], query: string): EspnTeam[] {
   });
 }
 
-/** Optional: official name/city/state from College Scorecard (needs a key). */
-async function scorecard(name: string) {
+/**
+ * Optional: official name/city/state from College Scorecard (needs
+ * DATAGOV_API_KEY). ESPN gives the team's `location` (e.g. "Oregon"); we search
+ * Scorecard for it and prefer the result whose name normalizes exactly to that
+ * (so "Oregon" → "University of Oregon", not "Western Oregon University"),
+ * falling back to the top result for distinctive names ("Sam Houston" → "Sam
+ * Houston State University").
+ */
+async function scorecard(location: string) {
   const key = process.env.DATAGOV_API_KEY;
   if (!key) return null;
   const url = new URL("https://api.data.gov/ed/collegescorecard/v1/schools");
-  url.searchParams.set("school.name", name);
+  url.searchParams.set("school.name", location);
   url.searchParams.set("fields", "school.name,school.city,school.state");
-  url.searchParams.set("per_page", "1");
+  url.searchParams.set("per_page", "25");
   url.searchParams.set("api_key", key);
-  const res = await fetch(url);
-  if (!res.ok) return null;
-  const r = (await res.json())?.results?.[0];
-  return r
-    ? { name: r["school.name"], city: r["school.city"], state: r["school.state"] }
-    : null;
+  let results: Array<Record<string, string>>;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    results = (await res.json())?.results ?? [];
+  } catch {
+    return null;
+  }
+  if (!results.length) return null;
+  const target = norm(location);
+  const best =
+    results.find((r) => norm(r["school.name"] ?? "") === target) ?? results[0];
+  return {
+    name: best["school.name"],
+    city: best["school.city"],
+    state: best["school.state"],
+  };
 }
 
 async function seedOne(teams: EspnTeam[], query: string) {
@@ -87,9 +105,9 @@ async function seedOne(teams: EspnTeam[], query: string) {
 
   const t = matches[0];
   const mascot = t.name;
-  const enriched = await scorecard(query);
-  const name = enriched?.name ?? t.displayName;
-  const short = enriched?.name ?? t.location;
+  const enriched = await scorecard(t.location); // ESPN's short location, e.g. "Oregon"
+  const name = enriched?.name ?? t.displayName; // official name if Scorecard found it
+  const short = t.location; // keep ESPN's short form for the header lockup
   const slug = slugify(short);
   const logoUrl = t.logos?.[0]?.href;
   const logo = logoUrl ? await uploadImage(client, logoUrl) : undefined;
@@ -104,14 +122,15 @@ async function seedOne(teams: EspnTeam[], query: string) {
     ...(enriched?.state ? { state: enriched.state } : {}),
     ...(logo ? { logo } : {}),
     theme: {
-      primary: color(t.color) ?? color("#000000"),
-      ink: color("#111827"), // placeholder — set the school's dark brand color
+      primary: color(t.color) ?? "#000000",
+      ink: "#111827", // placeholder — set the school's dark brand color
     },
   };
 
   await writeSchool(client, slug, body, false); // always a draft
+  const loc = enriched?.city ? ` city=${enriched.city}, ${enriched.state}` : "";
   console.log(
-    `  ✓ ${slug} (draft) — mascot="${mascot}" primary=#${t.color ?? "?"} logo=${logoUrl ? "preview" : "none"}`,
+    `  ✓ ${slug} (draft) — mascot="${mascot}" primary=#${t.color ?? "?"}${loc} logo=${logoUrl ? "preview" : "none"}`,
   );
 }
 
