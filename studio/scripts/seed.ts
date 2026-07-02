@@ -1,17 +1,85 @@
-// One-time migration: import the existing in-repo schools (src/data/schools.ts)
-// and their local assets (public/assets/...) into Sanity as `school` documents.
+// One-time migration: import the existing schools + their local assets
+// (../public/assets/...) into Sanity as `school` documents.
 //
 // Run from the studio/ folder, after `sanity login`:
 //   npm run seed
 // (which is: sanity exec scripts/seed.ts --with-user-token)
 //
-// Idempotent: uses deterministic _ids (`school.<slug>`) + createOrReplace, so
-// re-running updates the docs rather than duplicating them. NOTE it re-uploads
-// the image assets each run — fine for a one-off; don't loop it.
+// The school data is inlined below (rather than imported from the site's
+// src/data/schools.ts) because `sanity exec` runs this through Node's ESM
+// loader, which can't resolve a .ts module outside this package. It's a one-off,
+// so a small copy is fine. Only primary/ink/onAccent are set — the deep/dark/
+// soft accent shades are DERIVED on the site.
+//
+// Idempotent: deterministic _ids (`school.<slug>`) + createOrReplace, so
+// re-running updates the docs. NOTE it re-uploads image assets each run — don't
+// loop it.
 import { getCliClient } from "sanity/cli";
 import { readFile, access } from "node:fs/promises";
 import path from "node:path";
-import { schools } from "../../src/data/schools";
+
+interface SeedSchool {
+  slug: string;
+  name: string;
+  short: string;
+  mascot: string;
+  fund: string;
+  city: string;
+  state: string;
+  logo?: string;
+  logoBadge?: boolean;
+  logoClass?: string;
+  mark?: string;
+  avatar?: string;
+  photos?: Partial<
+    Record<"team" | "fans" | "celebrate" | "mascot" | "action", string>
+  >;
+  theme: { primary: string; ink: string; onAccent?: string };
+}
+
+// Mirror of the two live entries in src/data/schools.ts (colors: primary + ink
+// + optional onAccent only — the rest are derived on the site).
+const SEED: SeedSchool[] = [
+  {
+    slug: "sam-houston",
+    name: "Sam Houston State University",
+    short: "Sam Houston State",
+    mascot: "Bearkats",
+    fund: "Bearkat Athletics Fund",
+    city: "Huntsville",
+    state: "TX",
+    logo: "/assets/schools/sam-houston/logo-white.svg",
+    mark: "/assets/schools/sam-houston/paw.svg",
+    photos: {
+      team: "/assets/schools/sam-houston/team.webp",
+      fans: "/assets/schools/sam-houston/fans.jpg",
+      celebrate: "/assets/schools/sam-houston/celebrate.jpg",
+      mascot: "/assets/schools/sam-houston/mascot.jpg",
+      action: "/assets/schools/sam-houston/action.jpg",
+    },
+    theme: { primary: "#ff5200", ink: "#1e1d23" },
+  },
+  {
+    slug: "westminster",
+    name: "Westminster Academy",
+    short: "Westminster Academy",
+    mascot: "Lions",
+    fund: "Lions Athletics Fund",
+    city: "Fort Lauderdale",
+    state: "FL",
+    logo: "/assets/schools/westminster/logo-white.png",
+    logoClass: "h-8 w-auto",
+    avatar: "/assets/schools/westminster/avatar.png",
+    photos: {
+      team: "/assets/schools/westminster/team.jpg",
+      fans: "/assets/schools/westminster/fans.jpg",
+      celebrate: "/assets/schools/westminster/celebrate.webp",
+      mascot: "/assets/schools/westminster/mascot.jpg",
+      action: "/assets/schools/westminster/action.jpg",
+    },
+    theme: { primary: "#e51937", ink: "#002a5c", onAccent: "#ffffff" },
+  },
+];
 
 const client = getCliClient({ apiVersion: "2025-01-01" });
 
@@ -40,11 +108,9 @@ async function uploadImage(url: string) {
   return { _type: "image", asset: { _type: "reference", _ref: asset._id } };
 }
 
-const color = (hex?: string) =>
-  hex ? { _type: "color", hex } : undefined;
+const color = (hex?: string) => (hex ? { _type: "color", hex } : undefined);
 
 async function seed() {
-  // Fail fast with a clear message if we're not being run from studio/.
   try {
     await access(publicPath("/assets"));
   } catch {
@@ -54,7 +120,7 @@ async function seed() {
     );
   }
 
-  for (const s of schools) {
+  for (const s of SEED) {
     console.log(`Seeding ${s.slug}…`);
     const [logo, mark, avatar] = await Promise.all([
       s.logo ? uploadImage(s.logo) : undefined,
@@ -94,7 +160,7 @@ async function seed() {
     await client.createOrReplace(doc);
     console.log(`  ✓ ${s.slug}`);
   }
-  console.log(`Done — seeded ${schools.length} school(s).`);
+  console.log(`Done — seeded ${SEED.length} school(s).`);
 }
 
 seed().catch((err) => {
