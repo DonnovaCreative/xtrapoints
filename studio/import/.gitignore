@@ -1,0 +1,5 @@
+# Operators drop real import manifests + asset folders here — don't commit them.
+# Keep only the tracked example.
+*
+!.gitignore
+!example.json

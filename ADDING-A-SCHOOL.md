@@ -1,145 +1,114 @@
 # Adding a co-branded school landing page
 
-Everything for the `/schools/<slug>` pages is driven by **one file**:
-[`src/data/schools.ts`](src/data/schools.ts). Add one entry to the `schools`
-array and you automatically get **two pages**, fully re-skinned to that school:
+Each school automatically gets **two pages**, fully re-skinned to that school:
 
 - `/schools/<slug>` — the **donor** landing page (waitlist)
 - `/schools/<slug>/ambassadors` — the **ambassador** program page
 
-No new components, routes, or CSS. The shared template
-(`src/pages/schools/[school].astro` + `…/[school]/ambassadors.astro`) reads each
-field below and the design language re-colors itself to the school.
+…plus an auto-generated 1200×630 social share image at `/schools/<slug>/og.png`.
+
+**School content lives in Sanity**, not in the repo. Editors manage it in the
+Studio, and publishing triggers an automatic site rebuild (Sanity webhook →
+Vercel Deploy Hook). The Astro templates read it at build time via
+[`src/data/schoolsSource.ts`](src/data/schoolsSource.ts) (GROQ) and map it onto
+the `School` shape in [`src/data/schools.ts`](src/data/schools.ts).
+
+- **Studio (editor):** https://xtrapoint.sanity.studio
+- **Project:** `xjhhxbqk` / dataset `production`
 
 ---
 
-## The fields (your "props")
+## Three ways to add schools
 
-Each object in `schools` matches the `School` interface. Required unless noted.
+### 1. Studio form — the default (no code)
 
-| Field | Example | Controls / where it shows |
-| --- | --- | --- |
-| `slug` | `"sam-houston"` | The URL: `/schools/sam-houston`. Lowercase, hyphenated. Also the assets folder name. |
-| `name` | `"Sam Houston State University"` | Full legal name — `alt` text, SEO `<title>`/description. |
-| `short` | `"Sam Houston State"` | Short name used in headings/copy and the header lockup. |
-| `mascot` | `"Bearkats"` | Plural mascot — used all over the copy ("back the Bearkats"). |
-| `fund` | `"Bearkat Athletics Fund"` | The fund supporters give to — phone mockup, headings, form tags. |
-| `city` / `state` | `"Huntsville"` / `"TX"` | Metadata (not heavily shown yet; keep accurate). |
-| `logo?` | `/assets/schools/<slug>/logo-white.png` | **Optional.** Logo in the dark header next to the XtraPoint mark. Use a **white/reversed** version so it reads on the navy. **Omit → a styled text wordmark is used.** |
-| `logoBadge?` | `true` | **Optional.** Set for a **colored** logo (e.g. dark-maned) → renders it on a white badge so it stays visible on the dark header. Omit for white/mono logos. |
-| `logoClass?` | `"h-10 w-auto"` | **Optional.** Header logo sizing. Default `"h-7 w-auto"` — bump it for wide crest/wordmark lockups. |
-| `mark?` | `/assets/schools/<slug>/paw.svg` | **Optional.** Small **single-color** icon (e.g. a paw) for the app-mockup avatar, tinted to the accent. **Omit → a letter monogram (first letter of `fund`).** |
-| `avatar?` | `/assets/schools/<slug>/avatar.png` | **Optional.** **Full-color** square logo for the app-mockup avatar. Takes priority over `mark`. |
-| `photos?` | object, see below | **Optional.** Real game-day photography. Each is independent and **degrades gracefully if missing.** |
-| `theme` | object, see below | The 5 brand colors. Required. |
+For one-off additions by anyone, technical or not:
 
-### `photos` (all optional)
+1. Go to **https://xtrapoint.sanity.studio** and sign in.
+2. **School → Create new**, fill the fields (below), upload the logo + any
+   photos, and pick the two brand colors.
+3. **Publish.** Within seconds the webhook rebuilds staging + production, and the
+   two pages + share image go live.
 
-| Key | Where it appears | If omitted |
-| --- | --- | --- |
-| `team` | Ghosted behind the **donor hero** | Hero shows just the dot field |
-| `celebrate` | Full-bleed **spirit band** on the donor page | Band is hidden |
-| `fans` | Framed photo in the **"Become an Ambassador"** callout | Falls back to Bronze/Silver/Gold tiles |
-| `action` | Ghosted behind the **ambassador hero** | Hero shows just the dot field |
-| `mascot` | Full-bleed **spirit band** on the ambassador page | Band is hidden |
+### 2. Bulk import — many at once (terminal)
 
-### `theme` — the 5 colors
+For a batch you already have data for. From `studio/`:
 
-The whole design uses one accent + one dark. These map onto the global tokens
-per page (see `schoolThemeVars`), so buttons, the handwritten accent words, the
-dot field, chips, etc. all re-color at once.
-
-| Field | What it is | Tip |
-| --- | --- | --- |
-| `primary` | The school's main brand color (replaces XtraPoint lime) — buttons, accents, dots | Use the official hex. |
-| `primaryDeep` | Hover/pressed shade | ~10% darker than `primary`. |
-| `primaryDark` | Accent color for **text/icons on white** | ⚠️ Must be dark enough to read on white. For bright accents (yellow/light orange) go noticeably darker. |
-| `primarySoft` | Translucent fill for soft chip backgrounds | `rgba(<primary>, 0.12)` — there's a `hexToRgba(hex, 0.12)` helper if you'd rather compute it. |
-| `ink` | Dark section background | A dark brand color, or a dark neutral. Needs white text to be legible on it. |
-| `onAccent?` | **Optional.** Text/icon color **on** the accent (button labels) | Defaults to `ink` (dark text — right for bright accents like lime/orange). For a **mid/dark accent like red**, set `onAccent: "#ffffff"` so labels stay legible. |
-
----
-
-## Where assets go
-
-Put everything in **`public/assets/schools/<slug>/`** and reference it as
-`/assets/schools/<slug>/<file>` (the `public/` prefix is dropped in the URL).
-
-| Asset | Recommended | Notes |
-| --- | --- | --- |
-| `logo-white.svg` | White/light SVG | It sits on the dark header — must read on near-black. |
-| `paw.svg` (mark) | Single-color SVG using `fill="currentColor"` | It's tinted to the accent via CSS mask, so the file's own color doesn't matter. |
-| Photos | `.jpg`/`.webp`, ~1600–2048px wide, < ~400 KB | Landscape works best; they're used as wide backgrounds. They lazy-load. |
-
----
-
-## Step-by-step: add a new school
-
-1. **Create the assets folder:** `public/assets/schools/<slug>/` and drop in the
-   logo, mark, and any photos.
-2. **Get the brand colors** (school athletics brand guide, or sample the hex from
-   the logo/uniforms). You need `primary`, a deep + dark variant, and `ink`.
-3. **Add one entry** to the `schools` array in `src/data/schools.ts` (template
-   below).
-4. **Run it:** `npm run dev` → visit `/schools/<slug>` and `/schools/<slug>/ambassadors`.
-5. **Build to confirm:** `npm run build` (the source of truth for "is it broken").
-
-### Copy-paste template
-
-```ts
-{
-  slug: "new-school",
-  name: "New School University",
-  short: "New School",
-  mascot: "Mascots",
-  fund: "Mascot Athletics Fund",
-  city: "City",
-  state: "ST",
-  logo: "/assets/schools/new-school/logo-white.svg", // optional
-  mark: "/assets/schools/new-school/paw.svg",         // optional
-  photos: {                                            // all optional
-    team: "/assets/schools/new-school/team.jpg",
-    fans: "/assets/schools/new-school/fans.jpg",
-    celebrate: "/assets/schools/new-school/celebrate.jpg",
-    mascot: "/assets/schools/new-school/mascot.jpg",
-    action: "/assets/schools/new-school/action.jpg",
-  },
-  theme: {
-    primary: "#0033A0",      // school primary
-    primaryDeep: "#002D8A",  // ~10% darker
-    primaryDark: "#002472",  // dark enough for text on white
-    primarySoft: "rgba(0, 51, 160, 0.12)",
-    ink: "#101418",          // dark sections
-  },
-},
+```sh
+# drafts (review in the Studio before they go live):
+IMPORT_FILE=../import/schools.json npm run import
+# or straight to live:
+IMPORT_FILE=../import/schools.json PUBLISH=1 npm run import
 ```
 
-The bare minimum (no assets yet) is `slug`, `name`, `short`, `mascot`, `fund`,
-`city`, `state`, and `theme` — the page still renders with the wordmark, a
-monogram, and dot-field-only heroes.
+The manifest is a JSON array; see [`studio/import/example.json`](studio/import/example.json).
+Image fields (`logo`, `mark`, `avatar`, `photos.*`) may be **local file paths**
+(resolved from where you run the command) **or remote URLs**. `slug`, `short`,
+and `fund` are optional — derived from `name`/`mascot` if omitted. Requires only
+your `sanity login` (no separate token).
+
+### 3. Auto-seed a college (terminal)
+
+Pulls most of a **college's** data from public sources so onboarding becomes
+"confirm + upload the approved logo." From `studio/`:
+
+```sh
+COLLEGE="Sam Houston State" npm run seed:college          # one
+IMPORT_FILE=../import/colleges.txt npm run seed:college    # one name per line
+```
+
+It fetches the **mascot, primary color, and a logo preview** from ESPN's public
+API and creates a **draft** (never live). Then in the Studio you confirm the
+name/city, set the dark **ink** color, **replace the preview logo with the
+officially-approved file**, and Publish.
+
+- **Colleges only** — K-12 schools aren't in ESPN; add those via path 1 or 2.
+- **ESPN colors are approximate** — verify against the official brand hex.
+- **The auto-pulled logo is an unverified preview** — school logos are
+  trademarked, so a co-branded page needs the partner's approved logo + sign-off.
+- Optional: set `DATAGOV_API_KEY` (free from api.data.gov) to also fill the
+  official name/city/state from College Scorecard.
 
 ---
 
-## Social share image (auto-generated)
+## The fields
 
-Each school automatically gets a **1200×630 Open Graph card** at
-`/schools/<slug>/og.png`, wired into both pages' `<head>` (`og:image` /
-`twitter:image`). It's rendered at **build time** from the registry entry —
-dark `ink` background, the XtraPoint × school logo lockup, and the Anton +
-Permanent Marker headline in the school's `primary` color, mirroring the donor
-hero. **No action needed per school** — it just works from `logo` + `theme`.
+| Field | Example | Notes |
+| --- | --- | --- |
+| `name` | `Sam Houston State University` | Full legal name — SEO title, alt text. |
+| `short` | `Sam Houston State` | Short name in headings + the header lockup. |
+| `slug` | `sam-houston` | The URL. Click **Generate** from the short name. |
+| `mascot` | `Bearkats` | Plural — used throughout the copy. |
+| `fund` | `Bearkat Athletics Fund` | The fund supporters give to. |
+| `city` / `state` | `Huntsville` / `TX` | Metadata. |
+| `logo` | image | **White/mono** logo for the dark header (SVG or PNG). Also the OG lockup. Omit → text wordmark. |
+| `logoBadge` | toggle | ON only for a **colored** logo → white badge so it reads on the dark header. |
+| `logoClass` | `h-8 w-auto` | Advanced header sizing; default `h-7 w-auto`. |
+| `mark` | image | Optional single-color icon (e.g. a paw) for the app avatar; tinted to the accent. |
+| `avatar` | image | Optional full-color square logo for the app avatar (beats `mark`). |
+| `photos.*` | images | `team` / `celebrate` / `fans` / `action` / `mascot` — each optional; pages degrade gracefully. |
 
-- Generator: [`src/og/renderSchoolOg.ts`](src/og/renderSchoolOg.ts)
-  (satori → SVG, `@resvg/resvg-js` → PNG). Fonts bundled in `src/og/fonts/`.
-- Endpoint: [`src/pages/schools/[school]/og.png.ts`](src/pages/schools/[school]/og.png.ts).
-- To preview a card, run `npm run build` and open `dist/schools/<slug>/og.png`,
-  or paste the live URL into a social-card validator.
-- `logo` (a white/mono SVG or PNG) makes the best lockup; `logoBadge: true`
-  puts a colored logo on a white chip, same as the header.
+### Brand colors — just two
+
+Editors set **`primary`** (the accent, replaces the XtraPoint lime) and **`ink`**
+(the dark section/header color). The hover, darker-for-text, and soft-fill shades
+are **derived automatically** (`deriveSchoolTheme` in `src/data/schools.ts`).
+
+- `onAccent` (optional): text color **on** the accent — defaults to the dark
+  color; set to white for mid/dark accents like red.
+- `primaryDarkOverride` (optional): only for very bright accents where the
+  derived on-white shade isn't dark enough to read.
+
+---
+
+## Assets
+
+Uploaded through Sanity and served from its image CDN (`cdn.sanity.io`) — no
+files go in the repo. Recommended: white/mono SVG or PNG logo that reads on
+near-black; landscape photos ~1600–2048px.
 
 ## What you do NOT edit
 
-- The page templates (`src/pages/schools/…`) — shared by every school.
-- The components (`SchoolHeader`, `SchoolPhone`, `SchoolPhotoBand`) — generic.
-- The forms — the donor waitlist and ambassador waitlist are wired in already.
-  (Submission routing/inboxes are a Web3Forms key concern, not per-school.)
+- The page templates (`src/pages/schools/…`) and components — shared by every school.
+- `src/data/schools.ts` — types + theme helpers only (no per-school data).
+- The Studio schema (`studio/schemas/school.ts`) — unless you're adding a new field.

@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Example State University",
+    "short": "Example State",
+    "mascot": "Rockets",
+    "fund": "Rocket Athletics Fund",
+    "city": "Springfield",
+    "state": "IL",
+    "primary": "#0033a0",
+    "ink": "#0a1a3f",
+    "logo": "https://example.com/logo-white.svg",
+    "photos": {
+      "team": "./assets/example/team.jpg",
+      "celebrate": "./assets/example/celebrate.jpg"
+    }
+  }
+]
