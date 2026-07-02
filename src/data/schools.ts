@@ -96,14 +96,18 @@ export const deriveSchoolTheme = (input: {
   onAccent?: string;
   primaryDark?: string;
 }): SchoolTheme => {
-  const primary = input.primary || BRAND_PRIMARY;
+  // Only accept #rrggbb strings; anything else (empty, or a stray object from an
+  // older format) falls back to the brand default rather than crashing.
+  const hex = (v: unknown): string | undefined =>
+    typeof v === "string" && /^#[0-9a-fA-F]{6}$/.test(v) ? v : undefined;
+  const primary = hex(input.primary) ?? BRAND_PRIMARY;
   return {
     primary,
     primaryDeep: darken(primary, 0.1),
-    primaryDark: input.primaryDark || darken(primary, 0.22),
+    primaryDark: hex(input.primaryDark) ?? darken(primary, 0.22),
     primarySoft: hexToRgba(primary, 0.12),
-    ink: input.ink || BRAND_INK,
-    ...(input.onAccent ? { onAccent: input.onAccent } : {}),
+    ink: hex(input.ink) ?? BRAND_INK,
+    ...(hex(input.onAccent) ? { onAccent: hex(input.onAccent) } : {}),
   };
 };
 

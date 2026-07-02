@@ -35,11 +35,10 @@ export const slugify = (s: string): string =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
-/** A Sanity color-input value from a hex string (accepts with/without leading #). */
-export const color = (hex?: string) => {
+/** Normalize a hex string for the theme color fields (stored as plain strings). */
+export const color = (hex?: string): string | undefined => {
   if (!hex) return undefined;
-  const h = (hex.startsWith("#") ? hex : `#${hex}`).toLowerCase();
-  return { _type: "color", hex: h };
+  return (hex.startsWith("#") ? hex : `#${hex}`).toLowerCase();
 };
 
 const contentTypeFor = (name: string): string => {
