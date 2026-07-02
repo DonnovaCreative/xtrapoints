@@ -71,9 +71,18 @@ Theming re-skins the whole design by overriding global tokens per page
   incentives (Bronze/Silver/Gold) / enroll. Enroll is a **placeholder inline
   `WaitlistForm`** (real application pending, must be university-approved).
 - **Auto OG cards** — each school emits a 1200×630 share image at
-  `/schools/<slug>/og.png` (build-time; satori + `@resvg/resvg-js`), wired into
-  both pages' `og:image`/`twitter:image`. Mirrors the hero from `logo` + `theme`;
-  no per-school work. Generator: `src/og/renderSchoolOg.ts` (fonts in `src/og/fonts/`).
+  `/schools/<slug>/og.png`, wired into both pages' `og:image`/`twitter:image`.
+  Mirrors the hero from `logo` + `theme`; no per-school work. Generator:
+  `src/og/renderSchoolOg.ts` (satori + `@resvg/resvg-js`, fonts in `src/og/fonts/`).
+  **On-demand** (`prerender = false`): a Vercel Node function generates each card
+  once, then it's CDN-cached (build time no longer scales with school count).
+  Fonts + co-brand logos are bundled into the function via `includeFiles` in
+  `astro.config.mjs` (logo list derived from the registry).
+- **Content source is decoupled** — page templates + the OG endpoint read schools
+  only through `src/data/schoolsSource.ts` (`getSchools()` / `getSchool()`), not
+  the raw array. Phase-1 groundwork so the planned move to Sanity (see the
+  scaling plan) is a body-only edit in that one module. `src/data/schools.ts`
+  still holds the actual data for now.
 
 ## Forms (Web3Forms)
 
