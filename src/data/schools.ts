@@ -1,7 +1,9 @@
 // =============================================================================
-// SCHOOL PARTNER REGISTRY — the co-branded /schools/[slug] template is driven
-// entirely by this list. To launch a new partner school, add one entry here
-// (name, mascot, fund, brand colors, logo) — no new components needed.
+// SCHOOL TYPES + THEME HELPERS for the co-branded /schools/[slug] template.
+//
+// School CONTENT now lives in Sanity (see src/data/schoolsSource.ts, which maps
+// CMS documents onto the `School` shape below). This file holds the shared
+// types and the theming helpers used by the templates and the OG generator.
 //
 // Theming works by OVERRIDING the global design tokens per page (see
 // schoolThemeVars): the whole XtraPoint design language re-skins to the school's
@@ -53,61 +55,6 @@ export interface School {
   };
   theme: SchoolTheme;
 }
-
-export const schools: School[] = [
-  {
-    slug: "sam-houston",
-    name: "Sam Houston State University",
-    short: "Sam Houston State",
-    mascot: "Bearkats",
-    fund: "Bearkat Athletics Fund",
-    city: "Huntsville",
-    state: "TX",
-    logo: "/assets/schools/sam-houston/logo-white.svg", // white Bearkat mascot
-    mark: "/assets/schools/sam-houston/paw.svg", // paw (inherits accent)
-    photos: {
-      team: "/assets/schools/sam-houston/team.webp",
-      fans: "/assets/schools/sam-houston/fans.jpg",
-      celebrate: "/assets/schools/sam-houston/celebrate.jpg",
-      mascot: "/assets/schools/sam-houston/mascot.jpg",
-      action: "/assets/schools/sam-houston/action.jpg",
-    },
-    theme: {
-      primary: "#ff5200", // Bearkat Orange (official SHSU brand)
-      primaryDeep: "#e64a00",
-      primaryDark: "#cc4200", // darker for text/icons on light backgrounds
-      primarySoft: "rgba(255, 82, 0, 0.12)",
-      ink: "#1e1d23", // official SHSU navy grey for dark sections
-    },
-  },
-  {
-    slug: "westminster",
-    name: "Westminster Academy",
-    short: "Westminster Academy",
-    mascot: "Lions",
-    fund: "Lions Athletics Fund",
-    city: "Fort Lauderdale",
-    state: "FL",
-    logo: "/assets/schools/westminster/logo-white.png", // white wide crest + wordmark lockup
-    logoClass: "h-8 w-auto", // wide horizontal lockup
-    avatar: "/assets/schools/westminster/avatar.png", // color Lions head (app mockup)
-    photos: {
-      team: "/assets/schools/westminster/team.jpg",
-      fans: "/assets/schools/westminster/fans.jpg",
-      celebrate: "/assets/schools/westminster/celebrate.webp",
-      mascot: "/assets/schools/westminster/mascot.jpg",
-      action: "/assets/schools/westminster/action.jpg",
-    },
-    theme: {
-      primary: "#e51937", // Westminster red (official brand)
-      primaryDeep: "#cc1431",
-      primaryDark: "#b3122b", // darker red for text/icons on white (contrast)
-      primarySoft: "rgba(229, 25, 55, 0.12)",
-      ink: "#002a5c", // Westminster navy for dark sections
-      onAccent: "#ffffff", // white reads on the red accent (navy would be muddy)
-    },
-  },
-];
 
 /** Convert a #rrggbb hex to an rgba() string at the given alpha. */
 export const hexToRgba = (hex: string, alpha: number): string => {

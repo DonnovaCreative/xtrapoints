@@ -8,8 +8,7 @@
     "dev": "sanity dev",
     "start": "sanity dev",
     "build": "sanity build",
-    "deploy": "sanity deploy",
-    "seed": "sanity exec scripts/seed.ts --with-user-token"
+    "deploy": "sanity deploy"
   },
   "dependencies": {
     "@sanity/color-input": "^3",
