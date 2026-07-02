@@ -127,6 +127,12 @@ async function seed() {
     );
   }
 
+  const cfg = client.config();
+  console.log(
+    `Client → project=${cfg.projectId} dataset=${cfg.dataset} ` +
+      `token=${cfg.token ? "yes" : "NO"} perspective=${cfg.perspective ?? "(default)"}`,
+  );
+
   for (const s of SEED) {
     console.log(`Seeding ${s.slug}…`);
     const [logo, mark, avatar] = await Promise.all([
@@ -164,10 +170,14 @@ async function seed() {
       },
     };
 
-    await client.createOrReplace(doc);
-    console.log(`  ✓ ${s.slug}`);
+    const res = await client.createOrReplace(doc);
+    console.log(`  ✓ ${s.slug} → _id=${res._id} _rev=${res._rev}`);
   }
-  console.log(`Done — seeded ${SEED.length} school(s).`);
+
+  // Self-verify with the same authenticated client (bypasses any perspective/
+  // draft ambiguity): how many published `school` docs actually exist now?
+  const count = await client.fetch('count(*[_type == "school"])');
+  console.log(`Done — dataset now reports ${count} published school doc(s).`);
 }
 
 seed().catch((err) => {
