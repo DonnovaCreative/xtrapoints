@@ -6,4 +6,6 @@ export default defineCliConfig({
     projectId: "xjhhxbqk",
     dataset: "production",
   },
+  // Hosted Studio at https://xtrapoint.sanity.studio (avoids the deploy prompt).
+  studioHost: "xtrapoint",
 });
