@@ -216,8 +216,13 @@ const linkClass = dark
     transform: translate(-50%, 0);
   }
 
-  /* Mobile panel — solid variant background so it reads over any page. */
+  /* Mobile panel — absolutely positioned below the bar so it never adds height
+     to the fixed header when closed (otherwise the header's box, and its scrolled
+     background, would span bar + panel). Carries its own solid background. */
   .nav-panel {
+    position: absolute;
+    inset-inline: 0;
+    top: 100%;
     opacity: 0;
     visibility: hidden;
     transform: translateY(-6px);
@@ -231,6 +236,15 @@ const linkClass = dark
     visibility: visible;
     transform: none;
   }
+  /* Panel background (its own — the bar is a separate box now). */
+  .site-header[data-variant="dark"] .nav-panel {
+    background: color-mix(in srgb, var(--color-ink) 97%, black);
+  }
+  .site-header[data-variant="light"] .nav-panel {
+    background: #fff;
+  }
+  /* When the menu is open, give the bar itself a solid fill (even at the top of
+     the page) so the logo/toggle don't float on a transparent strip. */
   .site-header[data-variant="dark"][data-open] {
     background: color-mix(in srgb, var(--color-ink) 96%, black);
   }
