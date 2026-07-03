@@ -4,6 +4,42 @@ Short log of non-obvious engineering decisions. Newest first.
 
 ---
 
+## 2026-07-02 — Co-branded sales one-pager: HTML page + headless-Chromium PDF
+
+**Context:** Each school needs a branded sales sell-sheet (see the Oregon
+reference). Doing these by hand per school doesn't scale.
+
+**Decision:** Make the one-pager a **third re-skinned template**
+(`/schools/<slug>/one-pager`) reading the same Sanity data as the landing pages,
+and generate the PDF on demand by printing that page with **headless Chromium**
+(`/schools/<slug>/one-pager.pdf`, `puppeteer-core` + `@sparticuz/chromium`),
+CDN-cached like the OG image. A new school gets its sell-sheet for free.
+
+**Alternatives considered:**
+- *Rebuild the layout in satori/@react-pdf* (the OG stack) — rejected; can't
+  cleanly reproduce a full marketing page (mesh gradient, watermark, phone), and
+  it'd mean maintaining the design twice.
+- *Hosted HTML→PDF API* — viable fallback, avoids bundling Chromium, but adds an
+  external dependency + per-render cost. Chose self-hosted Chromium (no new SaaS).
+
+**Two non-obvious gotchas:**
+- **Color mapping:** the one-pager follows the site rule (**primary** = CTA /
+  checks / editorial; **secondary** = atmospheric gradient/glow/watermark) rather
+  than copying Oregon's hand-picked *yellow* CTA. This keeps the CTA readable for
+  single-color schools (where secondary is only a pale tint of primary).
+- **`libnss3.so` on Vercel:** `@sparticuz/chromium` only extracts its bundled
+  glibc libs + sets `LD_LIBRARY_PATH` when it detects Lambda via `AWS_EXECUTION_ENV`
+  / `AWS_LAMBDA_JS_RUNTIME`. Vercel doesn't set those, so Chromium failed with
+  `libnss3.so: cannot open shared object file`. Fix: set
+  `process.env.AWS_LAMBDA_JS_RUNTIME ||= "nodejs20.x"` **before** importing the
+  package (its detection runs at module-eval time) to opt into the AL2023 lib set.
+
+**Caveat:** the PDF function fetches its own `/one-pager` page over HTTP, so
+enabling Vercel **Deployment Protection** on preview/staging would break PDF
+generation there (production unaffected).
+
+---
+
 ## 2026-07-01 — Per-environment search de-indexing (staging/preview only)
 
 **Context:** One static build/config deployed to both production and staging, so
