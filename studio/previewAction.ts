@@ -1,4 +1,3 @@
-import { EyeOpenIcon } from "@sanity/icons";
 import type { DocumentActionComponent } from "sanity";
 
 // "Open preview" document action for school docs. Opens the site's secret-gated
@@ -27,7 +26,6 @@ export const openPreviewAction: DocumentActionComponent = (props) => {
 
   return {
     label: "Open preview",
-    icon: EyeOpenIcon,
     onHandle: () => {
       if (!slug) {
         window.alert("Add and save a slug first, then open the preview.");
