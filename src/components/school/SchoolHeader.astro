@@ -1,7 +1,10 @@
 ---
 // Co-brand header for school pages: the school's logo (or a text wordmark),
-// an optional nav link, and a CTA. Supports a white header bar (school.whiteHeader)
-// for colored logos that need a light background.
+// an optional nav link, and a CTA. Same fixed-overlay shell as the main site
+// header (transparent at top → glass morph on scroll → hide/reveal; see
+// src/scripts/header-behavior.ts). Rendered inside the page's themed wrapper,
+// so the scrolled glass tint (var(--color-ink)) is the school's ink.
+// school.whiteHeader → the light variant (solid-ish white, for colored logos).
 import CtaButton from "@/components/CtaButton.astro";
 import type { School } from "@/data/schools";
 
@@ -15,7 +18,7 @@ export interface Props {
 const { school, cta, nav } = Astro.props;
 
 const white = school.whiteHeader ?? false;
-const headerClass = white ? "bg-white border-b border-gray-200" : "bg-ink";
+const variant = white ? "light" : "dark";
 const navClass = white
   ? "text-gray-600 hover:text-gray-900"
   : "text-white/80 hover:text-white";
@@ -23,8 +26,8 @@ const wordName = white ? "text-gray-900" : "text-white";
 const wordMascot = white ? "text-gray-500" : "text-white/55";
 ---
 
-<header class={`relative z-50 ${headerClass}`}>
-  <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4 lg:px-10">
+<header data-site-header data-variant={variant} class="site-header fixed inset-x-0 top-0 z-50">
+  <div class="mx-auto flex h-[var(--header-h)] max-w-7xl items-center justify-between gap-4 px-6 lg:px-10">
     <a href={`/schools/${school.slug}`} class="flex items-center" aria-label={school.short}>
       {school.logo ? (
         school.logoBadge ? (
@@ -51,3 +54,46 @@ const wordMascot = white ? "text-gray-500" : "text-white/55";
     </div>
   </div>
 </header>
+
+<style>
+  /* Same shell states as Header.astro (driven by header-behavior.ts). The light
+     variant starts on a soft white (not fully transparent) so colored school
+     logos always sit on a workable background. */
+  .site-header {
+    border-bottom: 1px solid transparent;
+    transition:
+      transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1),
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      backdrop-filter 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+  .site-header[data-hidden] {
+    transform: translateY(-100%);
+  }
+  .site-header[data-variant="light"] {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: var(--color-gray-100);
+  }
+  .site-header[data-scrolled] {
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+  .site-header[data-variant="dark"][data-scrolled] {
+    background: color-mix(in srgb, var(--color-ink) 82%, transparent);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+  .site-header[data-variant="light"][data-scrolled] {
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.15);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .site-header {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import "@/scripts/header-behavior";
+</script>

@@ -8,6 +8,12 @@
       "port": 4321
     },
     {
+      "name": "xtrapoints-dev-alt",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "--port", "4330"],
+      "port": 4330
+    },
+    {
       "name": "tesouro-dev",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--prefix", "/Users/coreydonovan/Code/tesouro-redesign", "--", "--port", "4322"],

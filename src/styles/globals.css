@@ -94,6 +94,11 @@
 :root {
   --radius: 0.625rem;
 
+  /* Fixed site header height (Header.astro / SchoolHeader.astro). Pages offset
+     their first section by this (pt-[calc(var(--header-h)+…)]) since the header
+     overlays content. Keep in sync with the header markup. */
+  --header-h: 4.25rem;
+
   --background: #ffffff;
   --foreground: var(--color-gray-900);
 

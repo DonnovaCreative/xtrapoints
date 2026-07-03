@@ -4,6 +4,44 @@ Short log of non-obvious engineering decisions. Newest first.
 
 ---
 
+## 2026-07-03 — Fixed overlay header: custom config-driven shell, not shadcn
+
+**Context:** The header was `position: relative` with a solid navy bar on every
+page — too bold on white pages (legal docs), and it needed to scale as the site
+grows (blog, products, solutions, guides).
+
+**Decision:** A custom Astro shell shared by `Header.astro` and
+`SchoolHeader.astro`: fixed overlay, **transparent at the top** (the hero's own
+background shows through), glass morph (blur + tint) once scrolled, and smart
+hide-on-scroll-down / reveal-on-scroll-up. States (`data-scrolled` / `data-hidden`
+/ `data-open`) are set by one shared script (`src/scripts/header-behavior.ts`);
+each component styles them. `variant="dark|light"` picks logo + text colors
+(light = navy logo for white pages). **Links are config-driven**
+(`src/config/nav.ts`); an item with `children` renders a CSS-only dropdown
+(hover/focus-within) with zero component changes.
+
+**Why not shadcn NavigationMenu:** everything needed here is *shell* behavior
+(fixed/transparent/morph/hide) that NavigationMenu doesn't provide — it's only the
+dropdown widget — and it would hydrate a React island on every page for what is
+currently links + a CTA (against the site's islands-only-for-real-interactivity
+rule, see CtaButton). If a rich mega-menu is ever needed, embed NavigationMenu as
+one island *inside* this shell; nothing else changes.
+
+**Non-obvious gotchas:**
+- **Every page's first section must offset itself** by the header height:
+  `pt-[calc(var(--header-h)+<original-pt>)]` (`--header-h` in globals `:root`).
+  A new top-level page that forgets this will tuck its hero under the header.
+- **School theming survives `position: fixed`** — CSS custom properties inherit
+  through fixed positioning, so the scrolled glass (`color-mix` on
+  `var(--color-ink)`) picks up the school's ink from the themed wrapper.
+- **`html { scroll-behavior: smooth }` affects programmatic checks** — a
+  `window.scrollTo()` animates, so state assertions mid-animation lie. Use
+  `behavior: 'instant'` when testing.
+- The header never hides while the mobile menu is open or focus is inside it
+  (keyboard users must not lose the bar mid-tab).
+
+---
+
 ## 2026-07-03 — Legal pages (Terms / Privacy): CMS rich text + one dynamic route
 
 **Context:** The footers linked Terms/Privacy out to `lpt.io`. XtraPoint needs its

@@ -1,29 +1,252 @@
 ---
+// Site header — a fixed overlay bar (transparent at the top of the page, so the
+// hero's own background shows through), with a scroll "glass" morph + smart
+// hide/reveal (see src/scripts/header-behavior.ts). Links are config-driven from
+// src/config/nav.ts — items with `children` render a CSS-only dropdown, so the
+// nav scales (blog, products, guides…) by editing the config, not this file.
+//
+// Variants:
+//   • dark  (default) — for pages that open on an ink/dark hero (white logo/text)
+//   • light           — for white pages like the legal docs (navy logo, dark text)
 import CtaButton from "@/components/CtaButton.astro";
 import { brand } from "@/config/brand";
+import { mainNav } from "@/config/nav";
+
+export interface Props {
+  /** dark: over ink/hero pages (default) · light: over solid-white pages. */
+  variant?: "dark" | "light";
+}
+const { variant = "dark" } = Astro.props;
+const dark = variant === "dark";
+
+const logo = dark ? brand.logo.white : brand.logo.navy;
+const linkClass = dark
+  ? "text-white/75 hover:text-white"
+  : "text-gray-600 hover:text-ink";
 ---
 
-<header class="relative z-50 bg-ink">
-  <div
-    class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-5 lg:px-10"
-  >
-    <a href="/" class="flex items-center gap-3" aria-label={`${brand.name} home`}>
+<header data-site-header data-variant={variant} class="site-header fixed inset-x-0 top-0 z-50">
+  <div class="mx-auto flex h-[var(--header-h)] max-w-7xl items-center justify-between gap-6 px-6 lg:px-10">
+    <a href="/" class="flex shrink-0 items-center gap-3" aria-label={`${brand.name} home`}>
       <img
-        src={brand.logo.white}
+        src={logo}
         alt={brand.name}
         width={brand.logo.width}
         height={brand.logo.height}
         class="h-[26px] w-auto"
       />
       <span
-        class="hidden border-l border-white/15 pl-3 font-mono text-[0.6875rem] uppercase tracking-[0.12em] text-white/55 sm:inline"
+        class={`hidden border-l pl-3 font-mono text-[0.6875rem] uppercase tracking-[0.12em] xl:inline ${
+          dark ? "border-white/15 text-white/55" : "border-gray-200 text-gray-400"
+        }`}
       >
         {brand.tagline}
       </span>
     </a>
 
-    <CtaButton href="/contact" variant="lime" class="!px-5 !py-2.5 !text-sm"
-      >Get Started</CtaButton
+    <!-- desktop nav (config-driven; children → CSS dropdown) -->
+    <nav class="hidden items-center gap-7 lg:flex" aria-label="Main">
+      {mainNav.map((item) =>
+        item.children ? (
+          <div class="nav-drop relative">
+            {item.href ? (
+              <a href={item.href} class={`nav-drop-trigger flex items-center gap-1.5 text-sm font-medium transition-colors ${linkClass}`}>
+                {item.label}
+                <svg class="h-3 w-3 opacity-60" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            ) : (
+              <button type="button" class={`nav-drop-trigger flex items-center gap-1.5 text-sm font-medium transition-colors ${linkClass}`}>
+                {item.label}
+                <svg class="h-3 w-3 opacity-60" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            )}
+            <div class="nav-drop-panel absolute left-1/2 top-full min-w-[15rem] -translate-x-1/2 pt-3">
+              <div class={`flex flex-col gap-0.5 rounded-2xl border p-2 shadow-xl ${
+                dark ? "border-white/10 bg-ink" : "border-gray-100 bg-white"
+              }`}>
+                {item.children.map((c) => (
+                  <a
+                    href={c.href}
+                    class={`rounded-xl px-3.5 py-2.5 text-sm transition-colors ${
+                      dark
+                        ? "text-white/80 hover:bg-white/5 hover:text-white"
+                        : "text-gray-700 hover:bg-gray-50 hover:text-ink"
+                    }`}
+                  >
+                    <span class="font-medium">{c.label}</span>
+                    {c.description && (
+                      <span class={`mt-0.5 block text-xs ${dark ? "text-white/45" : "text-gray-400"}`}>
+                        {c.description}
+                      </span>
+                    )}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <a href={item.href} class={`text-sm font-medium transition-colors ${linkClass}`}>
+            {item.label}
+          </a>
+        ),
+      )}
+    </nav>
+
+    <div class="flex shrink-0 items-center gap-3">
+      <CtaButton href="/contact" variant="lime" glow={dark} class="!px-5 !py-2.5 !text-sm">
+        Get Started
+      </CtaButton>
+
+      <!-- mobile menu toggle -->
+      <button
+        type="button"
+        data-nav-toggle
+        aria-expanded="false"
+        aria-controls="site-nav-panel"
+        aria-label="Menu"
+        class={`nav-toggle -mr-1 flex h-10 w-10 flex-col items-center justify-center gap-[5px] lg:hidden ${
+          dark ? "text-white" : "text-ink"
+        }`}
+      >
+        <span class="nav-toggle-bar block h-[2px] w-5 rounded-full bg-current transition-transform duration-300"></span>
+        <span class="nav-toggle-bar block h-[2px] w-5 rounded-full bg-current transition-transform duration-300"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- mobile panel -->
+  <div id="site-nav-panel" data-nav-panel class="nav-panel lg:hidden">
+    <nav
+      class={`border-t px-6 pb-8 pt-4 ${
+        dark ? "border-white/10" : "border-gray-100"
+      }`}
+      aria-label="Main menu"
     >
+      <ul class="flex flex-col">
+        {mainNav.map((item) => (
+          <li>
+            {item.href && (
+              <a
+                href={item.href}
+                class={`block py-3 text-base font-medium ${
+                  dark ? "text-white/85 hover:text-white" : "text-gray-800 hover:text-ink"
+                }`}
+              >
+                {item.label}
+              </a>
+            )}
+            {item.children && (
+              <ul class={`mb-2 flex flex-col border-l pl-4 ${dark ? "border-white/10" : "border-gray-100"}`}>
+                {!item.href && (
+                  <span class={`pt-3 pb-1 font-mono text-[0.625rem] uppercase tracking-[0.14em] ${dark ? "text-white/40" : "text-gray-400"}`}>
+                    {item.label}
+                  </span>
+                )}
+                {item.children.map((c) => (
+                  <li>
+                    <a
+                      href={c.href}
+                      class={`block py-2.5 text-sm ${dark ? "text-white/70 hover:text-white" : "text-gray-600 hover:text-ink"}`}
+                    >
+                      {c.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ul>
+    </nav>
   </div>
 </header>
+
+<style>
+  /* Shell: transparent at the top; glass morph once scrolled (or menu open);
+     slides away on scroll-down, returns on scroll-up (data-* set by the shared
+     header-behavior script). */
+  .site-header {
+    border-bottom: 1px solid transparent;
+    transition:
+      transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1),
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      backdrop-filter 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+  .site-header[data-hidden] {
+    transform: translateY(-100%);
+  }
+  .site-header[data-scrolled],
+  .site-header[data-open] {
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+  .site-header[data-variant="dark"][data-scrolled],
+  .site-header[data-variant="dark"][data-open] {
+    background: color-mix(in srgb, var(--color-ink) 82%, transparent);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+  .site-header[data-variant="light"][data-scrolled],
+  .site-header[data-variant="light"][data-open] {
+    background: rgba(255, 255, 255, 0.85);
+    border-color: var(--color-gray-100);
+    box-shadow: 0 8px 24px -16px rgba(3, 17, 109, 0.12);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .site-header {
+      transition: none;
+    }
+  }
+
+  /* Desktop dropdowns — CSS-only: open on hover or keyboard focus within. */
+  .nav-drop-panel {
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, 6px);
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease,
+      visibility 0.2s;
+  }
+  .nav-drop:hover .nav-drop-panel,
+  .nav-drop:focus-within .nav-drop-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+  }
+
+  /* Mobile panel — solid variant background so it reads over any page. */
+  .nav-panel {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease,
+      visibility 0.25s;
+  }
+  .site-header[data-open] .nav-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+  .site-header[data-variant="dark"][data-open] {
+    background: color-mix(in srgb, var(--color-ink) 96%, black);
+  }
+  .site-header[data-variant="light"][data-open] {
+    background: #fff;
+  }
+
+  /* Hamburger → X */
+  .site-header[data-open] .nav-toggle-bar:first-child {
+    transform: translateY(3.5px) rotate(45deg);
+  }
+  .site-header[data-open] .nav-toggle-bar:last-child {
+    transform: translateY(-3.5px) rotate(-45deg);
+  }
+</style>
+
+<script>
+  import "@/scripts/header-behavior";
+</script>

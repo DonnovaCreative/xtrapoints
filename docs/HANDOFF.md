@@ -48,6 +48,17 @@ npm run build    # static build — source of truth for "is it broken"
   `#03116d`, `--color-accent-2` (secondary), fonts Anton / Permanent Marker /
   Space Mono / Inter. `.ed` editorial accent word; `.glow`, `.dot-grid`,
   `.playbook-mark` (X/O marks, accept a `color` prop).
+- **Site header (fixed overlay)** — `Header.astro` + `SchoolHeader.astro` share a
+  shell: `fixed`, transparent at top (the hero bg shows through), glass morph on
+  scroll, hides on scroll-down / reveals on scroll-up
+  (`src/scripts/header-behavior.ts` drives `data-scrolled`/`data-hidden`/`data-open`).
+  `Header` takes `variant="dark|light"` — **light** (navy logo, white glass) is for
+  solid-white pages like the legal docs; school pages map `whiteHeader` → light.
+  **Nav links live in `src/config/nav.ts`** — items with `children` render a
+  CSS-only dropdown automatically (that's the scale path for blog/products/guides;
+  a shadcn NavigationMenu island only if a rich mega-menu is ever needed).
+  ⚠ The header overlays content: every page's **first section** must offset with
+  `pt-[calc(var(--header-h)+…)]` (`--header-h` in globals.css `:root`).
 
 ## 🎓 Co-branded school pages — now fully CMS-driven (READ ADDING-A-SCHOOL.md)
 
