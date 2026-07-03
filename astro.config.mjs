@@ -47,14 +47,5 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
-    ssr: {
-      // @hcaptcha/react-hcaptcha ships an ESM file that Vercel's Lambda otherwise
-      // require()s as CommonJS → "Cannot use import statement outside a module"
-      // when an on-demand route (the school draft preview) server-renders the
-      // ContactForm island at runtime. Bundling it into the server output fixes
-      // the interop. (Static pages render ContactForm at build time, so they were
-      // unaffected — this only bit the runtime function.)
-      noExternal: ["@hcaptcha/react-hcaptcha"],
-    },
   },
 });
