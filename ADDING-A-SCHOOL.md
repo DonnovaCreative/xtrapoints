@@ -5,7 +5,8 @@ Each school automatically gets **two pages**, fully re-skinned to that school:
 - `/schools/<slug>` — the **donor** landing page (waitlist)
 - `/schools/<slug>/ambassadors` — the **ambassador** program page
 
-…plus an auto-generated 1200×630 social share image at `/schools/<slug>/og.png`.
+…plus an auto-generated 1200×630 social share image at `/schools/<slug>/og.png`,
+and an auto-generated **co-branded sales one-pager** (see below).
 
 **School content lives in Sanity**, not in the repo. Editors manage it in the
 Studio, and publishing triggers an automatic site rebuild (Sanity webhook →
@@ -113,6 +114,29 @@ are **derived automatically** (`deriveSchoolTheme` in `src/data/schools.ts`).
   derived on-white shade isn't dark enough to read.
 
 ---
+
+## The co-branded sales one-pager (PDF)
+
+Every school also gets a **printable sales sell-sheet**, re-skinned to its brand
+automatically from the same Sanity data — no manual design per school.
+
+- **Preview in the browser:** `/schools/<slug>/one-pager` — a single US-Letter
+  page with a "Download PDF" button (the button is hidden in the PDF itself).
+- **Download the PDF:** `/schools/<slug>/one-pager.pdf` — generated on demand by
+  a headless-Chromium serverless function that prints the page above, then
+  CDN-cached (same on-demand pattern as the OG image).
+
+It pulls the school **logo, brand colors, mascot, and fund** from Sanity, so the
+only per-school work is what you already do to add the school. Colors follow the
+site rule — **primary** drives the CTA / checks / editorial accents, **secondary**
+drives the atmospheric layer (hero gradient end, glows, the giant faint logo
+watermark). Single-color schools still look right (secondary falls back to a
+primary tint). The copy is static (identical for every school); to change it,
+edit [`src/pages/schools/[school]/one-pager.astro`](src/pages/schools/[school]/one-pager.astro).
+
+> The layout is tuned to fit exactly one Letter page. If you add/lengthen copy,
+> re-check `/schools/<slug>/one-pager` fits on one sheet (the CTA footer should
+> sit flush at the bottom) before shipping.
 
 ## Assets
 

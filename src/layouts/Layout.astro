@@ -8,12 +8,15 @@ export interface Props {
   description: string;
   /** Path-relative OG image in /public, defaults to the brand OG card. */
   ogImage?: string;
+  /** Force noindex on this page regardless of environment (e.g. sales collateral). */
+  noindex?: boolean;
 }
 
 const {
   title,
   description,
   ogImage = "/assets/og-image-xp.jpg",
+  noindex = false,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
@@ -33,7 +36,7 @@ const ogImageUrl = new URL(ogImage, Astro.site).href;
 
     {/* Non-production (staging / preview) builds only — keeps them out of search.
         Production (VERCEL_ENV="production") never renders this. */}
-    {shouldNoindex && <meta name="robots" content="noindex, nofollow" />}
+    {(shouldNoindex || noindex) && <meta name="robots" content="noindex, nofollow" />}
 
     <title>{title}</title>
     <meta name="description" content={description} />

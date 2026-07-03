@@ -31,8 +31,12 @@ export default defineConfig({
   // static hosting; no SSR runtime is used (the contact form posts client-side).
   output: 'static',
 
-  integrations: [react(), sitemap()],
-  adapter: vercel({ includeFiles: ogIncludeFiles }),
+  // Keep the co-branded sales one-pagers (print/PDF collateral) out of the
+  // sitemap — they're noindex sell sheets, not landing pages.
+  integrations: [react(), sitemap({ filter: (page) => !page.includes("/one-pager") })],
+  // maxDuration covers the one-pager PDF route's Chromium cold-start + render
+  // (src/pages/schools/[school]/one-pager.pdf.ts).
+  adapter: vercel({ includeFiles: ogIncludeFiles, maxDuration: 60 }),
 
   vite: {
     plugins: [tailwindcss()],

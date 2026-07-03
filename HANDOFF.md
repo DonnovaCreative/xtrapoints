@@ -83,6 +83,19 @@ the repo.
   (`prerender = false`) + `src/og/renderSchoolOg.ts` (satori + `@resvg/resvg-js`;
   fonts in `src/og/fonts/` bundled via `includeFiles` in `astro.config.mjs`;
   fetches the school logo from the Sanity CDN). CDN-cached, generated once.
+- **Sales one-pager (PDF)** — a third re-skinned template, sized to one US-Letter
+  sheet. `src/pages/schools/[school]/one-pager.astro` is the HTML source of truth
+  (static, `noindex`, sitemap-excluded; reuses `schoolThemeVars` + the theme/logo
+  data). `src/pages/schools/[school]/one-pager.pdf.ts` (`prerender = false`) prints
+  it to PDF via **headless Chromium** (`puppeteer-core` + `@sparticuz/chromium` on
+  Vercel; local Chrome in dev, override `CHROME_PATH`), CDN-cached like the OG. The
+  function needs Chromium's memory headroom — `maxDuration: 60` is set on the Vercel
+  adapter; the traced binary lives in the `_render.func` bundle (~110MB, well under
+  the 250MB limit). Copy is static; colors: **primary** = CTA/checks/editorial,
+  **secondary** = atmospheric (gradient end, glow, logo watermark). Layout is tuned
+  to fit one page — re-check the fit if you change copy. ⚠ The PDF function fetches
+  its own `/one-pager` page over HTTP, so enabling Vercel **Deployment Protection**
+  on preview/staging would break PDF generation *there* (production is unaffected).
 
 ### Adding schools — 3 paths (detail in ADDING-A-SCHOOL.md)
 
