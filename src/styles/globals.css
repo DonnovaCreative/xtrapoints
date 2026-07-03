@@ -1,6 +1,13 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* ---- Inter Display (self-hosted, /public/fonts) — site-wide body/display face ---- */
+@font-face { font-family: "Inter Display"; font-weight: 400; font-style: normal; font-display: swap; src: url("/fonts/InterDisplay-Regular.woff2") format("woff2"); }
+@font-face { font-family: "Inter Display"; font-weight: 500; font-style: normal; font-display: swap; src: url("/fonts/InterDisplay-Medium.woff2") format("woff2"); }
+@font-face { font-family: "Inter Display"; font-weight: 600; font-style: normal; font-display: swap; src: url("/fonts/InterDisplay-SemiBold.woff2") format("woff2"); }
+@font-face { font-family: "Inter Display"; font-weight: 700; font-style: normal; font-display: swap; src: url("/fonts/InterDisplay-Bold.woff2") format("woff2"); }
+@font-face { font-family: "Inter Display"; font-weight: 800; font-style: normal; font-display: swap; src: url("/fonts/InterDisplay-ExtraBold.woff2") format("woff2"); }
+
 /* =============================================================================
    XtraPoints design tokens — single source of truth.
    Brand colors + fonts pulled from the live page (lacore.webflow.io/xtra-points).
@@ -9,8 +16,8 @@
 
 @theme {
   /* --- Fonts --------------------------------------------------------------- */
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Anton", "Inter", sans-serif;   /* uppercase athletic display */
+  --font-sans: "Inter Display", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Anton", "Inter Display", "Inter", sans-serif;   /* uppercase athletic display */
   --font-editorial: "Permanent Marker", cursive;  /* handwritten accent / marquee */
   --font-mono: "Space Mono", ui-monospace, monospace;
 
