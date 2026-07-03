@@ -8,7 +8,7 @@ and say: _"Read HANDOFF.md and README.md, then let's continue."_
 > onboarding paths), [docs/deploys-and-indexing.md](docs/deploys-and-indexing.md)
 > (envs + SEO), [DECISIONS.md](DECISIONS.md) (why). This file is **current state**.
 
-_Last updated: 2026-07-02._
+_Last updated: 2026-07-03._
 
 ---
 
@@ -23,6 +23,10 @@ _Last updated: 2026-07-02._
   doesn't publish. If prod doesn't update after ~a few minutes (earlier deploys
   were ~80s), re-trigger with an empty commit (`git commit --allow-empty`) or the
   next Sanity publish. It clears.
+- **Deploy rate limit:** pushing many commits in a short window can hit a Vercel
+  **deployment rate limit** (builds queue/pause). It resets on a rolling window
+  (minutes–hour); a single empty commit re-triggers once it clears. Don't spam
+  commits — that makes it worse.
 
 ## Stack / how to run
 
@@ -83,19 +87,45 @@ the repo.
   (`prerender = false`) + `src/og/renderSchoolOg.ts` (satori + `@resvg/resvg-js`;
   fonts in `src/og/fonts/` bundled via `includeFiles` in `astro.config.mjs`;
   fetches the school logo from the Sanity CDN). CDN-cached, generated once.
-- **Sales one-pager (PDF)** — a third re-skinned template, sized to one US-Letter
-  sheet. `src/pages/schools/[school]/one-pager.astro` is the HTML source of truth
-  (static, `noindex`, sitemap-excluded; reuses `schoolThemeVars` + the theme/logo
-  data). `src/pages/schools/[school]/one-pager.pdf.ts` (`prerender = false`) prints
-  it to PDF via **headless Chromium** (`puppeteer-core` + `@sparticuz/chromium` on
-  Vercel; local Chrome in dev, override `CHROME_PATH`), CDN-cached like the OG. The
-  function needs Chromium's memory headroom — `maxDuration: 60` is set on the Vercel
-  adapter; the traced binary lives in the `_render.func` bundle (~110MB, well under
-  the 250MB limit). Copy is static; colors: **primary** = CTA/checks/editorial,
-  **secondary** = atmospheric (gradient end, glow, logo watermark). Layout is tuned
-  to fit one page — re-check the fit if you change copy. ⚠ The PDF function fetches
-  its own `/one-pager` page over HTTP, so enabling Vercel **Deployment Protection**
-  on preview/staging would break PDF generation *there* (production is unaffected).
+- **Sales one-pager (PDF)** — a third re-skinned template per school, one US-Letter
+  sheet, built **1:1 from Figma** (file `W4w45f3JV7E4AFSiFSymdO`, node `1:118`).
+  `src/pages/schools/[school]/one-pager.astro` = HTML source of truth (static,
+  `noindex`, sitemap-excluded via `astro.config.mjs`). It's authored in Figma's
+  native **612×792** coordinate space inside a `transform: scale()` canvas that
+  fills the 8.5×11in sheet, so px values map straight from Figma. Static copy;
+  re-skins via `schoolThemeVars` + theme/logo/avatar data.
+  `one-pager.pdf.ts` (`prerender = false`) prints it via **headless Chromium**
+  (`puppeteer-core` + `@sparticuz/chromium` on Vercel; local Chrome in dev, override
+  `CHROME_PATH`), CDN-cached like the OG. `maxDuration: 60` on the Vercel adapter;
+  traced binary in the `_render.func` bundle (~110MB < 250MB limit). **Live in prod.**
+  - **Type:** self-hosted **Inter Display** (`/public/fonts`, from rsms/inter) +
+    Space Mono — *not* the site's Anton stack.
+  - **Color roles (per Figma):** **secondary** (yellow) = CTA button + chevron
+    bullets + hero-gradient end + progress bar; **primary** (green) = eyebrows /
+    checks / editorial accent / phone header; **`darken(primary,.68)`** = the
+    dark-green sections (hero-left, phone "add card", footer). Hero **watermark =
+    the full-color `avatar`**. Single-color schools still work (secondary →
+    primary tint). XP mark = `xtrapoint-logo-solid-white.svg`.
+  - **⚠ PDF export = keep everything OPAQUE.** Chromium exports *fade-to-transparent
+    gradients* and *element `opacity`* as PDF **soft-masks**, which some viewers
+    (Preview/Quartz, PDFium) silently DROP. So: hero is a single **opaque** gradient
+    (no transparent stops); XP mark is the **solid-white** logo (not the alpha-stop
+    gradient one, whose glyph vanished); the dot texture is **inline vector
+    `<circle>`s** (a CSS-gradient/`<img>` dot pattern rasterizes → blurs) stepped
+    down with **`fill-opacity`** (= *constant alpha*, which is safe + crisp, unlike
+    element opacity). **Verify PDFs via macOS Quartz** — `sips -s format png x.pdf
+    --out x.png` — NOT just poppler (`pdftoppm`); poppler renders soft-masks fine
+    and hides the bug.
+  - **⚠ Vercel Chromium `libnss3` fix:** Vercel doesn't set the AWS env vars
+    `@sparticuz/chromium` sniffs to detect Lambda, so it skips extracting its glibc
+    libs → `libnss3.so: cannot open shared object file`. Fixed by
+    `process.env.AWS_LAMBDA_JS_RUNTIME ||= "nodejs20.x"` **before** importing it
+    (its detection runs at import time). See `one-pager.pdf.ts`.
+  - **⚠ Deployment Protection:** the PDF fn fetches its own `/one-pager` over HTTP,
+    so enabling Vercel Deployment Protection on preview/staging breaks PDF gen
+    *there* (production unaffected).
+  - Layout is tuned to fit exactly one page (CTA footer flush at the bottom) —
+    re-check the fit if you change copy.
 
 ### Adding schools — 3 paths (detail in ADDING-A-SCHOOL.md)
 
@@ -147,6 +177,13 @@ Staging/preview de-indexed, production indexable (keyed on `VERCEL_ENV`).
 5. **Ambassador waitlist inbox** — route to a dedicated Web3Forms key (not done).
 6. **Vercel Deployment Protection** on staging/preview (dashboard toggle).
 7. Homepage §06 stock photos (Pexels); Footer Terms/Privacy point to `lpt.io`.
+8. **One-pager top-right lockup** renders `school.logo` in its natural color on the
+   light/yellow hero (the `brightness(0)` filter was removed per design). A school
+   whose only logo asset is **white/mono** (fine for the dark landing header) will
+   look faint/invisible there — such schools need a dark or full-color logo variant.
+9. **One-pager watermark + dots use `fill-opacity`/image opacity** (constant alpha,
+   verified in Quartz). If a future viewer drops them, swap to a fully-opaque
+   technique (see the "keep everything OPAQUE" note above).
 
 ## Dev gotchas
 
