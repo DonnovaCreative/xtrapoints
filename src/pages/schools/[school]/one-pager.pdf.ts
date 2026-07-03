@@ -85,9 +85,7 @@ export const GET: APIRoute = async ({ params, url }) => {
     });
   } catch (err) {
     console.error("one-pager PDF render failed:", err);
-    // TEMP staging diagnostics — revert before production.
-    const msg = err instanceof Error ? `${err.message}\n\n${err.stack}` : String(err);
-    return new Response(`PDF generation failed:\n${msg}`, { status: 500 });
+    return new Response("PDF generation failed", { status: 500 });
   } finally {
     await browser?.close();
   }
