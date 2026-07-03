@@ -66,18 +66,17 @@ if (school.mark) {
       <div class="op-canvas" style={canvasStyle}>
         <!-- ===================== HERO ===================== -->
         <section class="op-hero">
-          <div class="op-hero-yellow" aria-hidden="true"></div>
           {school.avatar && (
             <div class="op-watermark" aria-hidden="true">
               <img src={school.avatar} alt="" />
             </div>
           )}
-          <div class="op-hero-dark" aria-hidden="true"></div>
+          <div class="op-hero-dots" aria-hidden="true"></div>
 
           <div class="op-hero-row">
             <!-- Heading & description -->
             <div class="op-hero-copy">
-              <img src="/assets/xtrapoint-logo-gradient-white.svg" alt={brand.nameSpaced} class="op-xplogo" />
+              <img src="/assets/xtrapoint-logo-solid-white.svg" alt={brand.nameSpaced} class="op-xplogo" />
               <div class="op-intro">
                 <h1 class="op-h1">Turn everyday purchases into recurring support for your team.</h1>
                 <p class="op-lede">
@@ -204,6 +203,7 @@ if (school.mark) {
 
         <!-- ===================== FOOTER ===================== -->
         <footer class="op-footer">
+          <div class="op-footer-dots" aria-hidden="true"></div>
           <div class="op-footer-left">
             <p class="op-cta-h">Ready to launch your program's giving platform?</p>
             <p class="op-cta-p">Partnering is simple: we provide the platform, the toolkit, and the coaching — your campus brings the energy. Let's design a kickoff for your next season.</p>
@@ -282,28 +282,29 @@ if (school.mark) {
     position: relative;
     overflow: hidden;
     padding: 16px 20px;
-    background: var(--color-lime);
+    /* Single OPAQUE gradient — no transparent stops. Chromium exports gradients
+       that fade to/from transparent as PDF soft-masks, which some viewers
+       (Preview/Quartz, PDFium) drop; opaque stops render everywhere. */
+    background: linear-gradient(to right, var(--op-deep) 0%, var(--op-deep) 16%, var(--color-lime) 58%, var(--color-accent-2) 100%);
     border-radius: 0 0 16px 16px;
   }
-  .op-hero-yellow {
-    position: absolute; inset: 0;
-    background: linear-gradient(to right, rgba(255,255,255,0) 38%, var(--color-accent-2) 100%);
+  /* Subtle dot texture (like the site's DotField), tiled as a background image. */
+  .op-hero-dots {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background-image: radial-gradient(rgba(255,255,255,0.11) 0.9px, transparent 0.9px);
+    background-size: 13px 13px;
   }
   .op-watermark {
     position: absolute; left: 300px; top: 50%; transform: translateY(-50%);
-    width: 282px; height: 282px; opacity: 0.25; pointer-events: none;
+    width: 282px; height: 282px; opacity: 0.22; z-index: 1; pointer-events: none;
   }
   .op-watermark img { width: 100%; height: 100%; object-fit: contain; }
-  .op-hero-dark {
-    position: absolute; inset: 0;
-    background: linear-gradient(to right, var(--op-deep) 16%, rgba(0,0,0,0) 68%);
-  }
   .op-hero-row {
     position: relative; z-index: 2;
     display: flex; gap: 16px; align-items: stretch;
   }
   .op-hero-copy { width: 332px; flex-shrink: 0; padding-right: 14px; display: flex; flex-direction: column; gap: 14px; }
-  .op-xplogo { height: 30px; width: auto; }
+  .op-xplogo { height: 30px; width: auto; align-self: flex-start; }
   .op-intro { display: flex; flex-direction: column; gap: 8px; }
   .op-h1 {
     font-weight: 700; font-size: 24px; line-height: 1.0;
@@ -322,7 +323,6 @@ if (school.mark) {
   .op-graphic { flex: 1 0 0; min-width: 0; position: relative; display: flex; flex-direction: column; align-items: flex-end; gap: 14px; }
   .op-lockup { display: block; }
   .op-lockup img { height: 32px; width: auto; display: block; }
-  .op-lockup--dark img { filter: brightness(0); }              /* mono white logo → dark on the yellow */
   .op-lockup--badge { background: #fff; border-radius: 6px; padding: 4px 7px; }
   .op-lockup-text { font-weight: 800; font-size: 18px; color: var(--op-deep); }
 
@@ -335,7 +335,6 @@ if (school.mark) {
     transform: rotate(-4deg); transform-origin: top center;
     background: #fff; border: 3px solid #000; border-radius: 14px;
     overflow: hidden; display: flex; flex-direction: column;
-    box-shadow: -6px 8px 14px rgba(0,0,0,0.1), 4px -2px 8px rgba(0,0,0,0.06);
   }
   .op-phone-island { position: absolute; top: 6px; left: 50%; transform: translateX(-50%); width: 40px; height: 11px; border-radius: 6px; background: #000; z-index: 3; }
   .op-phone-status { position: absolute; top: 0; left: 0; right: 0; height: 24px; display: flex; align-items: center; justify-content: space-between; padding: 0 9px; z-index: 2; }
@@ -372,8 +371,7 @@ if (school.mark) {
   .op-chip {
     position: absolute; z-index: 4;
     display: flex; gap: 6px; align-items: center;
-    background: #fff; border-radius: 6px; padding: 6px 9px;
-    box-shadow: -6px 8px 12px rgba(0,0,0,0.08), -1px 2px 4px rgba(0,0,0,0.06);
+    background: #fff; border: 0.5px solid #e5e7eb; border-radius: 6px; padding: 6px 9px;
   }
   .op-chip--roundup { top: 30px; right: 4px; }
   .op-chip--recurring { top: 128px; left: 52px; }
@@ -427,13 +425,18 @@ if (school.mark) {
     position: relative; overflow: hidden;
     display: flex; gap: 20px; align-items: flex-start; justify-content: center;
     padding: 16px 20px;
-    background: linear-gradient(rgba(0,0,0,0.51), rgba(0,0,0,0.51)), var(--color-lime);
+    background: var(--op-deep);
   }
-  .op-footer-left { width: 379px; flex-shrink: 0; display: flex; flex-direction: column; gap: 4px; }
+  .op-footer-dots {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background-image: radial-gradient(rgba(255,255,255,0.06) 0.9px, transparent 0.9px);
+    background-size: 13px 13px;
+  }
+  .op-footer-left { position: relative; z-index: 1; width: 379px; flex-shrink: 0; display: flex; flex-direction: column; gap: 4px; }
   .op-cta-h { font-weight: 800; font-size: 16px; line-height: 1.15; letter-spacing: 0.16px; color: #fff; }
   .op-cta-p { font-weight: 400; font-size: 9px; line-height: 1.5; color: #fff; }
   .op-copyright { font-weight: 400; font-size: 7px; color: rgba(255,255,255,0.75); margin-top: 4px; }
-  .op-footer-right { flex: 1 0 0; min-width: 0; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 12px; }
+  .op-footer-right { position: relative; z-index: 1; flex: 1 0 0; min-width: 0; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 12px; }
   .op-cta-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--color-accent-2); color: var(--op-deep); font-weight: 600; font-size: 11px; padding: 8px 12px; border-radius: 7px; }
   .op-cta-btn svg { width: 16px; height: 16px; }
   .op-cta-mail { display: inline-flex; align-items: center; gap: 6px; color: #fff; font-weight: 700; font-size: 12px; text-decoration: underline; text-underline-offset: 2px; }
