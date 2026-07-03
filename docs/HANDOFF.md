@@ -182,6 +182,31 @@ sites — no code/git. (Content pipeline; code still ships via staging→main me
   webhook filter to include `legalPage` (or trigger a deploy manually). See
   "Publish → rebuild" above.
 
+## 👁 Draft preview (school pages) — secret-gated, on-demand
+
+Editors can preview a school's **unpublished draft** on the real page before
+publishing (Option A — no visual-editing overlays yet).
+
+- **Studio:** open a School doc → **"Open preview"** action (⋯ menu) → opens the
+  live draft in a new tab. Added via `studio/previewAction.ts` + `document.actions`
+  in `sanity.config.ts`.
+- **Route:** `src/pages/preview/schools/[slug].astro` (`prerender = false`, a Vercel
+  function) renders the shared `SchoolLanding.astro` from the **draft** via
+  `getSchoolDraft()` (a `previewClient` with the `previewDrafts` perspective in
+  `schoolsSource.ts`). The static donor page renders the *same* component from
+  published data, so preview == production fidelity.
+- **Gating:** requires `?secret=<PREVIEW_SECRET>` or it 401s; also sends
+  `X-Robots-Tag: noindex`. **Security is obscurity-level** — the Studio bundles the
+  secret (see note in `previewAction.ts`); fine for draft school pages, upgrade to
+  `@sanity/preview-url-secret` for true per-click gating.
+- **Env (all three must share the same secret):** site `PREVIEW_SECRET` (`.env` +
+  **Vercel Production + Preview**) · Studio `SANITY_STUDIO_PREVIEW_SECRET` +
+  `SANITY_STUDIO_PREVIEW_ORIGIN` (`studio/.env`, baked in at `sanity deploy`).
+  Origin currently points at **staging** for pre-publish review; repoint to prod
+  if desired.
+- Only the **donor** page has preview so far; `/ambassadors` is an easy follow-on
+  (same pattern — extract its body + a second preview route).
+
 ## Forms (Web3Forms) — unchanged
 
 All forms post to Web3Forms (`PUBLIC_WEB3FORMS_KEY` in `.env` + Vercel) →
@@ -196,6 +221,7 @@ Staging/preview de-indexed, production indexable (keyed on `VERCEL_ENV`).
 | Var | Where | Purpose |
 | --- | --- | --- |
 | `SANITY_READ_TOKEN` | Vercel Prod+Preview **and** local `.env` | Read school content at build + OG runtime (required) |
+| `PREVIEW_SECRET` | Vercel Prod+Preview **and** local `.env` | Gates the draft-preview route; must match Studio's `SANITY_STUDIO_PREVIEW_SECRET` |
 | `DATAGOV_API_KEY` | local `.env` only (optional) | Auto-seed city/state via College Scorecard |
 | `PUBLIC_WEB3FORMS_KEY` | `.env` + Vercel | Contact/waitlist form delivery |
 

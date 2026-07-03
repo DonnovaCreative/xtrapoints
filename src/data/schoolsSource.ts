@@ -126,6 +126,26 @@ export async function getSchool(slug: string): Promise<School | undefined> {
   return doc ? toSchool(doc) : undefined;
 }
 
+// -----------------------------------------------------------------------------
+// DRAFT PREVIEW — used only by the secret-gated on-demand preview route
+// (src/pages/preview/schools/[slug].astro). The `previewDrafts` perspective
+// overlays drafts on published content and returns the draft version (with a
+// normalized _id), so editors can see unpublished edits before publishing.
+// Never used by the static build, which reads published content only.
+// -----------------------------------------------------------------------------
+const previewClient = sanityClient.withConfig({ perspective: "previewDrafts" });
+
+/** One school by slug, preferring its unpublished draft. undefined if none. */
+export async function getSchoolDraft(
+  slug: string,
+): Promise<School | undefined> {
+  const doc = await previewClient.fetch<SchoolDoc | null>(
+    `*[_type == "school" && slug.current == $slug]${PROJECTION}[0]`,
+    { slug },
+  );
+  return doc ? toSchool(doc) : undefined;
+}
+
 /** Site-wide settings singleton (shared across all school pages). */
 export interface SiteSettings {
   legalCopy?: string;

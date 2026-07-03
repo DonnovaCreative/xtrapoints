@@ -1,0 +1,41 @@
+---
+// On-demand DRAFT preview of a co-branded school donor page. Renders the same
+// SchoolLanding component as the live route, but from the school's unpublished
+// draft — so editors can review changes in the Studio before publishing.
+//
+// Secret-gated: requires ?secret=<PREVIEW_SECRET> (server-only env var, set on
+// Vercel + in .env). Without a valid secret it 401s, so unpublished content
+// (trademarked logos, unreviewed copy) is never publicly reachable. Also served
+// noindex. This route is server-rendered (not part of the static build).
+export const prerender = false;
+
+import SchoolLanding from "@/components/school/SchoolLanding.astro";
+import { getSchoolDraft, getSiteSettings } from "@/data/schoolsSource";
+
+// Preview surfaces must never be indexed, even on production.
+Astro.response.headers.set("X-Robots-Tag", "noindex, nofollow");
+
+const expected = process.env.PREVIEW_SECRET ?? import.meta.env.PREVIEW_SECRET;
+const provided = Astro.url.searchParams.get("secret");
+
+if (!expected || provided !== expected) {
+  return new Response(
+    "Unauthorized — a valid preview secret is required. Open this page from the “Open preview” button in the Studio.",
+    { status: 401, headers: { "content-type": "text/plain; charset=utf-8" } },
+  );
+}
+
+const { slug } = Astro.params;
+const school = slug ? await getSchoolDraft(slug) : undefined;
+
+if (!school) {
+  return new Response(
+    `No school found for “${slug}”. It may not exist yet, or has no draft or published version.`,
+    { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } },
+  );
+}
+
+const settings = await getSiteSettings();
+---
+
+<SchoolLanding school={school} settings={settings} />

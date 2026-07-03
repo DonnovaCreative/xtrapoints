@@ -33,7 +33,14 @@ export default defineConfig({
 
   // Keep the co-branded sales one-pagers (print/PDF collateral) out of the
   // sitemap — they're noindex sell sheets, not landing pages.
-  integrations: [react(), sitemap({ filter: (page) => !page.includes("/one-pager") })],
+  integrations: [
+    react(),
+    sitemap({
+      // Exclude noindex collateral: the print/PDF one-pagers and the secret-gated
+      // draft-preview routes.
+      filter: (page) => !page.includes("/one-pager") && !page.includes("/preview/"),
+    }),
+  ],
   // maxDuration covers the one-pager PDF route's Chromium cold-start + render
   // (src/pages/schools/[school]/one-pager.pdf.ts).
   adapter: vercel({ includeFiles: ogIncludeFiles, maxDuration: 60 }),

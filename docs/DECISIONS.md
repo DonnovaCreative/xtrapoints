@@ -4,6 +4,42 @@ Short log of non-obvious engineering decisions. Newest first.
 
 ---
 
+## 2026-07-03 — Draft preview for school pages (on-demand SSR, not a rebuild)
+
+**Context:** Editors wanted a Contentful-style "see it before publishing." The
+site is `output: 'static'`, so published content is baked at build time and drafts
+render nowhere.
+
+**Decision (Option A — preview URL + Studio button, no visual-editing overlays):**
+- Extract the donor page body into `SchoolLanding.astro` (shared, prop-driven).
+  The static route renders it from published data; a new **on-demand** route
+  `src/pages/preview/schools/[slug].astro` (`prerender = false`) renders the *same*
+  component from the **draft** (`getSchoolDraft` → a `previewClient` with the
+  `previewDrafts` perspective). Same component = preview matches production exactly.
+- A Studio document action (`previewAction.ts`) opens the preview URL for the
+  current doc.
+
+**Why not the full Presentation tool (Option B):** visual editing needs a viewer
+token, stega-encoded content, and the visual-editing overlay integration — much
+heavier. Option A delivers the core "preview before publish" now; B can layer on
+later inside the same route.
+
+**Non-obvious gotchas / decisions:**
+- **Refactor safety:** extracting `SchoolLanding` was verified byte-identical
+  against the pre-refactor built HTML for a sample school before shipping.
+- **Secret gating is obscurity-level.** The Studio is a public client bundle, so
+  any `SANITY_STUDIO_*` secret it holds is extractable. Acceptable for draft school
+  pages (client logos + generic copy); the route still 401s without the secret and
+  sends `noindex`. Upgrade path: `@sanity/preview-url-secret` (per-click,
+  dataset-verified) for true gating — needed before previewing anything sensitive.
+- **Three env vars must share one value:** site `PREVIEW_SECRET` (Vercel + .env)
+  and Studio `SANITY_STUDIO_PREVIEW_SECRET`. Studio origin points at staging for
+  pre-publish review.
+- Preview routes are excluded from the sitemap (astro.config filter) alongside the
+  one-pagers.
+
+---
+
 ## 2026-07-03 — Fixed overlay header: custom config-driven shell, not shadcn
 
 **Context:** The header was `position: relative` with a solid navy bar on every

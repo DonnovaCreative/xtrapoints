@@ -2,6 +2,7 @@ import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
 import { visionTool } from "@sanity/vision";
 import { schemaTypes } from "./schemas";
+import { openPreviewAction } from "./previewAction";
 
 export default defineConfig({
   name: "default",
@@ -33,12 +34,15 @@ export default defineConfig({
     visionTool(),
   ],
 
-  // Keep the singleton out of the global "create new" menu.
   document: {
+    // Keep the singleton out of the global "create new" menu.
     newDocumentOptions: (prev, { creationContext }) =>
       creationContext.type === "global"
         ? prev.filter((t) => t.templateId !== "siteSettings")
         : prev,
+    // Add "Open preview" to school documents (draft preview on the live site).
+    actions: (prev, { schemaType }) =>
+      schemaType === "school" ? [...prev, openPreviewAction] : prev,
   },
 
   schema: {

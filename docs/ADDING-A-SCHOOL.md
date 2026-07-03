@@ -28,7 +28,9 @@ For one-off additions by anyone, technical or not:
 1. Go to **https://xtrapoint.sanity.studio** and sign in.
 2. **School → Create new**, fill the fields (below), upload the logo + any
    photos, and pick the two brand colors.
-3. **Publish.** Within seconds the webhook rebuilds staging + production, and the
+3. **Preview before you publish:** use the **"Open preview"** action (the ⋯ menu
+   on the document) to see the draft rendered on the real donor page in a new tab.
+4. **Publish.** Within seconds the webhook rebuilds staging + production, and the
    two pages + share image go live.
 
 ### 2. Bulk import — many at once (terminal)
