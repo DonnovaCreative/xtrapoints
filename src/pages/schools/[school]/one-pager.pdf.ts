@@ -20,6 +20,14 @@ async function launchBrowser() {
   const puppeteer = (await import("puppeteer-core")).default;
 
   if (isServerless) {
+    // @sparticuz/chromium detects "am I on Lambda?" from AWS_EXECUTION_ENV /
+    // AWS_LAMBDA_JS_RUNTIME to decide whether to extract its bundled glibc libs
+    // (libnss3, etc.) and set LD_LIBRARY_PATH. Vercel runs functions on Lambda
+    // but does NOT set those vars, so without this the libs never extract and
+    // Chromium dies with "libnss3.so: cannot open shared object file". Vercel's
+    // Node 20/22 functions run on Amazon Linux 2023 — opt into that lib set.
+    // Must be set BEFORE the import (the detection runs at module-eval time).
+    process.env.AWS_LAMBDA_JS_RUNTIME ||= "nodejs20.x";
     const chromium = (await import("@sparticuz/chromium")).default;
     return puppeteer.launch({
       args: chromium.args,
