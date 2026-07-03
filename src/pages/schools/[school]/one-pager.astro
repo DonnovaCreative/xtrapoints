@@ -32,6 +32,23 @@ const t = school.theme;
 const deep = darken(t.primary, 0.68); // the dark-green "#002e18" role
 const canvasStyle = schoolThemeVars(t) + `--op-deep:${deep};`;
 
+// Dot texture (matches the supplied Dot grid.svg: r=0.375, 7.75px pitch).
+// Rendered as INLINE VECTOR circles rather than a CSS gradient or <img>, so
+// Chromium keeps it crisp in the PDF instead of rasterizing → blurring it.
+const DOT_R = 0.375;
+const DOT_GAP = 7.75;
+const dotGrid = (w: number, h: number): string => {
+  let s = "";
+  for (let y = DOT_R; y <= h; y += DOT_GAP) {
+    for (let x = DOT_R; x <= w; x += DOT_GAP) {
+      s += `<circle cx="${+x.toFixed(3)}" cy="${+y.toFixed(3)}" r="${DOT_R}"/>`;
+    }
+  }
+  return s;
+};
+const heroDots = dotGrid(612, 260);
+const footerDots = dotGrid(612, 130);
+
 // The phone-header mark is tinted WHITE via a CSS mask. Browsers won't apply a
 // cross-origin mask image (marks live on the Sanity CDN), so fetch the SVG at
 // build and inline it as a same-origin data URI (same trick as SchoolPhone).
@@ -71,7 +88,7 @@ if (school.mark) {
               <img src={school.avatar} alt="" />
             </div>
           )}
-          <div class="op-hero-dots" aria-hidden="true"></div>
+          <svg class="op-hero-dots" viewBox="0 0 612 260" width="612" height="260" fill="#fff" preserveAspectRatio="xMinYMin slice" aria-hidden="true" set:html={heroDots}></svg>
 
           <div class="op-hero-row">
             <!-- Heading & description -->
@@ -203,7 +220,7 @@ if (school.mark) {
 
         <!-- ===================== FOOTER ===================== -->
         <footer class="op-footer">
-          <div class="op-footer-dots" aria-hidden="true"></div>
+          <svg class="op-footer-dots" viewBox="0 0 612 130" width="612" height="130" fill="#fff" preserveAspectRatio="xMinYMin slice" aria-hidden="true" set:html={footerDots}></svg>
           <div class="op-footer-left">
             <p class="op-cta-h">Ready to launch your program's giving platform?</p>
             <p class="op-cta-p">Partnering is simple: we provide the platform, the toolkit, and the coaching — your campus brings the energy. Let's design a kickoff for your next season.</p>
@@ -288,11 +305,12 @@ if (school.mark) {
     background: linear-gradient(to right, var(--op-deep) 0%, var(--op-deep) 16%, var(--color-lime) 58%, var(--color-accent-2) 100%);
     border-radius: 0 0 16px 16px;
   }
-  /* Subtle dot texture (like the site's DotField), tiled as a background image. */
+  /* Subtle dot texture — inline vector (crisp in PDF, no rasterization).
+     Kept fully opaque: element-level opacity would re-introduce the soft-mask
+     that some PDF viewers drop. Subtlety comes from the tiny dot size. */
   .op-hero-dots {
-    position: absolute; inset: 0; z-index: 0; pointer-events: none;
-    background-image: radial-gradient(rgba(255,255,255,0.11) 0.9px, transparent 0.9px);
-    background-size: 13px 13px;
+    position: absolute; top: 0; left: 0; width: 612px; height: 260px;
+    z-index: 0; pointer-events: none;
   }
   .op-watermark {
     position: absolute; left: 300px; top: 50%; transform: translateY(-50%);
@@ -428,9 +446,8 @@ if (school.mark) {
     background: var(--op-deep);
   }
   .op-footer-dots {
-    position: absolute; inset: 0; z-index: 0; pointer-events: none;
-    background-image: radial-gradient(rgba(255,255,255,0.06) 0.9px, transparent 0.9px);
-    background-size: 13px 13px;
+    position: absolute; top: 0; left: 0; width: 612px; height: 130px;
+    z-index: 0; pointer-events: none;
   }
   .op-footer-left { position: relative; z-index: 1; width: 379px; flex-shrink: 0; display: flex; flex-direction: column; gap: 4px; }
   .op-cta-h { font-weight: 800; font-size: 16px; line-height: 1.15; letter-spacing: 0.16px; color: #fff; }
