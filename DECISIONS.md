@@ -19,8 +19,15 @@ Stripe-guides-style sticky table of contents and cross-links between the pages.
 - **Body is rich text (Portable Text)**, rendered to HTML at build with
   `@portabletext/to-html`. The sticky **TOC is derived from the H2/H3 headings**,
   not authored separately.
-- **Scrollspy is plain inline JS** (IntersectionObserver + smooth anchor scroll),
-  matching the site's no-island, progressive-enhancement pattern — no React.
+- **Scrollspy is plain inline JS** (rAF-throttled scroll → "last heading past the
+  top line" + smooth anchor scroll), matching the site's no-island, progressive-
+  enhancement pattern — no React.
+- **Design is editorial/quiet (à la stripe.com/legal), not the athletic hero.**
+  No colored hero; light page, Space Mono eyebrow + Inter title, a numbered section
+  outline shared between the sidebar and the body H2s (CSS `counter`), cross-doc
+  links live in the sidebar (mobile: in the header) — deliberately restrained, with
+  lime used only as an accent. Inter (not Anton) for the title is intentional: legal
+  copy is a calmer register than the marketing pages.
 - Content seeded via `studio/scripts/seed-legal.ts` (`npm run seed:legal`), the
   same `sanity exec --with-user-token` pattern as the school scripts.
 
@@ -34,6 +41,11 @@ Stripe-guides-style sticky table of contents and cross-links between the pages.
   injected via `set:html`, so prose rules target it as `.legal-body :global(...)`
   (the `.legal-body` wrapper carries the scope; `:global()` matches its injected
   descendants).
+- **Exclude drafts in GROQ.** The build authenticates with `SANITY_READ_TOKEN`, so
+  queries return `drafts.*` docs (created whenever an editor opens a doc in the
+  Studio) alongside the published version → the page rendered a doc twice. Fixed
+  with `!(_id in path("drafts.**"))` in `legalSource.ts`. ⚠ `schoolsSource.ts` has
+  the same latent bug — apply the same guard there.
 - **Entity framing:** XtraPoint is a **DBA of LaCore Payments Technologies, Inc.**
   (as is "LPT"). The seed keeps LaCore as the binding legal entity and uses
   "XtraPoint" as the operating/defined term. **This is seed content — legal review

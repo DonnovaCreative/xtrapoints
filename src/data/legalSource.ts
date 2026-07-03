@@ -12,7 +12,10 @@ interface LegalDoc {
   body: LegalPage["body"] | null;
 }
 
-const VALID = `_type == "legalPage" && defined(slug.current) && defined(body)`;
+// Exclude drafts — the build authenticates with a token, so unpublished drafts
+// (`drafts.legalPage.*`, created whenever an editor opens a doc in the Studio)
+// would otherwise be returned alongside the published version and render twice.
+const VALID = `_type == "legalPage" && !(_id in path("drafts.**")) && defined(slug.current) && defined(body)`;
 const PROJECTION = `{
   "slug": slug.current,
   title, navLabel, lastUpdated, body
