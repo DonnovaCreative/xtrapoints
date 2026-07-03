@@ -126,13 +126,16 @@ automatically from the same Sanity data — no manual design per school.
   a headless-Chromium serverless function that prints the page above, then
   CDN-cached (same on-demand pattern as the OG image).
 
-It pulls the school **logo, brand colors, mascot, and fund** from Sanity, so the
-only per-school work is what you already do to add the school. Colors follow the
-site rule — **primary** drives the CTA / checks / editorial accents, **secondary**
-drives the atmospheric layer (hero gradient end, glows, the giant faint logo
-watermark). Single-color schools still look right (secondary falls back to a
-primary tint). The copy is static (identical for every school); to change it,
-edit [`src/pages/schools/[school]/one-pager.astro`](src/pages/schools/[school]/one-pager.astro).
+It's built 1:1 from the Figma source and pulls the school **logo, brand colors,
+mascot, fund, and avatar** from Sanity, so the only per-school work is what you
+already do to add the school. Color roles: **primary** = eyebrows / checks /
+editorial accent / phone header; **secondary** = the CTA button + chevron bullets
++ hero gradient end; a darkened primary = the dark-green sections (footer, phone
+"add card"). The big faint hero **watermark uses the school's full-color avatar**
+(the "App avatar" image) — set one for it to appear. Single-color schools still
+look right (secondary falls back to a lighter primary tint). Type is Inter Display
++ Space Mono. The copy is static (identical for every school); to change layout or
+copy, edit [`src/pages/schools/[school]/one-pager.astro`](src/pages/schools/[school]/one-pager.astro).
 
 > The layout is tuned to fit exactly one Letter page. If you add/lengthen copy,
 > re-check `/schools/<slug>/one-pager` fits on one sheet (the CTA footer should

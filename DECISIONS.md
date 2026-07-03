@@ -22,11 +22,20 @@ CDN-cached like the OG image. A new school gets its sell-sheet for free.
 - *Hosted HTML→PDF API* — viable fallback, avoids bundling Chromium, but adds an
   external dependency + per-render cost. Chose self-hosted Chromium (no new SaaS).
 
-**Two non-obvious gotchas:**
-- **Color mapping:** the one-pager follows the site rule (**primary** = CTA /
-  checks / editorial; **secondary** = atmospheric gradient/glow/watermark) rather
-  than copying Oregon's hand-picked *yellow* CTA. This keeps the CTA readable for
-  single-color schools (where secondary is only a pale tint of primary).
+Built 1:1 from the Figma source (file `W4w45f3JV7E4AFSiFSymdO`, node `1:118`):
+authored in Figma's native **612×792** coordinate space and scaled (×1.3334) to
+fill the 8.5×11in sheet, so px values map straight from Figma. Type is
+**Inter Display** (self-hosted in `/public/fonts`, from rsms/inter) + **Space Mono**
+— NOT the site's Anton/Inter stack. The XtraPoint mark is the gradient-white
+lockup (`/public/assets/xtrapoint-logo-gradient-white.svg`).
+
+**Non-obvious gotchas:**
+- **Color mapping (per the Figma):** **primary** = eyebrows / checks / editorial
+  accent / phone header; **secondary** = the CTA button + chevron bullets + hero
+  gradient end + progress bar; **darken(primary, .68)** = the dark-green role
+  (hero-left gradient, phone "add card", footer). The hero **watermark** is the
+  school's full-color **avatar**. Single-color schools still work — secondary
+  falls back to a primary tint (a paler CTA, but readable).
 - **`libnss3.so` on Vercel:** `@sparticuz/chromium` only extracts its bundled
   glibc libs + sets `LD_LIBRARY_PATH` when it detects Lambda via `AWS_EXECUTION_ENV`
   / `AWS_LAMBDA_JS_RUNTIME`. Vercel doesn't set those, so Chromium failed with
