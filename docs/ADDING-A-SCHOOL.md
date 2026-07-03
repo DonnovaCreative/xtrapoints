@@ -11,8 +11,8 @@ and an auto-generated **co-branded sales one-pager** (see below).
 **School content lives in Sanity**, not in the repo. Editors manage it in the
 Studio, and publishing triggers an automatic site rebuild (Sanity webhook →
 Vercel Deploy Hook). The Astro templates read it at build time via
-[`src/data/schoolsSource.ts`](src/data/schoolsSource.ts) (GROQ) and map it onto
-the `School` shape in [`src/data/schools.ts`](src/data/schools.ts).
+[`src/data/schoolsSource.ts`](../src/data/schoolsSource.ts) (GROQ) and map it onto
+the `School` shape in [`src/data/schools.ts`](../src/data/schools.ts).
 
 - **Studio (editor):** https://xtrapoint.sanity.studio
 - **Project:** `xjhhxbqk` / dataset `production`
@@ -42,7 +42,7 @@ IMPORT_FILE=import/schools.json npm run import
 IMPORT_FILE=import/schools.json PUBLISH=1 npm run import
 ```
 
-The manifest is a JSON array; see [`studio/import/example.json`](studio/import/example.json).
+The manifest is a JSON array; see [`studio/import/example.json`](../studio/import/example.json).
 Image fields (`logo`, `mark`, `avatar`, `photos.*`) may be **local file paths**
 (resolved from where you run the command) **or remote URLs**. `slug`, `short`,
 and `fund` are optional — derived from `name`/`mascot` if omitted. Requires only
@@ -135,7 +135,7 @@ editorial accent / phone header; **secondary** = the CTA button + chevron bullet
 (the "App avatar" image) — set one for it to appear. Single-color schools still
 look right (secondary falls back to a lighter primary tint). Type is Inter Display
 + Space Mono. The copy is static (identical for every school); to change layout or
-copy, edit [`src/pages/schools/[school]/one-pager.astro`](src/pages/schools/[school]/one-pager.astro).
+copy, edit [`src/pages/schools/[school]/one-pager.astro`](../src/pages/schools/[school]/one-pager.astro).
 
 > The layout is tuned to fit exactly one Letter page. If you add/lengthen copy,
 > re-check `/schools/<slug>/one-pager` fits on one sheet (the CTA footer should

@@ -1,12 +1,13 @@
 # Session handoff — XtraPoint marketing site
 
 Pick-up notes for continuing in a fresh chat. Start a new chat **in this project**
-and say: _"Read HANDOFF.md and README.md, then let's continue."_
+and say: _"Read docs/HANDOFF.md and README.md, then let's continue."_
 
-> Reference docs: [README.md](README.md) (run/build, brand toggle, contact form),
+> Reference docs: [README.md](../README.md) (run/build, brand toggle, contact form),
 > [ADDING-A-SCHOOL.md](ADDING-A-SCHOOL.md) (the co-branded school pages + the 3
-> onboarding paths), [docs/deploys-and-indexing.md](docs/deploys-and-indexing.md)
-> (envs + SEO), [DECISIONS.md](DECISIONS.md) (why). This file is **current state**.
+> onboarding paths), [COMMANDS.md](COMMANDS.md) (everyday terminal commands),
+> [deploys-and-indexing.md](deploys-and-indexing.md) (envs + SEO),
+> [DECISIONS.md](DECISIONS.md) (why). This file is **current state**.
 
 _Last updated: 2026-07-03._
 
@@ -175,7 +176,7 @@ sites — no code/git. (Content pipeline; code still ships via staging→main me
 All forms post to Web3Forms (`PUBLIC_WEB3FORMS_KEY` in `.env` + Vercel) →
 `sales@xtrapoint.com`. hCaptcha on the full ContactForm; honeypot on WaitlistForm.
 
-## Environments & SEO — unchanged (see docs/deploys-and-indexing.md)
+## Environments & SEO — unchanged (see deploys-and-indexing.md)
 
 Staging/preview de-indexed, production indexable (keyed on `VERCEL_ENV`).
 

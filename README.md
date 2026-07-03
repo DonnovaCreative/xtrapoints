@@ -4,6 +4,18 @@ Fast, static marketing site for **XtraPoints**, rebuilt from the live Webflow pa
 (`lacore.webflow.io/xtra-points`) as a production Astro app. Two pages: a home
 landing page and a `/contact` "Get Started" page with a working form.
 
+## Documentation
+
+Deeper docs live in [`docs/`](docs):
+
+| Doc | What it covers |
+| --- | --- |
+| [docs/HANDOFF.md](docs/HANDOFF.md) | **Start here** — current state, git/deploy flow, gotchas |
+| [docs/COMMANDS.md](docs/COMMANDS.md) | Everyday terminal commands (dev, commit, deploy, Sanity) |
+| [docs/ADDING-A-SCHOOL.md](docs/ADDING-A-SCHOOL.md) | Adding co-branded school pages + editing legal pages |
+| [docs/deploys-and-indexing.md](docs/deploys-and-indexing.md) | Environments + search-engine indexing control |
+| [docs/DECISIONS.md](docs/DECISIONS.md) | Log of non-obvious engineering decisions (why) |
+
 ## Stack
 
 | Concern        | Choice                                              |

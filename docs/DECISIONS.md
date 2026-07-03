@@ -134,7 +134,7 @@ accidentally noindexed. The header rules never list production hosts.
 **Follow-up:** Enable Vercel **Deployment Protection** (password/SSO) on
 staging/preview — a dashboard toggle and the stronger fix for public access.
 
-See [docs/deploys-and-indexing.md](docs/deploys-and-indexing.md).
+See [deploys-and-indexing.md](deploys-and-indexing.md).
 
 ---
 
