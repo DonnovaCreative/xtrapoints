@@ -3,20 +3,16 @@
 // SchoolLanding component as the live route, but from the school's unpublished
 // draft — so editors can review changes in the Studio before publishing.
 //
-// Secret-gated: requires ?secret=<PREVIEW_SECRET> (server-only env var, set on
-// Vercel + in .env). Without a valid secret it 401s, so unpublished content
-// (trademarked logos, unreviewed copy) is never publicly reachable. Also served
-// noindex. This route is server-rendered (not part of the static build).
+// Secret-gated (?secret=<PREVIEW_SECRET>) + noindex. Server-rendered (not static).
+// Imports are dynamic + wrapped so any module-load/data error surfaces as readable
+// text (the route is secret-gated, so this is safe) instead of an opaque 500.
 export const prerender = false;
 
-import SchoolLanding from "@/components/school/SchoolLanding.astro";
-import { getSchoolDraft, getSiteSettings } from "@/data/schoolsSource";
-
-// Preview surfaces must never be indexed, even on production.
 Astro.response.headers.set("X-Robots-Tag", "noindex, nofollow");
 
 const expected = process.env.PREVIEW_SECRET ?? import.meta.env.PREVIEW_SECRET;
 const provided = Astro.url.searchParams.get("secret");
+const debug = Astro.url.searchParams.get("debug") === "1";
 
 if (!expected || provided !== expected) {
   return new Response(
@@ -26,17 +22,26 @@ if (!expected || provided !== expected) {
 }
 
 const { slug } = Astro.params;
-const debug = Astro.url.searchParams.get("debug") === "1";
 
-let school;
-let settings;
+let school: any;
+let settings: any;
+let SchoolLanding: any;
+let loadError: string | null = null;
+
 try {
-  school = slug ? await getSchoolDraft(slug) : undefined;
-  settings = await getSiteSettings();
+  const src = await import("@/data/schoolsSource");
+  school = slug ? await src.getSchoolDraft(slug) : undefined;
+  settings = await src.getSiteSettings();
+  SchoolLanding = (await import("@/components/school/SchoolLanding.astro")).default;
 } catch (err) {
-  // Secret-gated route, so surfacing the error here is safe and speeds debugging.
-  const msg = err instanceof Error ? `${err.name}: ${err.message}\n\n${err.stack ?? ""}` : String(err);
-  return new Response(`Preview data error:\n\n${msg}`, {
+  loadError =
+    err instanceof Error
+      ? `${err.name}: ${err.message}\n\n${err.stack ?? ""}`
+      : String(err);
+}
+
+if (loadError) {
+  return new Response(`Preview load error:\n\n${loadError}`, {
     status: 500,
     headers: { "content-type": "text/plain; charset=utf-8" },
   });
@@ -47,11 +52,14 @@ if (debug) {
     JSON.stringify(
       {
         slug,
-        hasPreviewSecret: Boolean(expected),
-        hasSanityToken: Boolean(process.env.SANITY_READ_TOKEN ?? import.meta.env.SANITY_READ_TOKEN),
         node: process.version,
+        hasPreviewSecret: Boolean(expected),
+        hasSanityToken: Boolean(
+          process.env.SANITY_READ_TOKEN ?? import.meta.env.SANITY_READ_TOKEN,
+        ),
         schoolFound: Boolean(school),
         schoolName: school?.name,
+        schoolLandingLoaded: Boolean(SchoolLanding),
       },
       null,
       2,
