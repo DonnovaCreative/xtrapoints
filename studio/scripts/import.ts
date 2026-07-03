@@ -20,8 +20,19 @@ interface Row {
   state?: string;
   primary: string;
   ink: string;
+  /** Optional second brand color for the two-tone atmospheric treatment. */
+  secondary?: string;
+  /** Text color ON the accent (defaults to ink; set white for mid/dark accents). */
   onAccent?: string;
+  /** Only for very bright accents whose derived on-white shade isn't dark enough. */
+  primaryDarkOverride?: string;
   logo?: string;
+  /** ON for a COLORED logo → white badge so it reads on the dark header. */
+  logoBadge?: boolean;
+  /** Use a white header bar instead of the dark one (for colored logos). */
+  whiteHeader?: boolean;
+  /** Header logo size preset. */
+  logoSize?: "sm" | "md" | "lg" | "xl";
   mark?: string;
   avatar?: string;
   photos?: Partial<
@@ -62,13 +73,20 @@ async function run() {
       ...(r.city ? { city: r.city } : {}),
       ...(r.state ? { state: r.state } : {}),
       ...(logo ? { logo } : {}),
+      ...(r.logoBadge ? { logoBadge: true } : {}),
+      ...(r.whiteHeader ? { whiteHeader: true } : {}),
+      ...(r.logoSize ? { logoSize: r.logoSize } : {}),
       ...(mark ? { mark } : {}),
       ...(avatar ? { avatar } : {}),
       ...(Object.keys(photos).length ? { photos } : {}),
       theme: {
         primary: color(r.primary),
         ink: color(r.ink),
+        ...(r.secondary ? { secondary: color(r.secondary) } : {}),
         ...(r.onAccent ? { onAccent: color(r.onAccent) } : {}),
+        ...(r.primaryDarkOverride
+          ? { primaryDarkOverride: color(r.primaryDarkOverride) }
+          : {}),
       },
     };
 

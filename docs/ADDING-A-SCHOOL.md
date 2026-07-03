@@ -44,9 +44,14 @@ IMPORT_FILE=import/schools.json PUBLISH=1 npm run import
 
 The manifest is a JSON array; see [`studio/import/example.json`](../studio/import/example.json).
 Image fields (`logo`, `mark`, `avatar`, `photos.*`) may be **local file paths**
-(resolved from where you run the command) **or remote URLs**. `slug`, `short`,
-and `fund` are optional — derived from `name`/`mascot` if omitted. Requires only
-your `sanity login` (no separate token).
+(resolved from where you run the command — absolute paths are safest) **or remote
+URLs**. `slug`, `short`, and `fund` are optional — derived from `name`/`mascot` if
+omitted. Requires only your `sanity login` (no separate token).
+
+Besides the basics, the importer maps the full theme + logo-display set:
+`secondary`, `onAccent`, `primaryDarkOverride`, and `logoBadge` / `whiteHeader` /
+`logoSize` — so a colored-logo school can be set to read on the header (badge or
+white bar) straight from the manifest, no per-school toggling in the Studio.
 
 ### 3. Auto-seed a college (terminal)
 

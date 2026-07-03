@@ -2,16 +2,30 @@
   {
     "name": "Example State University",
     "short": "Example State",
+    "slug": "example-state",
     "mascot": "Rockets",
     "fund": "Rocket Athletics Fund",
     "city": "Springfield",
     "state": "IL",
     "primary": "#0033a0",
+    "secondary": "#ffb81c",
     "ink": "#0a1a3f",
+    "onAccent": "#ffffff",
     "logo": "https://example.com/logo-white.svg",
+    "logoBadge": false,
+    "whiteHeader": false,
+    "logoSize": "md",
+    "avatar": "https://example.com/logo-fullcolor-square.png",
     "photos": {
       "team": "./assets/example/team.jpg",
       "celebrate": "./assets/example/celebrate.jpg"
     }
+  },
+  {
+    "name": "Minimal College",
+    "mascot": "Owls",
+    "primary": "#6d28d9",
+    "ink": "#1e1b3a",
+    "logo": "/absolute/path/to/minimal-white-logo.svg"
   }
 ]
