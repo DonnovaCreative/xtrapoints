@@ -11,9 +11,6 @@ const explore = [
   { label: "Student ambassadors", href: "/#ambassadors" },
 ];
 
-// XtraPoint is a LaCore Payments product — corporate/legal lives on lpt.io.
-// (Swap these once XtraPoint has its own terms/privacy pages.)
-const LPT = "https://www.lpt.io";
 const year = new Date().getFullYear();
 
 const headClass =
@@ -78,8 +75,8 @@ const linkClass =
         <span class="text-white/40">{brand.name} is a DBA of LaCore Payments Technologies.</span>
       </p>
       <div class="flex items-center gap-6">
-        <a href={`${LPT}/terms`} class={linkClass}>Terms</a>
-        <a href={`${LPT}/privacy-policy`} class={linkClass}>Privacy</a>
+        <a href="/terms" class={linkClass}>Terms</a>
+        <a href="/privacy-policy" class={linkClass}>Privacy</a>
         <a
           href="https://www.linkedin.com/company/lpt-io/"
           class="text-white/60 transition-colors hover:text-lime"

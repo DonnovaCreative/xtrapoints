@@ -12,7 +12,6 @@ export interface Props {
 }
 const { legalCopy } = Astro.props;
 
-const LPT = "https://www.lpt.io";
 const year = new Date().getFullYear();
 const linkClass = "text-sm text-white/70 transition-colors hover:text-lime";
 ---
@@ -46,8 +45,8 @@ const linkClass = "text-sm text-white/70 transition-colors hover:text-lime";
         <span class="text-white/40">{brand.name} is a DBA of LaCore Payments Technologies.</span>
       </p>
       <div class="flex items-center gap-6">
-        <a href={`${LPT}/terms`} class={linkClass}>Terms</a>
-        <a href={`${LPT}/privacy-policy`} class={linkClass}>Privacy</a>
+        <a href="/terms" class={linkClass}>Terms</a>
+        <a href="/privacy-policy" class={linkClass}>Privacy</a>
         <a
           href="https://www.linkedin.com/company/lpt-io/"
           class="text-white/60 transition-colors hover:text-lime"

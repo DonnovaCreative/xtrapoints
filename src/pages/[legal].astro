@@ -1,0 +1,263 @@
+---
+// Legal pages (Terms & Conditions, Privacy Policy, …). One dynamic root route,
+// one document per page in Sanity (doc type `legalPage`). Adding a legal doc in
+// the Studio makes its page + cross-links appear with no code change.
+//
+// Layout: a compact dark hero (brand-consistent) with cross-page quick-links,
+// then a two-column body — a sticky sidebar table of contents (scrollspy, like
+// stripe.com/guides) beside the rich-text article rendered from Portable Text.
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import { brand } from "@/config/brand";
+import { getLegalPages, getLegalPage } from "@/data/legalSource";
+import { renderLegalBody } from "@/data/legal";
+
+export async function getStaticPaths() {
+  const pages = await getLegalPages();
+  return pages.map((page) => ({
+    params: { legal: page.slug },
+    props: { page, all: pages },
+  }));
+}
+
+const { page, all } = Astro.props;
+const { html, toc } = renderLegalBody(page.body);
+
+const updated = page.lastUpdated
+  ? new Date(`${page.lastUpdated}T00:00:00`).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+  : null;
+
+const description = `${page.title} for ${brand.nameSpaced}.`;
+---
+
+<Layout title={`${page.title} · ${brand.name}`} description={description}>
+  <Header />
+  <main>
+    <!-- hero -->
+    <section class="relative overflow-hidden bg-ink">
+      <div class="dot-grid opacity-60"></div>
+      <div class="relative z-10 mx-auto max-w-7xl px-6 py-14 lg:px-10 lg:py-16">
+        <p class="font-mono text-xs uppercase tracking-[0.12em] text-lime">
+          Legal
+        </p>
+        <h1
+          class="font-display mt-3 text-[clamp(2.25rem,5vw,3.5rem)] uppercase leading-[0.95] tracking-tight text-white"
+        >
+          {page.title}
+        </h1>
+        {updated && (
+          <p class="mt-4 font-mono text-xs uppercase tracking-[0.08em] text-white/45">
+            Last updated {updated}
+          </p>
+        )}
+
+        <!-- cross-page quick links -->
+        {all.length > 1 && (
+          <nav class="mt-7 flex flex-wrap gap-2.5" aria-label="Legal pages">
+            {all.map((l) =>
+              l.slug === page.slug ? (
+                <span
+                  aria-current="page"
+                  class="rounded-full bg-lime px-4 py-1.5 text-sm font-medium text-ink"
+                >
+                  {l.navLabel}
+                </span>
+              ) : (
+                <a
+                  href={`/${l.slug}`}
+                  class="rounded-full border border-white/15 px-4 py-1.5 text-sm text-white/75 transition-colors hover:border-lime/60 hover:text-white"
+                >
+                  {l.navLabel}
+                </a>
+              ),
+            )}
+          </nav>
+        )}
+      </div>
+    </section>
+
+    <!-- body -->
+    <section class="bg-white">
+      <div
+        class="mx-auto grid max-w-7xl gap-10 px-6 py-14 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-16 lg:px-10 lg:py-20"
+      >
+        <!-- sticky TOC (desktop) -->
+        {toc.length > 0 && (
+          <aside class="hidden lg:block">
+            <nav
+              class="sticky top-24"
+              aria-label={`On this page: ${page.title}`}
+            >
+              <p
+                class="font-mono text-[0.6875rem] uppercase tracking-[0.12em] text-gray-400"
+              >
+                On this page
+              </p>
+              <ul class="mt-4 flex flex-col gap-1 border-l border-gray-200">
+                {toc.map((t) => (
+                  <li>
+                    <a
+                      href={`#${t.id}`}
+                      data-toc-link
+                      class:list={[
+                        "toc-link -ml-px block border-l-2 border-transparent py-1 text-sm leading-snug text-gray-500 transition-colors hover:text-ink",
+                        t.level === 2 ? "pl-4" : "pl-8 text-[0.8125rem]",
+                      ]}
+                    >
+                      {t.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </aside>
+        )}
+
+        <!-- article -->
+        <article class="legal-body min-w-0 max-w-3xl" set:html={html} />
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  /* Portable Text is injected via set:html, so target it with :global() under
+     the scoped .legal-body wrapper. Prose tuned to the brand tokens. */
+  .legal-body :global(h2),
+  .legal-body :global(h3) {
+    scroll-margin-top: 6rem; /* clears the top when jumping to an anchor */
+    color: var(--color-ink);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .legal-body :global(h2) {
+    margin-top: 2.75rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.5rem;
+    line-height: 1.2;
+  }
+  .legal-body :global(h2:first-child) {
+    margin-top: 0;
+  }
+  .legal-body :global(h3) {
+    margin-top: 1.75rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.125rem;
+    line-height: 1.3;
+  }
+  .legal-body :global(p) {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    color: var(--color-gray-600);
+    line-height: 1.75;
+  }
+  .legal-body :global(a) {
+    color: var(--color-lime-dark);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 0.15s ease;
+  }
+  .legal-body :global(a:hover) {
+    color: var(--color-ink);
+  }
+  .legal-body :global(strong) {
+    color: var(--color-gray-800);
+    font-weight: 600;
+  }
+  .legal-body :global(ul),
+  .legal-body :global(ol) {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+    color: var(--color-gray-600);
+    line-height: 1.75;
+  }
+  .legal-body :global(ul) {
+    list-style: disc;
+  }
+  .legal-body :global(ol) {
+    list-style: decimal;
+  }
+  .legal-body :global(li) {
+    margin: 0.25rem 0;
+  }
+  .legal-body :global(li::marker) {
+    color: var(--color-lime-dark);
+  }
+  .legal-body :global(blockquote) {
+    margin: 1.25rem 0;
+    border-left: 3px solid var(--color-gray-200);
+    padding-left: 1rem;
+    color: var(--color-gray-500);
+    font-style: italic;
+  }
+
+  .toc-link.is-active {
+    color: var(--color-lime-dark);
+    border-color: var(--color-lime);
+    font-weight: 500;
+  }
+</style>
+
+<!-- Scrollspy + smooth anchor scroll (like stripe.com/guides). No JS = plain
+     anchor links that still work; base content is never hidden. -->
+<script is:inline>
+  (() => {
+    const links = Array.from(document.querySelectorAll("[data-toc-link]"));
+    if (!links.length) return;
+    const linkById = new Map(
+      links.map((l) => [decodeURIComponent(l.hash.slice(1)), l]),
+    );
+    const headings = Array.from(
+      document.querySelectorAll(".legal-body h2, .legal-body h3"),
+    ).filter((h) => h.id && linkById.has(h.id));
+    if (!headings.length) return;
+
+    const reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    let current = null;
+    const setActive = (id) => {
+      if (id === current) return;
+      current = id;
+      links.forEach((l) => l.classList.remove("is-active"));
+      linkById.get(id)?.classList.add("is-active");
+    };
+
+    // Smooth-scroll on click; keep the URL hash in sync.
+    linkById.forEach((link, id) => {
+      link.addEventListener("click", (e) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        e.preventDefault();
+        history.replaceState(null, "", `#${id}`);
+        el.scrollIntoView({
+          behavior: reduce ? "auto" : "smooth",
+          block: "start",
+        });
+        setActive(id);
+      });
+    });
+
+    // Highlight the section in the top reading band as you scroll.
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) setActive(e.target.id);
+          }
+        },
+        { rootMargin: "-88px 0px -72% 0px", threshold: 0 },
+      );
+      headings.forEach((h) => io.observe(h));
+    }
+
+    setActive(headings[0].id);
+  })();
+</script>

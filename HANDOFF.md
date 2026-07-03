@@ -145,6 +145,31 @@ Sanity **publish webhooks** → **Vercel Deploy Hooks** (one for `staging`, one 
 `main`), filtered to `school` docs (drafts excluded). Publishing rebuilds both
 sites — no code/git. (Content pipeline; code still ships via staging→main merge.)
 
+## 📄 Legal pages (Terms & Privacy) — CMS-driven rich text
+
+`/terms` and `/privacy-policy` are driven by Sanity, same read path as schools.
+
+- **One doc type** `legalPage` (Studio → **Legal pages**): title, slug (= the
+  URL), short `navLabel`, `lastUpdated`, and a **Portable Text `body`**. One
+  **dynamic route** `src/pages/[legal].astro` renders all of them — add a doc,
+  get a page + cross-links, no code.
+- **Editing:** in the Studio, edit the `body` rich text; H2/H3 headings become the
+  sticky **table-of-contents** automatically (Stripe-guides scrollspy). Publishing
+  rebuilds the site (webhook — see below; note the webhook filter, next bullet).
+- **Data layer** — `src/data/legalSource.ts` (`getLegalPages()`/`getLegalPage()`),
+  `src/data/legal.ts` (`renderLegalBody()` → `{html, toc}` via
+  `@portabletext/to-html`; **coordinated heading-id pass** so TOC anchors match).
+- **Seed / re-seed** the two pages: `cd studio && PUBLISH=1 npm run seed:legal`
+  (`studio/scripts/seed-legal.ts`; omit `PUBLISH=1` for drafts). Content is
+  editable in the Studio afterward.
+- **⚠ Content is seeded, not legally reviewed** — see Open item #10. Copy is
+  LaCore's LPT text, adjusted so XtraPoint reads as a DBA of LaCore Payments
+  Technologies, Inc.; Department Contacts section was dropped per request.
+- **⚠ Publish webhook filter:** the Sanity→Vercel deploy hooks are filtered to
+  `school` docs. If publishing a `legalPage` edit should auto-rebuild, widen the
+  webhook filter to include `legalPage` (or trigger a deploy manually). See
+  "Publish → rebuild" above.
+
 ## Forms (Web3Forms) — unchanged
 
 All forms post to Web3Forms (`PUBLIC_WEB3FORMS_KEY` in `.env` + Vercel) →
@@ -176,7 +201,13 @@ Staging/preview de-indexed, production indexable (keyed on `VERCEL_ENV`).
    (inherent to Deploy Hooks; not fixed).
 5. **Ambassador waitlist inbox** — route to a dedicated Web3Forms key (not done).
 6. **Vercel Deployment Protection** on staging/preview (dashboard toggle).
-7. Homepage §06 stock photos (Pexels); Footer Terms/Privacy point to `lpt.io`.
+7. Homepage §06 stock photos (Pexels) still to replace. _(Footer Terms/Privacy
+   now point to the internal `/terms` + `/privacy-policy` pages — see below.)_
+10. **Legal pages content is seeded, not lawyered.** `/terms` + `/privacy-policy`
+    are live from Sanity, but the copy is LaCore's LPT text auto-adjusted (XtraPoint
+    as a DBA of LaCore Payments Technologies, Inc.). **Have counsel review it in the
+    Studio.** Specifically confirm: the contact email (`support@lacorepayments.com`,
+    the operating entity's inbox) and the Melissa, TX mailing address.
 8. **One-pager top-right lockup** renders `school.logo` in its natural color on the
    light/yellow hero (the `brightness(0)` filter was removed per design). A school
    whose only logo asset is **white/mono** (fine for the dark landing header) will

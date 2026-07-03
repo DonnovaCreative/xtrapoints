@@ -10,7 +10,8 @@
     "build": "sanity build",
     "deploy": "sanity deploy",
     "import": "sanity exec scripts/import.ts --with-user-token",
-    "seed:college": "sanity exec scripts/seed-college.ts --with-user-token"
+    "seed:college": "sanity exec scripts/seed-college.ts --with-user-token",
+    "seed:legal": "sanity exec scripts/seed-legal.ts --with-user-token"
   },
   "dependencies": {
     "@sanity/vision": "^3",

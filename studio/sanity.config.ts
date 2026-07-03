@@ -12,12 +12,13 @@ export default defineConfig({
 
   plugins: [
     structureTool({
-      // Schools as a list + Site settings as a single (singleton) document.
+      // Schools + Legal pages as lists, Site settings as a singleton document.
       structure: (S) =>
         S.list()
           .title("Content")
           .items([
             S.documentTypeListItem("school").title("Schools"),
+            S.documentTypeListItem("legalPage").title("Legal pages"),
             S.divider(),
             S.listItem()
               .title("Site settings")

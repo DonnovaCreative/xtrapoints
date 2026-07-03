@@ -4,6 +4,50 @@ Short log of non-obvious engineering decisions. Newest first.
 
 ---
 
+## 2026-07-03 — Legal pages (Terms / Privacy): CMS rich text + one dynamic route
+
+**Context:** The footers linked Terms/Privacy out to `lpt.io`. XtraPoint needs its
+own pages, built from LaCore's legal copy, editable by non-engineers, with a
+Stripe-guides-style sticky table of contents and cross-links between the pages.
+
+**Decision:**
+- **One Sanity doc type `legalPage`** (title, slug, `navLabel`, `lastUpdated`,
+  `body` as Portable Text) + **one dynamic root route** `src/pages/[legal].astro`
+  driven by `getStaticPaths()`. Adding a legal doc in the Studio (e.g. a Cookie
+  Policy) makes its page + the cross-page quick-links appear with **no code
+  change** — the slug *is* the URL (`terms` → `/terms`).
+- **Body is rich text (Portable Text)**, rendered to HTML at build with
+  `@portabletext/to-html`. The sticky **TOC is derived from the H2/H3 headings**,
+  not authored separately.
+- **Scrollspy is plain inline JS** (IntersectionObserver + smooth anchor scroll),
+  matching the site's no-island, progressive-enhancement pattern — no React.
+- Content seeded via `studio/scripts/seed-legal.ts` (`npm run seed:legal`), the
+  same `sanity exec --with-user-token` pattern as the school scripts.
+
+**Non-obvious gotchas:**
+- **Heading ids must match between the TOC and the rendered headings.**
+  `renderLegalBody()` (src/data/legal.ts) does a single coordinated pass: it
+  assigns deduped slug ids keyed by each block's `_key`, builds the TOC from them,
+  then the `to-html` heading serializer looks the id back up by `_key`. Don't
+  slugify twice independently — dedup counters would drift.
+- **Scoped `<style>` doesn't reach `set:html` content.** The Portable Text HTML is
+  injected via `set:html`, so prose rules target it as `.legal-body :global(...)`
+  (the `.legal-body` wrapper carries the scope; `:global()` matches its injected
+  descendants).
+- **Entity framing:** XtraPoint is a **DBA of LaCore Payments Technologies, Inc.**
+  (as is "LPT"). The seed keeps LaCore as the binding legal entity and uses
+  "XtraPoint" as the operating/defined term. **This is seed content — legal review
+  happens in the Studio.** Contact email left as `support@lacorepayments.com` (the
+  operating entity's real inbox) and the Melissa, TX address kept; confirm both.
+
+**Alternatives considered:**
+- *Two hand-written `.astro` pages with hard-coded copy* — rejected; not editable
+  by the client and duplicates layout.
+- *A React island for the TOC* — unnecessary; the site is islands-only for genuine
+  interactivity and this is a scroll listener.
+
+---
+
 ## 2026-07-02 — Co-branded sales one-pager: HTML page + headless-Chromium PDF
 
 **Context:** Each school needs a branded sales sell-sheet (see the Oregon

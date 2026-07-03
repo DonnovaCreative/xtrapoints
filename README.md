@@ -172,13 +172,16 @@ Per the brief, links were normalized (not copied verbatim from the live page):
 - Ambassador CTA → `mailto:sales@xtrapoints.com` (the live page's `xtrapoint.com`
   was a typo — not reproduced).
 - Footer corporate emails (support/press/billing/security) → kept `@lpt.io`.
+- Footer **Terms / Privacy** → internal `/terms` + `/privacy-policy` (own
+  CMS-driven legal pages — see HANDOFF.md "Legal pages"). Previously linked to
+  `lpt.io`.
 - ⚠ **Footer company/resource links**: the live page used root-relative paths
-  (`/company`, `/security`, `/partners`, `/press`, `/terms`, `/privacy-policy`)
-  that resolve to the **lacore.webflow.io staging host**. They are remapped to
-  the production domain `https://www.lpt.io/...` in
-  [`Footer.astro`](src/components/Footer.astro). **Confirm these production URLs
-  exist** (or adjust). External links (`foundry.lacorepayments.com`,
-  `live.standards.site/lpt`, LinkedIn) were kept as-is.
+  (`/company`, `/security`, `/partners`, `/press`) that resolve to the
+  **lacore.webflow.io staging host**. They are remapped to the production domain
+  `https://www.lpt.io/...` in [`Footer.astro`](src/components/Footer.astro).
+  **Confirm these production URLs exist** (or adjust). External links
+  (`foundry.lacorepayments.com`, `live.standards.site/lpt`, LinkedIn) were kept
+  as-is.
 
 ## Deploy to Vercel + domain (xtrapoints.com)
 

@@ -152,3 +152,25 @@ near-black; landscape photos ~1600–2048px.
 - The page templates (`src/pages/schools/…`) and components — shared by every school.
 - `src/data/schools.ts` — types + theme helpers only (no per-school data).
 - The Studio schema (`studio/schemas/school.ts`) — unless you're adding a new field.
+
+---
+
+## Editing the legal pages (Terms & Privacy)
+
+These aren't school pages, but they're edited the same way — in Sanity, as rich
+text. In the Studio go to **Legal pages** → open **Terms & Conditions** or
+**Privacy Policy** and edit the **Body**:
+
+- Use **Heading 2** for the main sections — each becomes an entry in the page's
+  sticky table of contents (and **Heading 3** for sub-sections). The contents
+  list and its scroll highlighting are generated from these headings, so you never
+  maintain the TOC by hand.
+- Set **Last updated** when you make a substantive change.
+- The two pages automatically cross-link to each other; add a third **Legal page**
+  (e.g. a Cookie Policy) and it joins the nav on its own — no developer needed.
+
+> ⚠️ **Publishing a legal page may not auto-rebuild the live site.** The
+> auto-rebuild webhook is currently scoped to *school* changes. Until that's
+> widened to legal pages (see HANDOFF.md), ask a developer to trigger a deploy
+> after you publish legal edits. And remember this is legal copy — have it
+> reviewed before it goes live.
