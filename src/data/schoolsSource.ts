@@ -37,7 +37,10 @@ interface SchoolDoc {
 }
 
 // Any school with a slug renders — colors default to the XtraPoint brand.
-const VALID = `_type == "school" && defined(slug.current)`;
+// Exclude drafts — the build authenticates with a token, so unpublished drafts
+// (`drafts.school.*`, created whenever an editor opens a doc in the Studio)
+// would otherwise be returned alongside the published version and render twice.
+const VALID = `_type == "school" && !(_id in path("drafts.**")) && defined(slug.current)`;
 
 const PROJECTION = `{
   "slug": slug.current,
