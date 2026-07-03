@@ -26,7 +26,39 @@ if (!expected || provided !== expected) {
 }
 
 const { slug } = Astro.params;
-const school = slug ? await getSchoolDraft(slug) : undefined;
+const debug = Astro.url.searchParams.get("debug") === "1";
+
+let school;
+let settings;
+try {
+  school = slug ? await getSchoolDraft(slug) : undefined;
+  settings = await getSiteSettings();
+} catch (err) {
+  // Secret-gated route, so surfacing the error here is safe and speeds debugging.
+  const msg = err instanceof Error ? `${err.name}: ${err.message}\n\n${err.stack ?? ""}` : String(err);
+  return new Response(`Preview data error:\n\n${msg}`, {
+    status: 500,
+    headers: { "content-type": "text/plain; charset=utf-8" },
+  });
+}
+
+if (debug) {
+  return new Response(
+    JSON.stringify(
+      {
+        slug,
+        hasPreviewSecret: Boolean(expected),
+        hasSanityToken: Boolean(process.env.SANITY_READ_TOKEN ?? import.meta.env.SANITY_READ_TOKEN),
+        node: process.version,
+        schoolFound: Boolean(school),
+        schoolName: school?.name,
+      },
+      null,
+      2,
+    ),
+    { status: 200, headers: { "content-type": "application/json; charset=utf-8" } },
+  );
+}
 
 if (!school) {
   return new Response(
@@ -34,8 +66,6 @@ if (!school) {
     { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } },
   );
 }
-
-const settings = await getSiteSettings();
 ---
 
 <SchoolLanding school={school} settings={settings} />
