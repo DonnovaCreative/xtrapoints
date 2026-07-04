@@ -25,6 +25,21 @@ heavier. Option A delivers the core "preview before publish" now; B can layer on
 later inside the same route.
 
 **Non-obvious gotchas / decisions:**
+- **⚠ On-demand SSR routes must render browser-oriented islands as `client:only`.**
+  The preview route 500'd on Vercel (only there — not locally, not in the static
+  build) because it server-rendered `DotField` (three.js) and `ContactForm`
+  (`@hcaptcha/react-hcaptcha`). three.js/meshline aren't traced into the function
+  bundle, and @hcaptcha ships ESM that the Lambda `require()`s as CJS ("Cannot use
+  import statement outside a module"). Static pages dodge both because they render
+  at **build time**; the runtime function doesn't. Fix: both islands are
+  `client:only` in `SchoolLanding`, so Astro never imports them on the server.
+  **Rule for future SSR/on-demand routes: any client island they render must be
+  `client:only`.** (`vite.ssr.noExternal` for @hcaptcha was tried and did not
+  reliably fix it — `client:only` is the robust fix.)
+- **Debugging note:** this only reproduces in Vercel's serverless runtime. To get
+  the real stack when logs aren't accessible, the route temporarily surfaced errors
+  in the (secret-gated) response body; the defensive try/catch around the data
+  fetch was kept.
 - **Refactor safety:** extracting `SchoolLanding` was verified byte-identical
   against the pre-refactor built HTML for a sample school before shipping.
 - **Secret gating is obscurity-level.** The Studio is a public client bundle, so

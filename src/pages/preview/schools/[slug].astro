@@ -4,15 +4,19 @@
 // draft — so editors can review changes in the Studio before publishing.
 //
 // Secret-gated (?secret=<PREVIEW_SECRET>) + noindex. Server-rendered (not static).
-// Imports are dynamic + wrapped so any module-load/data error surfaces as readable
-// text (the route is secret-gated, so this is safe) instead of an opaque 500.
+//
+// ⚠ Any client island this renders must be client:only (DotField, ContactForm) —
+// on-demand SSR of a browser-oriented dep (three.js, @hcaptcha) breaks in the
+// Vercel Lambda. See DECISIONS.md.
 export const prerender = false;
+
+import SchoolLanding from "@/components/school/SchoolLanding.astro";
+import { getSchoolDraft, getSiteSettings } from "@/data/schoolsSource";
 
 Astro.response.headers.set("X-Robots-Tag", "noindex, nofollow");
 
 const expected = process.env.PREVIEW_SECRET ?? import.meta.env.PREVIEW_SECRET;
 const provided = Astro.url.searchParams.get("secret");
-const debug = Astro.url.searchParams.get("debug") === "1";
 
 if (!expected || provided !== expected) {
   return new Response(
@@ -23,49 +27,19 @@ if (!expected || provided !== expected) {
 
 const { slug } = Astro.params;
 
-let school: any;
-let settings: any;
-let SchoolLanding: any;
-let loadError: string | null = null;
-
+let school;
+let settings;
 try {
-  const src = await import("@/data/schoolsSource");
-  school = slug ? await src.getSchoolDraft(slug) : undefined;
-  settings = await src.getSiteSettings();
-  SchoolLanding = (await import("@/components/school/SchoolLanding.astro")).default;
+  school = slug ? await getSchoolDraft(slug) : undefined;
+  settings = await getSiteSettings();
 } catch (err) {
-  loadError =
-    err instanceof Error
-      ? `${err.name}: ${err.message}\n\n${err.stack ?? ""}`
-      : String(err);
-}
-
-if (loadError) {
-  return new Response(`Preview load error:\n\n${loadError}`, {
+  // Secret-gated, so surfacing the error is safe and speeds debugging.
+  const msg =
+    err instanceof Error ? `${err.name}: ${err.message}\n\n${err.stack ?? ""}` : String(err);
+  return new Response(`Preview data error:\n\n${msg}`, {
     status: 500,
     headers: { "content-type": "text/plain; charset=utf-8" },
   });
-}
-
-if (debug) {
-  return new Response(
-    JSON.stringify(
-      {
-        slug,
-        node: process.version,
-        hasPreviewSecret: Boolean(expected),
-        hasSanityToken: Boolean(
-          process.env.SANITY_READ_TOKEN ?? import.meta.env.SANITY_READ_TOKEN,
-        ),
-        schoolFound: Boolean(school),
-        schoolName: school?.name,
-        schoolLandingLoaded: Boolean(SchoolLanding),
-      },
-      null,
-      2,
-    ),
-    { status: 200, headers: { "content-type": "application/json; charset=utf-8" } },
-  );
 }
 
 if (!school) {
