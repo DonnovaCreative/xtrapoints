@@ -187,14 +187,24 @@ sites — no code/git. (Content pipeline; code still ships via staging→main me
 Editors can preview a school's **unpublished draft** on the real page before
 publishing (Option A — no visual-editing overlays yet).
 
-- **Studio:** open a School doc → **"Open preview"** action (⋯ menu) → opens the
-  live draft in a new tab. Added via `studio/previewAction.ts` + `document.actions`
-  in `sanity.config.ts`.
-- **Route:** `src/pages/preview/schools/[slug].astro` (`prerender = false`, a Vercel
-  function) renders the shared `SchoolLanding.astro` from the **draft** via
-  `getSchoolDraft()` (a `previewClient` with the `previewDrafts` perspective in
-  `schoolsSource.ts`). The static donor page renders the *same* component from
-  published data, so preview == production fidelity.
+- **Studio:** ⋯ menu on a doc → **"Open preview"** (eye icon). **School** docs get
+  two: *Open preview* (donor) + *Preview ambassador page*; **legal** docs get one.
+  Via `studio/previewAction.ts` (a `makePreviewAction` factory) + `document.actions`
+  in `sanity.config.ts`. Icon from `@sanity/icons@^3` (React-18 compatible — v5
+  needs React 19).
+- **Routes** (`prerender = false`; shared secret gate `src/lib/previewGuard.ts`):
+  - `preview/schools/[slug]` → `SchoolLanding.astro` (donor)
+  - `preview/schools/[slug]/ambassadors` → `SchoolAmbassadors.astro`
+  - `preview/legal/[slug]` → `LegalPageView.astro`
+  Each renders the **same component** as the live route, from the **draft**
+  (`getSchoolDraft()` / `getLegalPageDraft()` — a `previewClient` with the
+  `previewDrafts` perspective). So preview == production fidelity.
+- **⚠ Extracted shared components** back the static + preview routes:
+  `SchoolLanding`, `SchoolAmbassadors`, `LegalPageView`. Edit the page there.
+  Their client islands (DotField, ContactForm, WaitlistForm) are **`client:only`**
+  so the on-demand SSR function never server-renders browser-only deps (three.js,
+  @hcaptcha) — see the DECISIONS gotcha. Trade-off: those islands render
+  client-side on the live school pages too (mount after load).
 - **Gating:** requires `?secret=<PREVIEW_SECRET>` or it 401s; also sends
   `X-Robots-Tag: noindex`. **Security is obscurity-level** — the Studio bundles the
   secret (see note in `previewAction.ts`); fine for draft school pages, upgrade to
@@ -204,8 +214,7 @@ publishing (Option A — no visual-editing overlays yet).
   `SANITY_STUDIO_PREVIEW_ORIGIN` (`studio/.env`, baked in at `sanity deploy`).
   Origin currently points at **staging** for pre-publish review; repoint to prod
   if desired.
-- Only the **donor** page has preview so far; `/ambassadors` is an easy follow-on
-  (same pattern — extract its body + a second preview route).
+- Preview covers **donor, ambassador, and legal** pages.
 
 ## Forms (Web3Forms) — unchanged
 
