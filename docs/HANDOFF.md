@@ -139,12 +139,13 @@ the repo.
   - Layout is tuned to fit exactly one page (CTA footer flush at the bottom) —
     re-check the fit if you change copy.
 
-- **Hero shader** — the donor + ambassador heroes layer a React Bits **Silk**
-  shader (`src/components/islands/Silk.tsx`, `client:only`) *under* the DotField
-  dots, `mix-blend-screen` at ~50% opacity, tinted to the school's **secondary if
-  set, else primary** (`theme.hasSecondary`). Vendored (deps already present:
-  three + @react-three/fiber); like all WebGL islands it's `client:only` so the
-  preview SSR functions don't choke on it.
+- **Hero rays** — the donor + ambassador heroes layer React Bits **SideRays**
+  (`src/components/islands/SideRays.tsx`, WebGL via **`ogl`**, `client:only`)
+  *under* the DotField dots — soft animated light rays from the top-right corner.
+  `rayColor1` = primary, `rayColor2` = **secondary if set, else primary**
+  (`theme.hasSecondary`). Like all WebGL islands it's `client:only` so the preview
+  SSR functions don't choke on it. (Replaced an earlier Silk shader that read too
+  strong.) Intensity/saturation/origin are the tuning knobs in the two heroes.
 
 ### Adding schools — 3 paths (detail in ADDING-A-SCHOOL.md)
 
