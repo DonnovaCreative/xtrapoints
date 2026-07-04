@@ -139,6 +139,13 @@ the repo.
   - Layout is tuned to fit exactly one page (CTA footer flush at the bottom) —
     re-check the fit if you change copy.
 
+- **Hero shader** — the donor + ambassador heroes layer a React Bits **Silk**
+  shader (`src/components/islands/Silk.tsx`, `client:only`) *under* the DotField
+  dots, `mix-blend-screen` at ~50% opacity, tinted to the school's **secondary if
+  set, else primary** (`theme.hasSecondary`). Vendored (deps already present:
+  three + @react-three/fiber); like all WebGL islands it's `client:only` so the
+  preview SSR functions don't choke on it.
+
 ### Adding schools — 3 paths (detail in ADDING-A-SCHOOL.md)
 
 1. **Studio form** — https://xtrapoint.sanity.studio (non-technical).

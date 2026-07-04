@@ -12,6 +12,7 @@ import Eyebrow from "@/components/Eyebrow.astro";
 import PlaybookMark from "@/components/PlaybookMark.astro";
 import SchoolPhone from "@/components/school/SchoolPhone.astro";
 import DotField from "@/components/islands/DotField.tsx";
+import Silk from "@/components/islands/Silk.tsx";
 import ContactForm from "@/components/islands/ContactForm.tsx";
 import { schoolThemeVars, hexToRgba, type School } from "@/data/schools";
 import type { SiteSettings } from "@/data/schoolsSource";
@@ -66,6 +67,10 @@ const advantages = [
             <div class="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-transparent"></div>
           </div>
         )}
+        <!-- Silk shader wash (accent-tinted, animated) — layered UNDER the dots. -->
+        <div class="absolute inset-0 z-0 opacity-50 mix-blend-screen" aria-hidden="true">
+          <Silk client:only="react" speed={5} scale={0.9} color={t.hasSecondary ? t.secondary : t.primary} noiseIntensity={1.5} rotation={0} />
+        </div>
         <div class="absolute inset-0 z-0" aria-hidden="true">
           <DotField client:only="react" dotSpacing={26} dotRadius={2} bulgeStrength={60} glowRadius={200} gradientFrom={hexToRgba(t.primary, 0.5)} gradientTo={hexToRgba(t.secondary, 0.18)} glowColor={hexToRgba(t.primary, 0.5)} />
         </div>

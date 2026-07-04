@@ -22,6 +22,8 @@ export interface SchoolTheme {
   /** Secondary accent for atmospheric depth (glows, gradients, soft fills).
    *  A real secondary brand color, or a lighter tint of primary if none. */
   secondary: string;
+  /** True when a real secondary brand color was set (not the primary-tint fallback). */
+  hasSecondary: boolean;
   /** Translucent secondary for soft fills (rgba). */
   secondarySoft: string;
   /** Dark section background. */
@@ -123,13 +125,15 @@ export const deriveSchoolTheme = (input: {
   const primary = hex(input.primary) ?? BRAND_PRIMARY;
   // Two-color brand → use the real secondary; single-color → a lighter same-hue
   // tint of primary, so atmospheric layers get depth without a second color.
-  const secondary = hex(input.secondary) ?? lighten(primary, 0.4);
+  const realSecondary = hex(input.secondary);
+  const secondary = realSecondary ?? lighten(primary, 0.4);
   return {
     primary,
     primaryDeep: darken(primary, 0.1),
     primaryDark: hex(input.primaryDark) ?? darken(primary, 0.22),
     primarySoft: hexToRgba(primary, 0.12),
     secondary,
+    hasSecondary: Boolean(realSecondary),
     secondarySoft: hexToRgba(secondary, 0.14),
     ink: hex(input.ink) ?? BRAND_INK,
     ...(hex(input.onAccent) ? { onAccent: hex(input.onAccent) } : {}),
