@@ -1,0 +1,45 @@
+---
+// On-demand DRAFT preview of a legal page (Terms, Privacy, …). Renders the same
+// LegalPageView component as the live route, from the page's unpublished draft.
+// Secret-gated (?secret=<PREVIEW_SECRET>) + noindex. Server-rendered (not static).
+export const prerender = false;
+
+import LegalPageView from "@/components/LegalPageView.astro";
+import { getLegalPageDraft, getLegalPages } from "@/data/legalSource";
+import { previewUnauthorized } from "@/lib/previewGuard";
+
+Astro.response.headers.set("X-Robots-Tag", "noindex, nofollow");
+
+const denied = previewUnauthorized(Astro.url);
+if (denied) return denied;
+
+const { slug } = Astro.params;
+
+let page;
+let all;
+try {
+  page = slug ? await getLegalPageDraft(slug) : undefined;
+  // Cross-document links use the published set (fine for the sidebar switcher).
+  all = await getLegalPages();
+} catch (err) {
+  const msg =
+    err instanceof Error ? `${err.name}: ${err.message}\n\n${err.stack ?? ""}` : String(err);
+  return new Response(`Preview data error:\n\n${msg}`, {
+    status: 500,
+    headers: { "content-type": "text/plain; charset=utf-8" },
+  });
+}
+
+if (!page) {
+  return new Response(
+    `No legal page found for “${slug}”. It may not exist yet, or has no draft or published version.`,
+    { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } },
+  );
+}
+
+// Ensure the current (draft) page is represented in the cross-doc list even if
+// it isn't published yet, so the sidebar highlights it.
+if (!all.some((p) => p.slug === page.slug)) all = [...all, page];
+---
+
+<LegalPageView page={page} all={all} />

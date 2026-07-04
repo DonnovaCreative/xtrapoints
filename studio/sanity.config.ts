@@ -2,7 +2,11 @@ import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
 import { visionTool } from "@sanity/vision";
 import { schemaTypes } from "./schemas";
-import { openPreviewAction } from "./previewAction";
+import {
+  schoolDonorPreview,
+  schoolAmbassadorPreview,
+  legalPreview,
+} from "./previewAction";
 
 export default defineConfig({
   name: "default",
@@ -40,9 +44,13 @@ export default defineConfig({
       creationContext.type === "global"
         ? prev.filter((t) => t.templateId !== "siteSettings")
         : prev,
-    // Add "Open preview" to school documents (draft preview on the live site).
+    // Add draft-preview actions: school docs → donor + ambassador; legal → page.
     actions: (prev, { schemaType }) =>
-      schemaType === "school" ? [...prev, openPreviewAction] : prev,
+      schemaType === "school"
+        ? [...prev, schoolDonorPreview, schoolAmbassadorPreview]
+        : schemaType === "legalPage"
+          ? [...prev, legalPreview]
+          : prev,
   },
 
   schema: {

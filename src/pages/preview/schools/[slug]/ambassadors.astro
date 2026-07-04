@@ -1,12 +1,9 @@
 ---
-// On-demand DRAFT preview of a co-branded school DONOR page. Renders the same
-// SchoolLanding component as the live route, from the school's unpublished draft.
-// Secret-gated (?secret=<PREVIEW_SECRET>) + noindex. Server-rendered (not static).
-//
-// ⚠ Any client island rendered here must be client:only (see DECISIONS.md).
+// On-demand DRAFT preview of a co-branded school AMBASSADOR page. Same component
+// as the live route, from the school's unpublished draft. Secret-gated + noindex.
 export const prerender = false;
 
-import SchoolLanding from "@/components/school/SchoolLanding.astro";
+import SchoolAmbassadors from "@/components/school/SchoolAmbassadors.astro";
 import { getSchoolDraft, getSiteSettings } from "@/data/schoolsSource";
 import { previewUnauthorized } from "@/lib/previewGuard";
 
@@ -39,4 +36,4 @@ if (!school) {
 }
 ---
 
-<SchoolLanding school={school} settings={settings} />
+<SchoolAmbassadors school={school} settings={settings} />

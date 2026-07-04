@@ -47,3 +47,19 @@ export async function getLegalPage(
   );
   return doc ? toLegalPage(doc) : undefined;
 }
+
+// Draft preview — used only by the secret-gated preview route
+// (src/pages/preview/legal/[slug].astro). The previewDrafts perspective returns
+// the draft version (overlaid on published) so editors see unpublished edits.
+const previewClient = sanityClient.withConfig({ perspective: "previewDrafts" });
+
+/** One legal page by slug, preferring its unpublished draft. undefined if none. */
+export async function getLegalPageDraft(
+  slug: string,
+): Promise<LegalPage | undefined> {
+  const doc = await previewClient.fetch<LegalDoc | null>(
+    `*[_type == "legalPage" && defined(body) && slug.current == $slug]${PROJECTION}[0]`,
+    { slug },
+  );
+  return doc ? toLegalPage(doc) : undefined;
+}
