@@ -21,6 +21,7 @@ interface SchoolDoc {
   logo: string | null;
   logoBadge: boolean | null;
   whiteHeader: boolean | null;
+  logoLockup: boolean | null;
   logoSize: "sm" | "md" | "lg" | "xl" | null;
   mark: string | null;
   avatar: string | null;
@@ -45,7 +46,7 @@ const VALID = `_type == "school" && !(_id in path("drafts.**")) && defined(slug.
 const PROJECTION = `{
   "slug": slug.current,
   name, short, mascot, fund, city, state,
-  logoBadge, whiteHeader, logoSize,
+  logoBadge, whiteHeader, logoLockup, logoSize,
   "logo": logo.asset->url,
   "mark": mark.asset->url,
   "avatar": avatar.asset->url,
@@ -96,6 +97,7 @@ const toSchool = (doc: SchoolDoc): School => ({
   ...(doc.logo ? { logo: doc.logo } : {}),
   ...(doc.logoBadge ? { logoBadge: true } : {}),
   ...(doc.whiteHeader ? { whiteHeader: true } : {}),
+  ...(doc.logoLockup ? { logoLockup: true } : {}),
   logoClass: LOGO_SIZE[doc.logoSize ?? "md"] ?? LOGO_SIZE.md,
   ...(doc.mark ? { mark: doc.mark } : {}),
   ...(doc.avatar ? { avatar: doc.avatar } : {}),

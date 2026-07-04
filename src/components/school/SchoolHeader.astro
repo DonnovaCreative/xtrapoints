@@ -28,15 +28,26 @@ const wordMascot = white ? "text-gray-500" : "text-white/55";
 
 <header data-site-header data-variant={variant} class="site-header fixed inset-x-0 top-0 z-50">
   <div class="mx-auto flex h-[var(--header-h)] max-w-7xl items-center justify-between gap-4 px-6 lg:px-10">
-    <a href={`/schools/${school.slug}`} class="flex items-center" aria-label={school.short}>
+    <a href={`/schools/${school.slug}`} class="flex items-center gap-3" aria-label={school.short}>
       {school.logo ? (
-        school.logoBadge ? (
-          <span class="flex items-center justify-center rounded-lg bg-white px-2.5 py-1.5">
+        <Fragment>
+          {school.logoBadge ? (
+            <span class="flex items-center justify-center rounded-lg bg-white px-2.5 py-1.5">
+              <img src={school.logo} alt={school.name} class={school.logoClass ?? "h-7 w-auto"} />
+            </span>
+          ) : (
             <img src={school.logo} alt={school.name} class={school.logoClass ?? "h-7 w-auto"} />
-          </span>
-        ) : (
-          <img src={school.logo} alt={school.name} class={school.logoClass ?? "h-7 w-auto"} />
-        )
+          )}
+          {school.logoLockup && (
+            <span
+              class={`border-l pl-3 text-[0.9375rem] font-bold leading-tight tracking-tight ${wordName} ${
+                white ? "border-gray-200" : "border-white/20"
+              }`}
+            >
+              {school.short}
+            </span>
+          )}
+        </Fragment>
       ) : (
         <span class={`flex items-center gap-2 ${wordName}`}>
           <svg class="h-6 w-6 text-lime" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="12" cy="16" rx="5" ry="4.2"/><circle cx="6.2" cy="10.5" r="2.1"/><circle cx="10" cy="7.2" r="2.1"/><circle cx="14" cy="7.2" r="2.1"/><circle cx="17.8" cy="10.5" r="2.1"/></svg>

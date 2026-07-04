@@ -99,6 +99,7 @@ officially-approved file**, and Publish.
 | `city` / `state` | `Huntsville` / `TX` | Metadata. |
 | `logo` | image | **White/mono** logo for the dark header (SVG or PNG). Also the OG lockup. Omit → text wordmark. |
 | `logoBadge` | toggle | ON only for a **colored** logo → white badge so it reads on the dark header. |
+| `logoLockup` | toggle | "Show school name next to logo." ON for **small/square** logos (common for high schools) → locks the `short` name up as text beside the logo in the header. |
 | `logoClass` | `h-8 w-auto` | Advanced header sizing; default `h-7 w-auto`. |
 | `mark` | image | Optional single-color icon (e.g. a paw) for the app avatar; tinted to the accent. |
 | `avatar` | image | Optional full-color square logo for the app avatar (beats `mark`). |

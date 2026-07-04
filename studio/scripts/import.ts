@@ -31,6 +31,8 @@ interface Row {
   logoBadge?: boolean;
   /** Use a white header bar instead of the dark one (for colored logos). */
   whiteHeader?: boolean;
+  /** Show the school's short name as text beside the logo (small/square logos). */
+  logoLockup?: boolean;
   /** Header logo size preset. */
   logoSize?: "sm" | "md" | "lg" | "xl";
   mark?: string;
@@ -75,6 +77,7 @@ async function run() {
       ...(logo ? { logo } : {}),
       ...(r.logoBadge ? { logoBadge: true } : {}),
       ...(r.whiteHeader ? { whiteHeader: true } : {}),
+      ...(r.logoLockup ? { logoLockup: true } : {}),
       ...(r.logoSize ? { logoSize: r.logoSize } : {}),
       ...(mark ? { mark } : {}),
       ...(avatar ? { avatar } : {}),

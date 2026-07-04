@@ -111,6 +111,15 @@ export default defineType({
       initialValue: false,
     }),
     defineField({
+      name: "logoLockup",
+      title: "Show school name next to logo",
+      type: "boolean",
+      group: "branding",
+      description:
+        "Lock the school's short name up as text beside the logo in the header. Turn ON when the logo is small or square (common for high schools) and reads poorly on its own.",
+      initialValue: false,
+    }),
+    defineField({
       name: "logoSize",
       title: "Header logo size",
       type: "string",

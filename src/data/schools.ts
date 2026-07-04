@@ -46,6 +46,9 @@ export interface School {
   logoBadge?: boolean;
   /** Fill the header bar white (for colored logos with no white/mono version). */
   whiteHeader?: boolean;
+  /** Lock the school's short name up beside the logo in the header — for small/
+   *  square logos (common for high schools) that read poorly alone. */
+  logoLockup?: boolean;
   /** Header logo sizing classes. Default "h-7 w-auto"; bump for wide wordmarks. */
   logoClass?: string;
   /** Small square mark (e.g. paw) tinted with the accent; used in the app mockup. */
