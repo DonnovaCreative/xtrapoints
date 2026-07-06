@@ -1,0 +1,328 @@
+---
+// Customer Support page (/support). Static, footer-linked, not CMS-driven.
+// Design register mirrors the legal pages (LegalPageView.astro): quiet, light,
+// editorial — restrained header, numbered sections, a sticky sidebar TOC with
+// scrollspy. Copy is hardcoded here (client-provided). If this ever needs to be
+// editor-maintained, promote it to a Sanity doc type like the legal pages.
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import { brand } from "@/config/brand";
+
+const supportEmail = "support@xtrapoint.com";
+
+// On-this-page outline (ids must match the section headings below).
+const toc = [
+  { id: "contact", text: "Contact us" },
+  { id: "order-support", text: "Order support" },
+  { id: "apple-pay", text: "Apple Pay orders" },
+  { id: "returns", text: "Returns and refunds" },
+  { id: "response-time", text: "Response time" },
+];
+
+const title = `Customer Support · ${brand.name}`;
+const description = `Get help from ${brand.nameSpaced} with questions about your order, payment, returns, refunds, or account.`;
+---
+
+<Layout title={title} description={description}>
+  <Header variant="light" />
+  <main class="bg-white">
+    <!-- page header — restrained, light, editorial -->
+    <div class="border-b border-gray-100">
+      <div
+        class="mx-auto max-w-7xl px-6 pb-10 pt-[calc(var(--header-h)+3rem)] lg:px-10 lg:pb-14 lg:pt-[calc(var(--header-h)+4rem)]"
+      >
+        <p
+          class="sp-fade flex items-center gap-2.5 font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-gray-400"
+        >
+          <span class="inline-block h-2 w-2 bg-lime" aria-hidden="true"></span>
+          Support
+        </p>
+        <h1
+          class="sp-fade mt-5 max-w-3xl text-[clamp(2rem,4.5vw,3.25rem)] font-bold leading-[1.05] tracking-tight text-ink"
+          style="animation-delay:60ms"
+        >
+          Customer Support
+        </h1>
+        <p
+          class="sp-fade mt-4 max-w-2xl text-lg leading-relaxed text-gray-600"
+          style="animation-delay:120ms"
+        >
+          We’re here to help with questions about your order, payment, shipping,
+          returns, refunds, or account.
+        </p>
+      </div>
+    </div>
+
+    <!-- body -->
+    <div
+      class="mx-auto grid max-w-7xl gap-y-10 px-6 py-12 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-x-20 lg:px-10 lg:py-16"
+    >
+      <!-- sticky sidebar: on-this-page -->
+      <aside class="hidden lg:block">
+        <div class="sticky top-24">
+          <nav aria-label="On this page">
+            <p
+              class="font-mono text-[0.625rem] uppercase tracking-[0.16em] text-gray-400"
+            >
+              On this page
+            </p>
+            <ul class="mt-3.5 flex flex-col">
+              {
+                toc.map((t, i) => (
+                  <li>
+                    <a
+                      href={`#${t.id}`}
+                      data-toc-link
+                      class="toc-link group flex gap-2.5 py-1.5 text-sm leading-snug text-gray-500 transition-colors hover:text-ink"
+                    >
+                      <span class="toc-num font-mono text-[0.6875rem] tabular-nums leading-5 text-gray-300 transition-colors">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span>{t.text}</span>
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </nav>
+        </div>
+      </aside>
+
+      <!-- article -->
+      <article class="support-body min-w-0 max-w-[42rem]">
+        <!-- 1 · Contact us -->
+        <h2 id="contact">Contact us</h2>
+        <dl class="contact-card">
+          <div>
+            <dt>Email</dt>
+            <dd>
+              <a href={`mailto:${supportEmail}`}>{supportEmail}</a>
+            </dd>
+          </div>
+          <div>
+            <dt>Hours</dt>
+            <dd>Monday–Friday, 9:00&nbsp;AM–5:00&nbsp;PM CST</dd>
+          </div>
+          <div>
+            <dt>Mailing address</dt>
+            <dd>
+              LaCore Payments Technologies, Inc.<br />
+              900 Wilmeth Rd<br />
+              McKinney, TX 75069<br />
+              United States
+            </dd>
+          </div>
+        </dl>
+
+        <!-- 2 · Order support -->
+        <h2 id="order-support">Order support</h2>
+        <p>
+          For questions about an order, please include your order number, full
+          name, the email address used at checkout, and a brief description of
+          the issue.
+        </p>
+
+        <!-- 3 · Apple Pay orders -->
+        <h2 id="apple-pay">Apple Pay orders</h2>
+        <p>
+          We accept Apple Pay for eligible online purchases. If you used Apple
+          Pay, your payment is processed securely using the card you selected in
+          Apple Wallet. We do not receive your full card number.
+        </p>
+        <p>
+          For order changes, shipping questions, returns, or refunds, please
+          contact us directly using the support information above.
+        </p>
+
+        <!-- 4 · Returns and refunds -->
+        <h2 id="returns">Returns and refunds</h2>
+        <p>
+          Refunds are issued according to our return policy. Approved refunds
+          will be credited back to the original payment method used at checkout,
+          including Apple Pay where applicable.
+        </p>
+
+        <!-- 5 · Response time -->
+        <h2 id="response-time">Response time</h2>
+        <p>
+          We typically respond to support requests within 1–2 business days.
+        </p>
+      </article>
+    </div>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  /* Gentle, calm entrance for the header (guarded for reduced motion). */
+  @media (prefers-reduced-motion: no-preference) {
+    .sp-fade {
+      animation: spFade 0.5s cubic-bezier(0.2, 0.6, 0.2, 1) both;
+    }
+  }
+  @keyframes spFade {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Active states for the TOC scrollspy. */
+  .toc-link.is-active {
+    color: var(--color-ink);
+    font-weight: 500;
+  }
+  .toc-link.is-active .toc-num {
+    color: var(--color-lime-dark);
+  }
+
+  /* --- Article prose — quiet + editorial, tuned to brand tokens (mirrors the
+     legal pages so /support and /terms read as one family). --------------- */
+  .support-body {
+    counter-reset: support-section;
+    color: var(--color-gray-600);
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+  .support-body p {
+    margin: 1.05rem 0;
+  }
+  .support-body h2 {
+    counter-increment: support-section;
+    scroll-margin-top: 6rem;
+    margin-top: 3.25rem;
+    color: var(--color-ink);
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+  }
+  .support-body h2:first-child {
+    margin-top: 0;
+  }
+  /* Numbered mono kicker above each section — mirrors the sidebar outline. */
+  .support-body h2::before {
+    content: counter(support-section, decimal-leading-zero);
+    display: block;
+    margin-bottom: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    color: var(--color-lime-dark);
+  }
+  .support-body a {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-decoration-color: var(--color-gray-300);
+    text-underline-offset: 3px;
+    transition:
+      color 0.15s ease,
+      text-decoration-color 0.15s ease;
+  }
+  .support-body a:hover {
+    color: var(--color-lime-dark);
+    text-decoration-color: var(--color-lime);
+  }
+  .support-body strong {
+    color: var(--color-gray-800);
+    font-weight: 600;
+  }
+
+  /* Contact block — a quiet card, structured as a definition list. */
+  .contact-card {
+    margin-top: 1.5rem;
+    display: grid;
+    gap: 1.25rem;
+    border: 1px solid var(--color-gray-200);
+    border-left: 3px solid var(--color-lime);
+    border-radius: 0.5rem;
+    background: var(--color-gray-50);
+    padding: 1.5rem 1.75rem;
+  }
+  .contact-card dt {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-gray-400);
+  }
+  .contact-card dd {
+    margin-top: 0.35rem;
+    color: var(--color-gray-700);
+    line-height: 1.6;
+  }
+  .contact-card dd a {
+    font-weight: 500;
+  }
+</style>
+
+<!-- Scrollspy + smooth anchor scroll (same pattern as the legal pages). No JS =
+     plain anchor links that still work; base content is never hidden. -->
+<script is:inline>
+  (() => {
+    const links = Array.from(document.querySelectorAll("[data-toc-link]"));
+    if (!links.length) return;
+    const linkById = new Map(
+      links.map((l) => [decodeURIComponent(l.hash.slice(1)), l]),
+    );
+    const headings = Array.from(
+      document.querySelectorAll(".support-body h2"),
+    ).filter((h) => h.id && linkById.has(h.id));
+    if (!headings.length) return;
+
+    const reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    let current = null;
+    const setActive = (id) => {
+      if (id === current) return;
+      current = id;
+      links.forEach((l) => l.classList.remove("is-active"));
+      linkById.get(id)?.classList.add("is-active");
+    };
+
+    // Smooth-scroll on click; keep the URL hash in sync.
+    linkById.forEach((link, id) => {
+      link.addEventListener("click", (e) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        e.preventDefault();
+        history.replaceState(null, "", `#${id}`);
+        el.scrollIntoView({
+          behavior: reduce ? "auto" : "smooth",
+          block: "start",
+        });
+        setActive(id);
+      });
+    });
+
+    // Highlight the section you're currently reading: the last heading whose top
+    // has scrolled past a line near the top of the viewport. rAF-throttled.
+    const LINE = 120; // px from the top of the viewport
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      let activeId = headings[0].id;
+      for (const h of headings) {
+        if (h.getBoundingClientRect().top - LINE <= 0) activeId = h.id;
+        else break;
+      }
+      setActive(activeId);
+    };
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    update();
+  })();
+</script>
