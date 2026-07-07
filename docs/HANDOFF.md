@@ -165,30 +165,48 @@ Sanity **publish webhooks** → **Vercel Deploy Hooks** (one for `staging`, one 
 `main`), filtered to `school` docs (drafts excluded). Publishing rebuilds both
 sites — no code/git. (Content pipeline; code still ships via staging→main merge.)
 
-## 📄 Legal pages (Terms & Privacy) — CMS-driven rich text
+## 📄 Legal & Compliance (legal docs + support + school legal copy)
 
-`/terms` and `/privacy-policy` are driven by Sanity, same read path as schools.
+All the legal / compliance / support content is grouped in the Studio under one
+**Legal & Compliance** folder (structure in `studio/sanity.config.ts`) so the
+client's team can manage it in one place:
 
-- **One doc type** `legalPage` (Studio → **Legal pages**): title, slug (= the
-  URL), short `navLabel`, `lastUpdated`, and a **Portable Text `body`**. One
-  **dynamic route** `src/pages/[legal].astro` renders all of them — add a doc,
-  get a page + cross-links, no code.
-- **Editing:** in the Studio, edit the `body` rich text; H2/H3 headings become the
-  sticky **table-of-contents** automatically (Stripe-guides scrollspy). Publishing
-  rebuilds the site (webhook — see below; note the webhook filter, next bullet).
+- **Legal Documents** — the `legalPage` list (was "Legal pages").
+- **Customer Support** — the `supportPage` singleton.
+- **School page legal copy** — the `siteSettings` singleton (the school-footer
+  disclaimer).
+
+### Legal Documents (`legalPage`) — `/terms`, `/privacy-policy`, `/refund-policy`, `/cookie-policy`
+
+- **One doc type** `legalPage`: title, slug (= the URL), short `navLabel`,
+  `lastUpdated`, **Portable Text `body`**. One **dynamic route**
+  `src/pages/[legal].astro` renders all of them — add a doc, get a page +
+  cross-links, no code. Slug is the URL (`terms` → `/terms`).
+- **Editing:** edit the `body` rich text; H2/H3 become the sticky **TOC**
+  automatically. Publishing rebuilds the site (webhook covers `legalPage`).
 - **Data layer** — `src/data/legalSource.ts` (`getLegalPages()`/`getLegalPage()`),
-  `src/data/legal.ts` (`renderLegalBody()` → `{html, toc}` via
-  `@portabletext/to-html`; **coordinated heading-id pass** so TOC anchors match).
-- **Seed / re-seed** the two pages: `cd studio && PUBLISH=1 npm run seed:legal`
-  (`studio/scripts/seed-legal.ts`; omit `PUBLISH=1` for drafts). Content is
-  editable in the Studio afterward.
-- **⚠ Content is seeded, not legally reviewed** — see Open item #10. Copy is
-  LaCore's LPT text, adjusted so XtraPoint reads as a DBA of LaCore Payments
-  Technologies, Inc.; Department Contacts section was dropped per request.
-- **⚠ Publish webhook filter:** the Sanity→Vercel deploy hooks are filtered to
-  `school` docs. If publishing a `legalPage` edit should auto-rebuild, widen the
-  webhook filter to include `legalPage` (or trigger a deploy manually). See
-  "Publish → rebuild" above.
+  `src/data/legal.ts` (`renderLegalBody()` → `{html, toc}`; **coordinated
+  heading-id pass** so TOC anchors match). Drafts excluded from the live build.
+- **Seed:** Terms/Privacy via `npm run seed:legal`; Refund + Cookie via
+  `npm run seed:legal-extra` (`studio/scripts/`; `PUBLISH=1` to go live). The
+  Portable Text builder is shared in `studio/scripts/_pt.ts`.
+- **Refund Policy** (`/refund-policy`) + **Cookie Policy** (`/cookie-policy`) are
+  seeded **starting points** for counsel. Cookie stays a **draft** (no tracking
+  yet → off the live site until published). The Support page links to the Refund
+  Policy, so **publish Refund when Support goes to prod** or that link 404s.
+- **⚠ Content is seeded, not legally reviewed** — see Open item #10. See also the
+  client's compliance checklist mapping (Open item #11).
+
+### Customer Support (`supportPage`) — `/support`
+
+- **Own doc type + bespoke layout** (NOT the shared legal template): structured
+  `email` / `hours` / `address` fields render the **contact card**; `body` rich
+  text renders the numbered sections below it (reuses `renderLegalBody`; contact
+  card is section 01). Route: `src/pages/support.astro`. Footer-linked only.
+- **Data layer** — `src/data/supportSource.ts` (`getSupportPage()` singleton).
+- **Seed:** `npm run seed:support` (`PUBLISH=1` to go live).
+- **⚠ Not in the rebuild webhook** — publishing `supportPage` does NOT auto-deploy;
+  the page updates on the next site build (or trigger one).
 
 ## 👁 Draft preview (school pages) — secret-gated, on-demand
 

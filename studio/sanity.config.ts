@@ -17,21 +17,41 @@ export default defineConfig({
 
   plugins: [
     structureTool({
-      // Schools + Legal pages as lists, Site settings as a singleton document.
+      // Schools at the top; everything legal/compliance/support grouped together
+      // in one "Legal & Compliance" folder so the client's team can manage all of
+      // it (legal documents, the support page, and the school-page legal copy) in
+      // one place. supportPage + siteSettings are singletons (single document).
       structure: (S) =>
         S.list()
           .title("Content")
           .items([
             S.documentTypeListItem("school").title("Schools"),
-            S.documentTypeListItem("legalPage").title("Legal pages"),
             S.divider(),
             S.listItem()
-              .title("Site settings")
-              .id("siteSettings")
+              .title("Legal & Compliance")
+              .id("legal-compliance")
               .child(
-                S.document()
-                  .schemaType("siteSettings")
-                  .documentId("siteSettings"),
+                S.list()
+                  .title("Legal & Compliance")
+                  .items([
+                    S.documentTypeListItem("legalPage").title("Legal Documents"),
+                    S.listItem()
+                      .title("Customer Support")
+                      .id("supportPage")
+                      .child(
+                        S.document()
+                          .schemaType("supportPage")
+                          .documentId("supportPage"),
+                      ),
+                    S.listItem()
+                      .title("School page legal copy")
+                      .id("siteSettings")
+                      .child(
+                        S.document()
+                          .schemaType("siteSettings")
+                          .documentId("siteSettings"),
+                      ),
+                  ]),
               ),
           ]),
     }),
@@ -39,10 +59,12 @@ export default defineConfig({
   ],
 
   document: {
-    // Keep the singleton out of the global "create new" menu.
+    // Keep the singletons out of the global "create new" menu.
     newDocumentOptions: (prev, { creationContext }) =>
       creationContext.type === "global"
-        ? prev.filter((t) => t.templateId !== "siteSettings")
+        ? prev.filter(
+            (t) => t.templateId !== "siteSettings" && t.templateId !== "supportPage",
+          )
         : prev,
     // Add draft-preview actions: school docs → donor + ambassador; legal → page.
     actions: (prev, { schemaType }) =>

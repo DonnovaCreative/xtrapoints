@@ -4,6 +4,44 @@ Short log of non-obvious engineering decisions. Newest first.
 
 ---
 
+## 2026-07-07 — Support = own doc type; "Legal & Compliance" Studio group
+
+**Context:** A client compliance package (round-up donation platform) implied
+several policy/support pages should be manageable on xtrapoint.com as the
+canonical legal home. `/support` had shipped as a static page. First pass folded
+it into the `legalPage` type — the user pushed back: Support should keep its own
+design and not sit inside "Legal pages."
+
+**Decision:**
+- **Support gets its own singleton doc type `supportPage`** with a bespoke layout
+  (structured `email`/`hours`/`address` → contact card; `body` rich text for the
+  sections, reusing `renderLegalBody`). `src/pages/support.astro` stays a normal
+  route reading the singleton. This keeps the original design while making the
+  copy CMS-editable. (Rejected: `legalPage` for support — lost the contact card,
+  mislabeled it "Legal," and dumped it in the legal cross-nav.)
+- **Refund Policy + Cookie Policy are `legalPage`s** (they *are* legal docs) —
+  Refund a published starting point, Cookie a permanent **draft** until tracking
+  exists. Seeded via `seed-legal-extra.ts`; the Portable Text builder was
+  extracted to `studio/scripts/_pt.ts` (shared with `seed-legal.ts`).
+- **One Studio group "Legal & Compliance"** (structure in `sanity.config.ts`)
+  holding Legal Documents (`legalPage`, renamed from "Legal pages"), Customer
+  Support (`supportPage`), and School page legal copy (`siteSettings`) — so the
+  client's team manages all of it in one place.
+
+**Non-obvious gotchas:**
+- **`supportPage` is NOT in the Sanity→Vercel rebuild webhook** (school +
+  legalPage only), so publishing it doesn't deploy — the page updates on the next
+  build. Intentional, but note it when editing support copy.
+- **Contact card + injected body share one CSS section counter.** The template
+  `<h2 id="contact">` (section 01) and the `set:html` body H2s (02+) both live in
+  `.support-body`, so the counter selectors are written for both scoped
+  (`.support-body h2`) and global (`.support-body :global(h2)`).
+- **Studio access ≠ nav grouping.** Grouping only organizes the desk; letting the
+  client's team edit means inviting them to the Sanity project. Restricting them
+  to *only* the legal group needs custom roles (RBAC, a paid Sanity plan).
+
+---
+
 ## 2026-07-03 — Draft preview for school pages (on-demand SSR, not a rebuild)
 
 **Context:** Editors wanted a Contentful-style "see it before publishing." The

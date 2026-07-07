@@ -14,70 +14,9 @@
 // confirm with counsel there: the contact email (support@lacorepayments.com, the
 // operating entity's inbox) and the Melissa, TX mailing address.
 import { getClient } from "./_lib.ts";
+import { type Block, h2, p, bullets } from "./_pt.ts";
 
 const client = getClient();
-
-// --- tiny Portable Text builder -------------------------------------------
-// Deterministic keys (no Math.random) so re-running produces stable documents.
-let keySeq = 0;
-const key = (p: string) => `${p}${(keySeq++).toString(36)}`;
-
-interface Span {
-  _type: "span";
-  _key: string;
-  text: string;
-  marks: string[];
-}
-interface MarkDef {
-  _key: string;
-  _type: "link";
-  href: string;
-}
-interface Block {
-  _type: "block";
-  _key: string;
-  style: string;
-  markDefs: MarkDef[];
-  children: Span[];
-  listItem?: "bullet" | "number";
-  level?: number;
-}
-
-// Parse inline `[label](href)` links and `**strong**` runs into spans + markDefs.
-function inline(text: string): { children: Span[]; markDefs: MarkDef[] } {
-  const markDefs: MarkDef[] = [];
-  const children: Span[] = [];
-  const push = (t: string, marks: string[] = []) => {
-    if (t) children.push({ _type: "span", _key: key("s"), text: t, marks });
-  };
-  const re = /\[([^\]]+)\]\(([^)]+)\)|\*\*([^*]+)\*\*/g;
-  let last = 0;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(text))) {
-    push(text.slice(last, m.index));
-    if (m[1] !== undefined) {
-      const dk = key("l");
-      markDefs.push({ _key: dk, _type: "link", href: m[2] });
-      children.push({ _type: "span", _key: key("s"), text: m[1], marks: [dk] });
-    } else {
-      children.push({ _type: "span", _key: key("s"), text: m[3], marks: ["strong"] });
-    }
-    last = re.lastIndex;
-  }
-  push(text.slice(last));
-  if (children.length === 0) push("");
-  return { children, markDefs };
-}
-
-const block = (style: string, text: string, extra: Partial<Block> = {}): Block => {
-  const { children, markDefs } = inline(text);
-  return { _type: "block", _key: key("b"), style, markDefs, children, ...extra };
-};
-const h2 = (t: string) => block("h2", t);
-const h3 = (t: string) => block("h3", t);
-const p = (t: string) => block("normal", t);
-const bullets = (items: string[]) =>
-  items.map((t) => block("normal", t, { listItem: "bullet", level: 1 }));
 
 // --- content ----------------------------------------------------------------
 const EFFECTIVE = "2026-07-03";
