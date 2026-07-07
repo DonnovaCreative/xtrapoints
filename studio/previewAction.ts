@@ -70,3 +70,23 @@ export const legalPreview = makePreviewAction(
   "Open preview",
   (slug) => `/preview/legal/${slug}`,
 );
+
+// Customer Support is a singleton (no slug), so it opens a fixed preview path.
+export const supportPreview: DocumentActionComponent = (props) => ({
+  label: "Open preview",
+  icon: EyeOpenIcon,
+  onHandle: () => {
+    if (!PREVIEW_SECRET) {
+      window.alert(
+        "Preview isn't configured: set SANITY_STUDIO_PREVIEW_SECRET (matching the site's PREVIEW_SECRET) and redeploy the Studio.",
+      );
+      props.onComplete();
+      return;
+    }
+    const url = `${PREVIEW_ORIGIN}/preview/support?secret=${encodeURIComponent(
+      PREVIEW_SECRET,
+    )}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+    props.onComplete();
+  },
+});

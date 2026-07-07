@@ -44,3 +44,16 @@ export async function getSupportPage(): Promise<SupportPage | undefined> {
   );
   return doc ? toSupportPage(doc) : undefined;
 }
+
+// Draft preview — used only by the secret-gated preview route
+// (src/pages/preview/support.astro). The previewDrafts perspective returns the
+// draft version (overlaid on published) so editors see unpublished edits.
+const previewClient = sanityClient.withConfig({ perspective: "previewDrafts" });
+
+/** The support page, preferring its unpublished draft. undefined if none. */
+export async function getSupportPageDraft(): Promise<SupportPage | undefined> {
+  const doc = await previewClient.fetch<SupportDoc | null>(
+    `*[_type == "supportPage"][0]${PROJECTION}`,
+  );
+  return doc ? toSupportPage(doc) : undefined;
+}

@@ -6,6 +6,7 @@ import {
   schoolDonorPreview,
   schoolAmbassadorPreview,
   legalPreview,
+  supportPreview,
 } from "./previewAction";
 
 export default defineConfig({
@@ -72,7 +73,9 @@ export default defineConfig({
         ? [...prev, schoolDonorPreview, schoolAmbassadorPreview]
         : schemaType === "legalPage"
           ? [...prev, legalPreview]
-          : prev,
+          : schemaType === "supportPage"
+            ? [...prev, supportPreview]
+            : prev,
   },
 
   schema: {

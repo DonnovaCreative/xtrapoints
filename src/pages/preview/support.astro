@@ -1,0 +1,36 @@
+---
+// On-demand DRAFT preview of the Customer Support page. Renders the same
+// SupportPageView component as the live route, from the unpublished draft.
+// Secret-gated (?secret=<PREVIEW_SECRET>) + noindex. Server-rendered (not static).
+export const prerender = false;
+
+import SupportPageView from "@/components/SupportPageView.astro";
+import { getSupportPageDraft } from "@/data/supportSource";
+import { previewUnauthorized } from "@/lib/previewGuard";
+
+Astro.response.headers.set("X-Robots-Tag", "noindex, nofollow");
+
+const denied = previewUnauthorized(Astro.url);
+if (denied) return denied;
+
+let page;
+try {
+  page = await getSupportPageDraft();
+} catch (err) {
+  const msg =
+    err instanceof Error ? `${err.name}: ${err.message}\n\n${err.stack ?? ""}` : String(err);
+  return new Response(`Preview data error:\n\n${msg}`, {
+    status: 500,
+    headers: { "content-type": "text/plain; charset=utf-8" },
+  });
+}
+
+if (!page) {
+  return new Response(
+    "No support page found. It may not exist yet, or has no draft or published version.",
+    { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } },
+  );
+}
+---
+
+<SupportPageView page={page} />
