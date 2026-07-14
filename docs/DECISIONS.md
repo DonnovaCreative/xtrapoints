@@ -4,6 +4,38 @@ Short log of non-obvious engineering decisions. Newest first.
 
 ---
 
+## 2026-07-07 — Studio "Auto-fill from ESPN" via a site endpoint + client-side upload
+
+**Context:** Non-technical editors wanted the terminal `seed:college` flow (pull a
+college's mascot/colors/logo from ESPN) available in the Studio when creating a
+new school.
+
+**Decision:** A **school document action** ("Auto-fill from ESPN") that calls a
+**secret-gated site endpoint** `src/pages/api/seed-college.ts` (`prerender=false`,
+shared logic in `src/lib/collegeSeed.ts`). The endpoint does the ESPN + College
+Scorecard lookups **server-side** (keeps `DATAGOV_API_KEY` off the client, avoids
+browser CORS on those APIs) and proxies the logo bytes as base64. The action then
+`setIfMissing`-prefills the open draft and **uploads the logo under the editor's
+own Sanity session** — so no server-side write token is needed.
+
+**Why these choices:**
+- **`setIfMissing`, not `set`** — "prefill" must never clobber what the editor
+  already typed. On a fresh draft everything fills; on a partially-filled one only
+  the blanks do.
+- **Client-side logo upload** (from proxied base64) instead of the endpoint
+  writing to Sanity — avoids introducing a server write token; writes stay under
+  the authenticated operator. The base64 hop sidesteps a CORS-blocked image fetch.
+- **Gated by `PREVIEW_SECRET`** and reuses the Studio's `SANITY_STUDIO_PREVIEW_*`
+  env (origin + secret) — no new Studio config.
+- **Draft-only, unverified** — colors are approximate, logo is a preview, ink is a
+  placeholder; the action says so. Colleges only (ESPN has no K-12).
+
+**Gotcha:** `DATAGOV_API_KEY` is local-only today, so the hosted flow fills
+mascot/colors/logo but not city/state/official name until the key is added to
+Vercel. The endpoint degrades gracefully (uses ESPN's short name).
+
+---
+
 ## 2026-07-07 — Support = own doc type; "Legal & Compliance" Studio group
 
 **Context:** A client compliance package (round-up donation platform) implied

@@ -19,7 +19,7 @@ the `School` shape in [`src/data/schools.ts`](../src/data/schools.ts).
 
 ---
 
-## Three ways to add schools
+## Four ways to add schools
 
 ### 1. Studio form — the default (no code)
 
@@ -28,10 +28,25 @@ For one-off additions by anyone, technical or not:
 1. Go to **https://xtrapoint.sanity.studio** and sign in.
 2. **School → Create new**, fill the fields (below), upload the logo + any
    photos, and pick the two brand colors.
-3. **Preview before you publish:** use the **"Open preview"** action (the ⋯ menu
+3. **Colleges: prefill it automatically.** On the new (empty) school, open the
+   ⋯ menu and click **"Auto-fill from ESPN"**, then type the team name (e.g.
+   `Oregon Ducks`). It fills in the mascot, brand colors, fund name, and a
+   **logo preview** — and city/state + the official name when the DataGov key is
+   configured (see below). It only fills **blank** fields, so anything you've
+   already typed is safe. ⚠ Colors are approximate and the logo is an
+   **unverified preview** — verify the colors, set the dark **ink** color, and
+   replace the logo with the partner-approved file before publishing. Colleges
+   only (ESPN doesn't list K-12 / non-football schools).
+4. **Preview before you publish:** use the **"Open preview"** action (the ⋯ menu
    on the document) to see the draft rendered on the real donor page in a new tab.
-4. **Publish.** Within seconds the webhook rebuilds staging + production, and the
+5. **Publish.** Within seconds the webhook rebuilds staging + production, and the
    two pages + share image go live.
+
+> The **Auto-fill from ESPN** button is the browser version of path 3 (the
+> terminal `seed:college`). It calls the site's `/api/seed-college` endpoint. To
+> also fill **city/state + the official school name**, set `DATAGOV_API_KEY` in
+> Vercel (Production + Preview) — a free key from api.data.gov/signup. Without it,
+> everything else still works; it just uses ESPN's short name.
 
 ### 2. Bulk import — many at once (terminal)
 

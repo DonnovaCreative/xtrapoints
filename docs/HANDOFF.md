@@ -149,10 +149,17 @@ the repo.
 
 ### Adding schools — 3 paths (detail in ADDING-A-SCHOOL.md)
 
-1. **Studio form** — https://xtrapoint.sanity.studio (non-technical).
+1. **Studio form** — https://xtrapoint.sanity.studio (non-technical). Colleges:
+   the ⋯ menu has **"Auto-fill from ESPN"** (`studio/collegeAutofillAction.ts`) →
+   prompts for a team name, calls the site endpoint **`/api/seed-college`**
+   (`src/pages/api/seed-college.ts` + `src/lib/collegeSeed.ts`), and
+   `setIfMissing`-prefills the open draft (mascot/colors/fund/logo; city/state +
+   official name only if `DATAGOV_API_KEY` is on Vercel). Logo is uploaded under
+   the editor's own session (no server write token). Endpoint is gated by
+   `PREVIEW_SECRET`; the action reuses the Studio's `SANITY_STUDIO_PREVIEW_*` vars.
 2. **Bulk import** — `cd studio && IMPORT_FILE=import/x.json npm run import`
    (`PUBLISH=1` for live; else drafts). `studio/scripts/import.ts`.
-3. **Auto-seed a college** — `cd studio && SEARCH="oregon" npm run seed:college`
+3. **Auto-seed a college (terminal)** — `cd studio && SEARCH="oregon" npm run seed:college`
    to find ESPN's name, then `COLLEGE="Oregon Ducks" npm run seed:college` →
    review-ready draft (mascot/color/logo-preview from ESPN; optional city/state +
    official name from College Scorecard if `DATAGOV_API_KEY` is in `.env`).
@@ -257,7 +264,7 @@ Staging/preview de-indexed, production indexable (keyed on `VERCEL_ENV`).
 | --- | --- | --- |
 | `SANITY_READ_TOKEN` | Vercel Prod+Preview **and** local `.env` | Read school content at build + OG runtime (required) |
 | `PREVIEW_SECRET` | Vercel Prod+Preview **and** local `.env` | Gates the draft-preview route; must match Studio's `SANITY_STUDIO_PREVIEW_SECRET` |
-| `DATAGOV_API_KEY` | local `.env` only (optional) | Auto-seed city/state via College Scorecard |
+| `DATAGOV_API_KEY` | local `.env`; **add to Vercel** to enable it in the Studio "Auto-fill from ESPN" flow (optional) | Auto-seed city/state + official name via College Scorecard |
 | `PUBLIC_WEB3FORMS_KEY` | `.env` + Vercel | Contact/waitlist form delivery |
 
 ## Open items / follow-ups
