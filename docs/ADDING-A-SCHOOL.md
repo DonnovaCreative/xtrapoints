@@ -115,7 +115,9 @@ officially-approved file**, and Publish.
 | `logo` | image | **White/mono** logo for the dark header (SVG or PNG). Also the OG lockup. Omit → text wordmark. |
 | `logoBadge` | toggle | ON only for a **colored** logo → white badge so it reads on the dark header. |
 | `logoLockup` | toggle | "Show school name next to logo." ON for **small/square** logos (common for high schools) → locks the `short` name up as text beside the logo in the header. |
-| `logoClass` | `h-8 w-auto` | Advanced header sizing; default `h-7 w-auto`. |
+| `logoSize` | preset / Custom | Header logo height: Small 24 / Medium 28 / Large 40 / X-Large 56 / 2X-Large 80 px, or **Custom** → a slider (24–120px). |
+| `headerHug` | toggle | OFF (default) = fixed 68px header bar. ON = header has no fixed height and grows to fit the logo — for tall crest/wordmark lockups. |
+| `headerPadding` | toggle | Only when `headerHug` is ON. ON (default) adds standard space above/below the logo; turn OFF when the logo file already has margin baked in (header sits tight to it). |
 | `mark` | image | Optional single-color icon (e.g. a paw) for the app avatar; tinted to the accent. |
 | `avatar` | image | Optional full-color square logo for the app avatar (beats `mark`). |
 | `photos.*` | images | `team` / `celebrate` / `fans` / `action` / `mascot` — each optional; pages degrade gracefully. |

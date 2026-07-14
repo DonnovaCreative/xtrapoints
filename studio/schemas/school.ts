@@ -1,6 +1,7 @@
 import { defineType, defineField } from "sanity";
 import { ColorInput } from "../components/ColorInput";
 import { FundInput } from "../components/FundInput";
+import { LogoHeightInput } from "../components/LogoHeightInput";
 
 const HEX_RULE = (r: import("sanity").StringRule) =>
   r.regex(/^#[0-9a-fA-F]{6}$/, { name: "hex color (e.g. #aaf10a)" });
@@ -125,7 +126,7 @@ export default defineType({
       type: "string",
       group: "branding",
       description:
-        "How tall the logo appears in the header. Bump it up for wide crest/wordmark lockups. The header bar is 68px tall, so X-Large and 2X-Large extend a little beyond it — fine on this overlay header, but preview to check.",
+        "How tall the logo appears in the header. Pick a preset, or choose Custom for a slider. The header bar is 68px by default, so larger logos extend beyond it — turn on “Header hugs the logo” below to grow the bar to fit.",
       options: {
         list: [
           { title: "Small — 24px", value: "sm" },
@@ -133,10 +134,41 @@ export default defineType({
           { title: "Large — 40px", value: "lg" },
           { title: "X-Large — 56px", value: "xl" },
           { title: "2X-Large — 80px", value: "2xl" },
+          { title: "Custom (slider) —", value: "custom" },
         ],
         layout: "radio",
       },
       initialValue: "md",
+    }),
+    defineField({
+      name: "logoHeight",
+      title: "Custom logo height",
+      type: "number",
+      group: "branding",
+      components: { input: LogoHeightInput },
+      description: "Drag to set the logo height, 24–120px.",
+      initialValue: 40,
+      validation: (r) => r.min(24).max(120),
+      hidden: ({ document }) => (document?.logoSize ?? "md") !== "custom",
+    }),
+    defineField({
+      name: "headerHug",
+      title: "Header hugs the logo",
+      type: "boolean",
+      group: "branding",
+      description:
+        "OFF (default): the header is a fixed 68px bar and the logo sits inside it. ON: the header has no fixed height and grows to fit the logo — best for tall crest/wordmark lockups.",
+      initialValue: false,
+    }),
+    defineField({
+      name: "headerPadding",
+      title: "Add padding around the logo",
+      type: "boolean",
+      group: "branding",
+      description:
+        "Only when “Header hugs the logo” is on. ON (default): adds standard space above/below the logo. Turn OFF when the logo file already has its own margin baked in, so the header sits tight to it.",
+      initialValue: true,
+      hidden: ({ document }) => !document?.headerHug,
     }),
     defineField({
       name: "mark",

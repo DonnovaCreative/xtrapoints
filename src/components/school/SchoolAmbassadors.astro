@@ -89,7 +89,7 @@ const recognition = [
   description={`Become a ${school.short} Ambassador: bring round-up giving to campus and earn swag, gift cards, and VIP perks. From ${brand.name}.`}
   ogImage={`/schools/${school.slug}/og.png`}
 >
-  <div style={themeStyle}>
+  <div style={`${themeStyle}--header-h:${school.headerHeightPx ?? 68}px;`}>
     <SchoolHeader
       school={school}
       nav={{ label: "For donors", href: donorUrl }}

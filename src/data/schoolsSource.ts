@@ -22,7 +22,10 @@ interface SchoolDoc {
   logoBadge: boolean | null;
   whiteHeader: boolean | null;
   logoLockup: boolean | null;
-  logoSize: "sm" | "md" | "lg" | "xl" | "2xl" | null;
+  logoSize: "sm" | "md" | "lg" | "xl" | "2xl" | "custom" | null;
+  logoHeight: number | null;
+  headerHug: boolean | null;
+  headerPadding: boolean | null;
   mark: string | null;
   avatar: string | null;
   photos: Partial<
@@ -46,7 +49,7 @@ const VALID = `_type == "school" && !(_id in path("drafts.**")) && defined(slug.
 const PROJECTION = `{
   "slug": slug.current,
   name, short, mascot, fund, city, state,
-  logoBadge, whiteHeader, logoLockup, logoSize,
+  logoBadge, whiteHeader, logoLockup, logoSize, logoHeight, headerHug, headerPadding,
   "logo": logo.asset->url,
   "mark": mark.asset->url,
   "avatar": avatar.asset->url,
@@ -66,17 +69,35 @@ const PROJECTION = `{
   }
 }`;
 
-// Header logo size preset → Tailwind class (see SchoolHeader). Heights in px are
-// noted for the Studio helper text (schemas/school.ts). Note: the header bar is
-// --header-h (68px), so xl/2xl extend beyond it — fine for wide crest/wordmark
-// lockups on the overlay header.
-const LOGO_SIZE: Record<string, string> = {
-  sm: "h-6 w-auto", // 24px
-  md: "h-7 w-auto", // 28px (default)
-  lg: "h-10 w-auto", // 40px
-  xl: "h-14 w-auto", // 56px
-  "2xl": "h-20 w-auto", // 80px
+// Header logo height presets → px (see SchoolHeader, which sets the height
+// inline so the "custom" slider can use any value). Editors also get a custom
+// size (24–120px) and can switch the header from the fixed 68px bar to hugging
+// the logo (with optional padding). Computed per school in `headerMetrics`.
+const LOGO_SIZE_PX: Record<string, number> = {
+  sm: 24,
+  md: 28, // default
+  lg: 40,
+  xl: 56,
+  "2xl": 80,
 };
+const DEFAULT_HEADER_H = 68; // the fixed bar, matches --header-h (4.25rem)
+const HEADER_PAD = 16; // standard vertical padding per side (hug mode)
+const CTA_MIN = 44; // keep the header tall enough for the CTA/nav when hugging
+
+/** Resolve logo height + header height/padding from the doc's size settings. */
+function headerMetrics(doc: SchoolDoc) {
+  const size = doc.logoSize ?? "md";
+  const logoHeightPx =
+    size === "custom"
+      ? Math.min(120, Math.max(24, doc.logoHeight ?? 40))
+      : (LOGO_SIZE_PX[size] ?? LOGO_SIZE_PX.md);
+  const headerHug = doc.headerHug ?? false;
+  const headerPadPx = doc.headerPadding === false ? 0 : HEADER_PAD;
+  const headerHeightPx = headerHug
+    ? Math.max(logoHeightPx, CTA_MIN) + headerPadPx * 2
+    : DEFAULT_HEADER_H;
+  return { logoHeightPx, headerHug, headerPadPx, headerHeightPx };
+}
 
 /** Drop null/empty photo entries so `school.photos?.team` behaves like before. */
 const mapPhotos = (photos: SchoolDoc["photos"]): School["photos"] => {
@@ -102,7 +123,7 @@ const toSchool = (doc: SchoolDoc): School => ({
   ...(doc.logoBadge ? { logoBadge: true } : {}),
   ...(doc.whiteHeader ? { whiteHeader: true } : {}),
   ...(doc.logoLockup ? { logoLockup: true } : {}),
-  logoClass: LOGO_SIZE[doc.logoSize ?? "md"] ?? LOGO_SIZE.md,
+  ...headerMetrics(doc),
   ...(doc.mark ? { mark: doc.mark } : {}),
   ...(doc.avatar ? { avatar: doc.avatar } : {}),
   ...(mapPhotos(doc.photos) ? { photos: mapPhotos(doc.photos) } : {}),

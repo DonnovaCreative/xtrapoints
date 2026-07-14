@@ -50,7 +50,7 @@ const advantages = [
   description={`Round-up giving for the ${school.fund}: your everyday spare change supports the ${school.mascot}, free. From ${brand.name} — launching soon.`}
   ogImage={`/schools/${school.slug}/og.png`}
 >
-  <div style={themeStyle}>
+  <div style={`${themeStyle}--header-h:${school.headerHeightPx ?? 68}px;`}>
     <SchoolHeader
       school={school}
       nav={{ label: "Become an Ambassador", href: ambassadorUrl }}

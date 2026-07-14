@@ -51,8 +51,14 @@ export interface School {
   /** Lock the school's short name up beside the logo in the header — for small/
    *  square logos (common for high schools) that read poorly alone. */
   logoLockup?: boolean;
-  /** Header logo sizing classes. Default "h-7 w-auto"; bump for wide wordmarks. */
-  logoClass?: string;
+  /** Resolved header logo height in px (from the size preset or custom slider). */
+  logoHeightPx?: number;
+  /** Header hugs the logo (no fixed bar height) instead of the standard 68px. */
+  headerHug?: boolean;
+  /** Vertical padding per side in the header row when hugging (0 = flush). */
+  headerPadPx?: number;
+  /** The header height (= --header-h) for this school: 68 fixed, or logo-based. */
+  headerHeightPx?: number;
   /** Small square mark (e.g. paw) tinted with the accent; used in the app mockup. */
   mark?: string;
   /** Full-color square logo for the app mockup avatar (takes priority over `mark`). */
