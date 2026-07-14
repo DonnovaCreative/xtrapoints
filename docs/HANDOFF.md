@@ -150,8 +150,9 @@ the repo.
 ### Adding schools — 3 paths (detail in ADDING-A-SCHOOL.md)
 
 1. **Studio form** — https://xtrapoint.sanity.studio (non-technical). Colleges:
-   the ⋯ menu has **"Auto-fill from ESPN"** (`studio/collegeAutofillAction.ts`) →
-   prompts for a team name, calls the site endpoint **`/api/seed-college`**
+   the ⋯ menu has **"Auto-fill from ESPN"** (`studio/collegeAutofillAction.tsx`) →
+   opens a dialog to search + pick a college (@sanity/ui), calls the site endpoint
+   **`/api/seed-college`**
    (`src/pages/api/seed-college.ts` + `src/lib/collegeSeed.ts`), and
    `setIfMissing`-prefills the open draft (mascot/colors/fund/logo; city/state +
    official name only if `DATAGOV_API_KEY` is on Vercel). Logo is uploaded under

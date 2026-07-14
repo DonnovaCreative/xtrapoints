@@ -125,13 +125,14 @@ export default defineType({
       type: "string",
       group: "branding",
       description:
-        "How big the logo appears in the header. Bump it up for wide crest/wordmark lockups.",
+        "How tall the logo appears in the header. Bump it up for wide crest/wordmark lockups. The header bar is 68px tall, so X-Large and 2X-Large extend a little beyond it — fine on this overlay header, but preview to check.",
       options: {
         list: [
-          { title: "Small", value: "sm" },
-          { title: "Medium (default)", value: "md" },
-          { title: "Large", value: "lg" },
-          { title: "X-Large", value: "xl" },
+          { title: "Small — 24px", value: "sm" },
+          { title: "Medium — 28px (default)", value: "md" },
+          { title: "Large — 40px", value: "lg" },
+          { title: "X-Large — 56px", value: "xl" },
+          { title: "2X-Large — 80px", value: "2xl" },
         ],
         layout: "radio",
       },

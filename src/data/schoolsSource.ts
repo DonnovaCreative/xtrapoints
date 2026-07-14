@@ -22,7 +22,7 @@ interface SchoolDoc {
   logoBadge: boolean | null;
   whiteHeader: boolean | null;
   logoLockup: boolean | null;
-  logoSize: "sm" | "md" | "lg" | "xl" | null;
+  logoSize: "sm" | "md" | "lg" | "xl" | "2xl" | null;
   mark: string | null;
   avatar: string | null;
   photos: Partial<
@@ -66,12 +66,16 @@ const PROJECTION = `{
   }
 }`;
 
-// Header logo size preset → Tailwind class (see SchoolHeader).
+// Header logo size preset → Tailwind class (see SchoolHeader). Heights in px are
+// noted for the Studio helper text (schemas/school.ts). Note: the header bar is
+// --header-h (68px), so xl/2xl extend beyond it — fine for wide crest/wordmark
+// lockups on the overlay header.
 const LOGO_SIZE: Record<string, string> = {
-  sm: "h-6 w-auto",
-  md: "h-7 w-auto",
-  lg: "h-8 w-auto",
-  xl: "h-10 w-auto",
+  sm: "h-6 w-auto", // 24px
+  md: "h-7 w-auto", // 28px (default)
+  lg: "h-10 w-auto", // 40px
+  xl: "h-14 w-auto", // 56px
+  "2xl": "h-20 w-auto", // 80px
 };
 
 /** Drop null/empty photo entries so `school.photos?.team` behaves like before. */
