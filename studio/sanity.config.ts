@@ -8,6 +8,7 @@ import {
   legalPreview,
   supportPreview,
 } from "./previewAction";
+import { collegeAutofillAction } from "./collegeAutofillAction";
 
 export default defineConfig({
   name: "default",
@@ -70,7 +71,7 @@ export default defineConfig({
     // Add draft-preview actions: school docs → donor + ambassador; legal → page.
     actions: (prev, { schemaType }) =>
       schemaType === "school"
-        ? [...prev, schoolDonorPreview, schoolAmbassadorPreview]
+        ? [...prev, collegeAutofillAction, schoolDonorPreview, schoolAmbassadorPreview]
         : schemaType === "legalPage"
           ? [...prev, legalPreview]
           : schemaType === "supportPage"
