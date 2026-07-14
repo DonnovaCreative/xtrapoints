@@ -5,6 +5,7 @@ import { schemaTypes } from "./schemas";
 import {
   schoolDonorPreview,
   schoolAmbassadorPreview,
+  schoolOnePagerPreview,
   legalPreview,
   supportPreview,
 } from "./previewAction";
@@ -71,7 +72,13 @@ export default defineConfig({
     // Add draft-preview actions: school docs → donor + ambassador; legal → page.
     actions: (prev, { schemaType }) =>
       schemaType === "school"
-        ? [...prev, collegeAutofillAction, schoolDonorPreview, schoolAmbassadorPreview]
+        ? [
+            ...prev,
+            collegeAutofillAction,
+            schoolDonorPreview,
+            schoolAmbassadorPreview,
+            schoolOnePagerPreview,
+          ]
         : schemaType === "legalPage"
           ? [...prev, legalPreview]
           : schemaType === "supportPage"

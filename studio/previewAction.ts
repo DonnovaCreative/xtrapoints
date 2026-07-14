@@ -66,6 +66,10 @@ export const schoolAmbassadorPreview = makePreviewAction(
   "Preview ambassador page",
   (slug) => `/preview/schools/${slug}/ambassadors`,
 );
+export const schoolOnePagerPreview = makePreviewAction(
+  "Preview one-pager (PDF)",
+  (slug) => `/preview/schools/${slug}/one-pager`,
+);
 export const legalPreview = makePreviewAction(
   "Open preview",
   (slug) => `/preview/legal/${slug}`,

@@ -221,24 +221,31 @@ client's team can manage it in one place:
 Editors can preview a school's **unpublished draft** on the real page before
 publishing (Option A — no visual-editing overlays yet).
 
-- **Studio:** ⋯ menu on a doc → **"Open preview"** (eye icon). **School** docs get
-  two: *Open preview* (donor) + *Preview ambassador page*; **legal** docs get one.
-  Via `studio/previewAction.ts` (a `makePreviewAction` factory) + `document.actions`
-  in `sanity.config.ts`. Icon from `@sanity/icons@^3` (React-18 compatible — v5
-  needs React 19).
+- **Studio:** ⋯ menu on a doc → eye-icon actions. **School** docs get three:
+  *Open preview* (donor) + *Preview ambassador page* + *Preview one-pager (PDF)*;
+  **legal** + **support** docs get one each. Via `studio/previewAction.ts` (a
+  `makePreviewAction` factory) + `document.actions` in `sanity.config.ts`. Icon
+  from `@sanity/icons@^3` (React-18 compatible — v5 needs React 19).
 - **Routes** (`prerender = false`; shared secret gate `src/lib/previewGuard.ts`):
   - `preview/schools/[slug]` → `SchoolLanding.astro` (donor)
   - `preview/schools/[slug]/ambassadors` → `SchoolAmbassadors.astro`
-  - `preview/legal/[slug]` → `LegalPageView.astro`
+  - `preview/schools/[slug]/one-pager` → `OnePagerView.astro` (draft sell sheet;
+    its Download button → the draft PDF below)
+  - `preview/schools/[slug]/one-pager.pdf` → prints the secret-gated draft HTML
+    preview via headless Chromium (shared `src/lib/onePagerPdf.ts`, used by the
+    published PDF too). So sales can download a sell sheet **before** publishing.
+    Not CDN-cached (drafts change). ⚠ Deployment Protection would break it (the fn
+    fetches its own preview URL — see DECISIONS).
+  - `preview/legal/[slug]` → `LegalPageView.astro`; `preview/support` → `SupportPageView.astro`
   Each renders the **same component** as the live route, from the **draft**
-  (`getSchoolDraft()` / `getLegalPageDraft()` — a `previewClient` with the
-  `previewDrafts` perspective). So preview == production fidelity.
+  (`getSchoolDraft()` / `getLegalPageDraft()` / `getSupportPageDraft()` — a
+  `previewClient` with the `previewDrafts` perspective). So preview == production fidelity.
 - **⚠ Extracted shared components** back the static + preview routes:
-  `SchoolLanding`, `SchoolAmbassadors`, `LegalPageView`. Edit the page there.
-  Their client islands (DotField, ContactForm, WaitlistForm) are **`client:only`**
-  so the on-demand SSR function never server-renders browser-only deps (three.js,
-  @hcaptcha) — see the DECISIONS gotcha. Trade-off: those islands render
-  client-side on the live school pages too (mount after load).
+  `SchoolLanding`, `SchoolAmbassadors`, `OnePagerView`, `LegalPageView`,
+  `SupportPageView`. Edit the page there. The donor/ambassador islands (DotField,
+  ContactForm, WaitlistForm) are **`client:only`** so the on-demand SSR function
+  never server-renders browser-only deps (three.js, @hcaptcha) — see the DECISIONS
+  gotcha. (The one-pager has no islands, so it server-renders directly.)
 - **Gating:** requires `?secret=<PREVIEW_SECRET>` or it 401s; also sends
   `X-Robots-Tag: noindex`. **Security is obscurity-level** — the Studio bundles the
   secret (see note in `previewAction.ts`); fine for draft school pages, upgrade to

@@ -1,0 +1,46 @@
+---
+// On-demand DRAFT preview of a school's sales one-pager. Renders the same
+// OnePagerView as the live route, from the school's unpublished draft, so sales
+// can preview/download the sell sheet before the page is published. Secret-gated
+// (?secret=<PREVIEW_SECRET>) + noindex. Server-rendered (not static).
+//
+// The one-pager has no client islands, so it's safe to server-render (unlike the
+// donor/ambassador previews — see DECISIONS.md).
+export const prerender = false;
+
+import OnePagerView from "@/components/school/OnePagerView.astro";
+import { getSchoolDraft } from "@/data/schoolsSource";
+import { previewUnauthorized } from "@/lib/previewGuard";
+
+Astro.response.headers.set("X-Robots-Tag", "noindex, nofollow");
+
+const denied = previewUnauthorized(Astro.url);
+if (denied) return denied;
+
+const { slug } = Astro.params;
+const secret = Astro.url.searchParams.get("secret") ?? "";
+
+let school;
+try {
+  school = slug ? await getSchoolDraft(slug) : undefined;
+} catch (err) {
+  const msg =
+    err instanceof Error ? `${err.name}: ${err.message}\n\n${err.stack ?? ""}` : String(err);
+  return new Response(`Preview data error:\n\n${msg}`, {
+    status: 500,
+    headers: { "content-type": "text/plain; charset=utf-8" },
+  });
+}
+
+if (!school) {
+  return new Response(
+    `No school found for “${slug}”. It may not exist yet, or has no draft or published version.`,
+    { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } },
+  );
+}
+
+// The download button points at the secret-gated draft PDF route.
+const pdfHref = `/preview/schools/${slug}/one-pager.pdf?secret=${encodeURIComponent(secret)}`;
+---
+
+<OnePagerView school={school} pdfHref={pdfHref} />
