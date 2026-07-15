@@ -38,7 +38,7 @@ const whatTheyDo = [
 ];
 
 const steps = [
-  { n: "01", title: "Apply & onboard", body: `Submit a short application. Once ${school.fund} approves you, complete a quick online training.` },
+  { n: "01", title: "Apply & onboard", body: `Submit a short application. Once ${school.approver} approves you, complete a quick online training.` },
   { n: "02", title: "Get your toolkit", body: "Your own referral link, QR codes, social templates, scripts & FAQs — everything done for you." },
   { n: "03", title: "Promote on campus", body: "Spread the word across campus, your network, and social channels." },
   { n: "04", title: "Advance through tiers", body: "As you sign up donors, climb from Bronze to Gold and unlock bigger rewards." },
@@ -46,7 +46,7 @@ const steps = [
 
 const criteria = [
   { title: "Current students", body: `Enrolled at ${school.short} and in good standing.` },
-  { title: "Reviewed & approved", body: `Applications are reviewed and approved by ${school.fund}.` },
+  { title: "Reviewed & approved", body: `Applications are reviewed and approved by ${school.approver}.` },
   { title: "Flexible & low-key", body: "Go at your own pace — no quotas, no set hours. Do what you can, when you can." },
   { title: `${school.mascot} at heart`, body: "Love for the team and a knack for connecting with people." },
 ];
@@ -81,8 +81,8 @@ const recognition = [
 ---
 
 <Layout
-  title={`${school.short} Ambassador Program × ${brand.name}`}
-  description={`Become a ${school.short} Ambassador: bring round-up giving to campus and earn swag, gift cards, and VIP perks. From ${brand.name}.`}
+  title={`${school.programName} Ambassador Program × ${brand.name}`}
+  description={`Become a ${school.programName} Ambassador: bring round-up giving to campus and earn swag, gift cards, and VIP perks. From ${brand.name}.`}
   ogImage={`/schools/${school.slug}/og.png`}
 >
   <div style={`${themeStyle}--header-h:${school.headerHeightPx ?? 68}px;`}>
@@ -123,7 +123,7 @@ const recognition = [
           </h1>
           <div class="reveal">
             <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/75">
-              Become a {school.short} Ambassador, bring round-up giving to the
+              Become a {school.programName} Ambassador, bring round-up giving to the
               {" "}{school.mascot} fanbase, and earn rewards, recognition, and real
               leadership experience while you do it.
             </p>
@@ -146,8 +146,8 @@ const recognition = [
             <p class="mt-5 text-lg leading-relaxed text-gray-600">
               The {brand.name} Ambassador Program is a crew of {school.short}
               students who bring round-up giving to campus. You spread the word,
-              sign up donors, and help fund {school.short} athletics, scholarships,
-              and student initiatives — building your résumé and network along the
+              sign up donors, and help fund {school.approver} to support
+              {" "}{school.beneficiary} — building your résumé and network along the
               way.
             </p>
           </div>
@@ -275,7 +275,7 @@ const recognition = [
             </h2>
             <p class="mt-5 text-lg leading-relaxed text-gray-600">
               The online ambassador application is on its way — every applicant is
-              reviewed and approved by {school.fund}. Join the waitlist and we'll
+              reviewed and approved by {school.approver}. Join the waitlist and we'll
               email you the moment enrollment opens.
             </p>
             <div class="mx-auto mt-8 max-w-md">

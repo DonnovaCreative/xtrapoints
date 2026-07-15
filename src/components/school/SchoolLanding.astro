@@ -31,23 +31,40 @@ const ambassadorUrl = `/schools/${school.slug}/ambassadors`;
 const steps = [
   { n: "01", title: "Download the app.", body: `Get the ${brand.name} app and pick the ${school.mascot}. (Coming soon to the App Store & Google Play.)` },
   { n: "02", title: "Link your bank account.", body: "Connect your bank account in seconds — verified in real time by Plaid. Your login is never shared with us." },
-  { n: "03", title: "Round up for the team.", body: `Every purchase rounds up to the nearest dollar — a $3.50 coffee becomes $4 — and the spare change becomes a gift to the ${school.fund}. It happens automatically, across everything you buy.` },
+  { n: "03", title: "Round up for the team.", body: `Every purchase rounds up to the nearest dollar — a $3.50 coffee becomes $4 — and the spare change becomes a gift to ${school.givingDest}. It happens automatically, across everything you buy.` },
 ];
 
 // Donor-facing advantages.
 const advantages = [
   { title: "Effortless", body: "Round-ups happen automatically in the background. Set it once and forget it." },
   { title: "You're in control", body: "Choose how much you round up, set a monthly cap, and change or pause it anytime." },
-  { title: "It adds up", body: `Spare change from everyday spending becomes steady, recurring support for the ${school.fund}.` },
+  { title: "It adds up", body: `Spare change from everyday spending becomes steady, recurring support for ${school.givingDest}.` },
   { title: "Secure by design", body: "Your bank connection is verified and protected by Plaid — your login is never shared with us." },
   { title: "Cancel anytime", body: "Pause or stop whenever you like — right from the app, no questions asked." },
   { title: "Anyone can join", body: "Students, alumni, family, friends, and local fans can all pitch in for the team." },
 ];
+
+// Optional explainer video → an embeddable source. YouTube/Vimeo render in an
+// iframe; anything else is treated as a direct video file.
+function videoEmbed(url?: string) {
+  if (!url) return null;
+  const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
+  if (yt) return { kind: "iframe" as const, src: `https://www.youtube.com/embed/${yt[1]}` };
+  const vm = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (vm) return { kind: "iframe" as const, src: `https://player.vimeo.com/video/${vm[1]}` };
+  return { kind: "file" as const, src: url };
+}
+const video = videoEmbed(school.videoUrl);
+
+// Split the optional custom "why give" body into paragraphs (blank-line delimited).
+const whyGiveParas = school.whyGiveBody
+  ? school.whyGiveBody.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
+  : [];
 ---
 
 <Layout
   title={`${school.short} × ${brand.name} — Round-Up Giving`}
-  description={`Round-up giving for the ${school.fund}: your everyday spare change supports the ${school.mascot}. From ${brand.name} — launching soon.`}
+  description={`Round-up giving for ${school.givingDest}: your everyday spare change supports ${school.beneficiary}. From ${brand.name} — launching soon.`}
   ogImage={`/schools/${school.slug}/og.png`}
 >
   <div style={`${themeStyle}--header-h:${school.headerHeightPx ?? 68}px;`}>
@@ -91,7 +108,7 @@ const advantages = [
             <div class="reveal">
               <p class="mt-6 max-w-xl text-lg leading-relaxed text-white/75">
                 Soon you'll link your bank account once and your everyday spending
-                will round up into automatic gifts for the {school.fund} — powered
+                will round up into automatic gifts for {school.givingDest} — powered
                 by {" "}{brand.name}. Setup takes less than a minute.
               </p>
               <div class="mt-8 flex flex-wrap items-center gap-4">
@@ -113,8 +130,8 @@ const advantages = [
               Signing up is <span class="ed ed-dark">Simple</span>.
             </h2>
             <p class="mt-5 text-lg leading-relaxed text-gray-600">
-              Three quick steps and your spare change starts supporting the
-              {" "}{school.mascot} — without changing how you already spend.
+              Three quick steps and your spare change starts supporting
+              {" "}{school.givingDest} — without changing how you already spend.
             </p>
           </div>
           <div class="stagger mt-14 grid gap-6 md:grid-cols-3">
@@ -128,6 +145,31 @@ const advantages = [
           </div>
         </div>
       </section>
+
+      <!-- ===================== EXPLAINER VIDEO (optional) ===================== -->
+      {video && (
+        <section class="relative overflow-hidden bg-white pb-20 lg:pb-28">
+          <div class="relative z-10 mx-auto max-w-4xl px-6 lg:px-10">
+            <div
+              class="reveal overflow-hidden rounded-3xl bg-ink shadow-2xl ring-1 ring-gray-200/60"
+              style="aspect-ratio:16/9"
+            >
+              {video.kind === "file" ? (
+                <video src={video.src} controls playsinline class="h-full w-full object-cover"></video>
+              ) : (
+                <iframe
+                  src={video.src}
+                  title="How round-up giving works"
+                  loading="lazy"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                  class="h-full w-full"
+                ></iframe>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       <!-- ===================== SPIRIT BAND ===================== -->
       {school.photos?.celebrate && (
@@ -148,26 +190,40 @@ const advantages = [
         <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">
           <div class="reveal max-w-3xl">
             <Eyebrow index="02" label="Why round up" />
-            <h2 class="font-display mt-4 max-w-[20ch] text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900">
-              Tiny change, <span class="ed ed-dark">Real impact</span>.
-            </h2>
-            <p class="mt-5 text-lg leading-relaxed text-gray-600">
-              Recurring, everyday giving is the kind a program can build on — spare
-              change from purchases you're already making becomes steady support the
-              {school.mascot} can count on all season long.
-            </p>
+            {whyGiveParas.length > 0 ? (
+              <h2 class="font-display mt-4 max-w-[20ch] text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900">
+                {school.whyGiveHeading ?? "Why your support matters"}
+              </h2>
+            ) : (
+              <Fragment>
+                <h2 class="font-display mt-4 max-w-[20ch] text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900">
+                  Tiny change, <span class="ed ed-dark">Real impact</span>.
+                </h2>
+                <p class="mt-5 text-lg leading-relaxed text-gray-600">
+                  Recurring, everyday giving is the kind a program can build on — spare
+                  change from purchases you're already making becomes steady support
+                  {" "}{school.beneficiary} can count on all season long.
+                </p>
+              </Fragment>
+            )}
           </div>
-          <div class="stagger mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {advantages.map((a) => (
-              <div class="rounded-2xl border border-gray-200 bg-white p-7">
-                <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-lime-soft text-lime-dark">
-                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
-                </span>
-                <h3 class="mt-4 text-lg font-bold tracking-tight text-gray-900">{a.title}</h3>
-                <p class="mt-2 leading-relaxed text-gray-600">{a.body}</p>
-              </div>
-            ))}
-          </div>
+          {whyGiveParas.length > 0 ? (
+            <div class="reveal mt-8 max-w-3xl space-y-5 text-lg leading-relaxed text-gray-600">
+              {whyGiveParas.map((para) => <p>{para}</p>)}
+            </div>
+          ) : (
+            <div class="stagger mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {advantages.map((a) => (
+                <div class="rounded-2xl border border-gray-200 bg-white p-7">
+                  <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-lime-soft text-lime-dark">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
+                  </span>
+                  <h3 class="mt-4 text-lg font-bold tracking-tight text-gray-900">{a.title}</h3>
+                  <p class="mt-2 leading-relaxed text-gray-600">{a.body}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -179,7 +235,7 @@ const advantages = [
           <div class="reveal-left">
             <Eyebrow index="03" label="For students" dark />
             <h2 class="font-display mt-4 text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-white">
-              Become a {school.short} <span class="ed">Ambassador</span>.
+              Become a {school.programName} <span class="ed">Ambassador</span>.
             </h2>
             <p class="mt-5 max-w-xl text-lg leading-relaxed text-white/75">
               Are you a {school.short} student? Lead the movement on campus —
@@ -208,7 +264,7 @@ const advantages = [
                 Be first to back the <span class="ed ed-dark">{school.mascot}</span>.
               </h2>
               <p class="mt-5 max-w-md text-lg leading-relaxed text-gray-600">
-                Round-up giving for the {school.fund} is almost here. Join the
+                Round-up giving for {school.givingDest} is almost here. Join the
                 waitlist and we'll tell you the moment it goes live — so you can be
                 among the first {school.mascot} fans to start giving.
               </p>

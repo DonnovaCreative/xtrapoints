@@ -26,6 +26,11 @@ interface SchoolDoc {
   logoHeight: number | null;
   headerHug: boolean | null;
   headerPadding: boolean | null;
+  fundShort: string | null;
+  beneficiary: string | null;
+  whyGiveHeading: string | null;
+  whyGiveBody: string | null;
+  videoUrl: string | null;
   mark: string | null;
   avatar: string | null;
   photos: Partial<
@@ -49,6 +54,7 @@ const VALID = `_type == "school" && !(_id in path("drafts.**")) && defined(slug.
 const PROJECTION = `{
   "slug": slug.current,
   name, short, mascot, fund, city, state,
+  fundShort, beneficiary, whyGiveHeading, whyGiveBody, videoUrl,
   logoBadge, whiteHeader, logoLockup, logoSize, logoHeight, headerHug, headerPadding,
   "logo": logo.asset->url,
   "mark": mark.asset->url,
@@ -83,6 +89,34 @@ const LOGO_SIZE_PX: Record<string, number> = {
 const DEFAULT_HEADER_H = 68; // the fixed bar, matches --header-h (4.25rem)
 const HEADER_PAD = 16; // standard vertical padding per side (hug mode)
 const CTA_MIN = 44; // keep the header tall enough for the CTA/nav when hugging
+
+// The one XP-branded explainer video, reused across all schools once it exists.
+// Set this to the hosted URL and every page gets it (schools can still override
+// per-doc). Empty = no default video renders yet.
+const DEFAULT_EXPLAINER_VIDEO = "";
+
+/**
+ * Resolve the naming used in copy. `fundShort` (e.g. "KatFund") is an optional
+ * collective brand; when set it drives the giving destination, the ambassador
+ * program name, and the approver. Everything falls back to the school + fund
+ * names so schools that don't set it read exactly as before.
+ */
+function naming(doc: SchoolDoc) {
+  const mascot = doc.mascot ?? "";
+  const short = doc.short ?? "";
+  const fund = doc.fund ?? "";
+  const collective = doc.fundShort?.trim() || undefined;
+  const beneficiary = doc.beneficiary?.trim() || `the ${mascot}`;
+  return {
+    beneficiary,
+    ...(collective ? { collective } : {}),
+    programName: collective || short, // "Become a {programName} Ambassador"
+    approver: collective || fund, // "approved by {approver}"
+    // Giving destination: "Bearkat Athletes through KatFund" when a collective is
+    // set, else "the Bearkat Athletics Fund" (unchanged default).
+    givingDest: collective ? `${beneficiary} through ${collective}` : `the ${fund}`,
+  };
+}
 
 /** Resolve logo height + header height/padding from the doc's size settings. */
 function headerMetrics(doc: SchoolDoc) {
@@ -124,6 +158,12 @@ const toSchool = (doc: SchoolDoc): School => ({
   ...(doc.whiteHeader ? { whiteHeader: true } : {}),
   ...(doc.logoLockup ? { logoLockup: true } : {}),
   ...headerMetrics(doc),
+  ...naming(doc),
+  ...(doc.whyGiveHeading ? { whyGiveHeading: doc.whyGiveHeading } : {}),
+  ...(doc.whyGiveBody ? { whyGiveBody: doc.whyGiveBody } : {}),
+  ...(doc.videoUrl || DEFAULT_EXPLAINER_VIDEO
+    ? { videoUrl: doc.videoUrl || DEFAULT_EXPLAINER_VIDEO }
+    : {}),
   ...(doc.mark ? { mark: doc.mark } : {}),
   ...(doc.avatar ? { avatar: doc.avatar } : {}),
   ...(mapPhotos(doc.photos) ? { photos: mapPhotos(doc.photos) } : {}),

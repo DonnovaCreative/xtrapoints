@@ -4,6 +4,39 @@ Short log of non-obvious engineering decisions. Newest first.
 
 ---
 
+## 2026-07-08 — School copy: scalable naming model + optional custom blocks
+
+**Context:** Client/school feedback (SHSU/KatFund) wanted per-school phrasing —
+"give through KatFund", "Become a KatFund Ambassador", "approved by KatFund",
+"support Bearkat Athletes" — plus an optional custom "why give" pitch and an
+explainer video. The constraint: this templates to hundreds of schools, so it
+must default cleanly with **zero required per-school authoring**.
+
+**Decision:** Two optional naming fields + resolved helpers in `schoolsSource`
+(`naming()`), never hand-written per school:
+- `fundShort` (e.g. "KatFund") → drives `programName` (else school `short`),
+  `approver` (else `fund`), and the giving destination.
+- `beneficiary` (e.g. "Bearkat Athletes") → defaults to `the <mascot>`.
+- `givingDest` = `"<beneficiary> through <collective>"` when `fundShort` is set,
+  else `"the <fund>"` (the exact prior default). Templates use `{givingDest}`
+  **bare** (no leading "the") so both branches read grammatically.
+- Optional `whyGiveHeading`/`whyGiveBody` replace the default value-prop cards
+  in the "Why round up" section only when the body is set (Bucket A rewrote the
+  default to be donor-focused, so the fallback is strong).
+- Optional `videoUrl` (per-school) with a single `DEFAULT_EXPLAINER_VIDEO`
+  constant for the one XP-branded video — never per-school custom video.
+
+**Why:** pushes the scalability the client asked us to protect — every new field
+is optional with a sensible default, so the ~hundreds of other schools need no
+input, while KatFund-style partners get their exact copy. Verified: a school with
+none of these set renders byte-for-byte as before.
+
+**Gotcha:** `beneficiary` is a ready-to-drop-in phrase (default carries its own
+"the"), so templates must NOT prefix it with "the" — otherwise "the Bearkat
+Athletes" for schools that set a proper-noun beneficiary.
+
+---
+
 ## 2026-07-07 — Studio "Auto-fill from ESPN" via a site endpoint + client-side upload
 
 **Context:** Non-technical editors wanted the terminal `seed:college` flow (pull a

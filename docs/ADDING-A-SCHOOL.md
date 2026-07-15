@@ -111,6 +111,8 @@ officially-approved file**, and Publish.
 | `slug` | `sam-houston` | The URL. Click **Generate** from the short name. |
 | `mascot` | `Bearkats` | Plural — used throughout the copy. |
 | `fund` | `Bearkat Athletics Fund` | The fund supporters give to. |
+| `fundShort` | `KatFund` | **Optional** collective/brand name. When set, the copy reads "give through KatFund", "Become a KatFund Ambassador", "approved by KatFund". Empty → uses the school + fund names as before. |
+| `beneficiary` | `Bearkat Athletes` | **Optional** phrase for who donations help. Empty → defaults to "the <Mascot>". |
 | `city` / `state` | `Huntsville` / `TX` | Metadata. |
 | `logo` | image | **White/mono** logo for the dark header (SVG or PNG). Also the OG lockup. Omit → text wordmark. |
 | `logoBadge` | toggle | ON only for a **colored** logo → white badge so it reads on the dark header. |
@@ -121,6 +123,8 @@ officially-approved file**, and Publish.
 | `mark` | image | Optional single-color icon (e.g. a paw) for the app avatar; tinted to the accent. |
 | `avatar` | image | Optional full-color square logo for the app avatar (beats `mark`). |
 | `photos.*` | images | `team` / `celebrate` / `fans` / `action` / `mascot` — each optional; pages degrade gracefully. |
+| `whyGiveHeading` / `whyGiveBody` | text | **Optional** (Page copy & media). A fund's own "why give" pitch — when the body is set it replaces the default value-prop cards in the "Why round up" section. One paragraph per blank line. Empty → the standard donor-focused default. |
+| `videoUrl` | URL | **Optional** explainer video (YouTube / Vimeo / MP4) shown under the sign-up steps. Empty → the standard XtraPoint explainer once it exists (set the `DEFAULT_EXPLAINER_VIDEO` constant in `schoolsSource.ts`). |
 
 ### Brand colors
 

@@ -41,6 +41,22 @@ export interface School {
   fund: string; // "Bearkat Athletics Fund"
   city: string;
   state: string;
+  // ── Resolved naming for copy (see schoolsSource `naming`) ──
+  /** Who supporters help, e.g. "Bearkat Athletes". Defaults to "the <mascot>". */
+  beneficiary: string;
+  /** Optional collective/fund brand, e.g. "KatFund". Undefined when not set. */
+  collective?: string;
+  /** Ambassador program name: the collective, else the school short name. */
+  programName: string;
+  /** Who approves ambassadors: the collective, else the fund name. */
+  approver: string;
+  /** Giving destination phrase: "<beneficiary> through <collective>", else "the <fund>". */
+  givingDest: string;
+  /** Optional custom "Why give" heading + body (fund's own donor pitch). */
+  whyGiveHeading?: string;
+  whyGiveBody?: string;
+  /** Optional explainer video URL (per-school override or the XP default). */
+  videoUrl?: string;
   /** Mono/white logo for the dark co-brand header. Empty → styled wordmark. */
   logo?: string;
   /** Set true for a COLORED logo (e.g. dark-maned) — renders it on a white

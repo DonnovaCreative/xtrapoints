@@ -17,6 +17,7 @@ export default defineType({
     { name: "details", title: "Details", default: true },
     { name: "branding", title: "Logos & marks" },
     { name: "photos", title: "Photos" },
+    { name: "content", title: "Page copy & media" },
     { name: "theme", title: "Brand colors" },
   ],
   fields: [
@@ -67,6 +68,22 @@ export default defineType({
       validation: (r) => r.required(),
     }),
     defineField({
+      name: "fundShort",
+      title: "Fund / collective short name",
+      type: "string",
+      group: "details",
+      description:
+        'Optional. A short brand name for the giving collective, e.g. "KatFund". When set, it\'s used in the copy ("give through KatFund", "Become a KatFund Ambassador", "approved by KatFund"). Leave empty to use the school + fund names as normal.',
+    }),
+    defineField({
+      name: "beneficiary",
+      title: "Who supporters help",
+      type: "string",
+      group: "details",
+      description:
+        'Optional. Short phrase for who donations support, e.g. "Bearkat Athletes". Drop the "the" if it reads as a name. Leave empty to default to "the <Mascot>".',
+    }),
+    defineField({
       name: "city",
       title: "City",
       type: "string",
@@ -81,6 +98,34 @@ export default defineType({
       group: "details",
       description:
         "Not currently shown on the pages and not required — metadata only (2-letter code, e.g. “TX”).",
+    }),
+
+    // ── Page copy & media (all optional — strong defaults render when empty) ──
+    defineField({
+      name: "whyGiveHeading",
+      title: "“Why give” heading (custom)",
+      type: "string",
+      group: "content",
+      description:
+        'Optional. Overrides the heading of the "Why round up" section. Only used if you also fill in the custom body below.',
+    }),
+    defineField({
+      name: "whyGiveBody",
+      title: "“Why give” body (custom)",
+      type: "text",
+      rows: 6,
+      group: "content",
+      description:
+        "Optional. The fund's own pitch for why supporters should give. When set, it replaces the default value-prop cards in the “Why round up” section. One paragraph per blank line. Leave empty to use the standard donor-focused default.",
+    }),
+    defineField({
+      name: "videoUrl",
+      title: "Explainer video URL",
+      type: "url",
+      group: "content",
+      description:
+        "Optional. A short video explaining round-up giving (YouTube, Vimeo, or an MP4). Shown under the sign-up steps. Leave empty to fall back to the standard XtraPoint explainer once it's available.",
+      validation: (r) => r.uri({ scheme: ["http", "https"] }),
     }),
 
     // ── Logos & marks ────────────────────────────────────────────────────────
