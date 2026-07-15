@@ -20,10 +20,11 @@ export default defineConfig({
 
   plugins: [
     structureTool({
-      // Schools at the top; everything legal/compliance/support grouped together
-      // in one "Legal & Compliance" folder so the client's team can manage all of
-      // it (legal documents, the support page, and the school-page legal copy) in
-      // one place. supportPage + siteSettings are singletons (single document).
+      // Schools at the top; legal/compliance/support docs grouped in one folder.
+      // "Site settings" is the site-wide singleton (default explainer video +
+      // the school-page footer legal copy) — surfaced top-level since it now
+      // holds site-wide defaults, not just legal copy. supportPage + siteSettings
+      // are singletons (single document).
       structure: (S) =>
         S.list()
           .title("Content")
@@ -46,15 +47,15 @@ export default defineConfig({
                           .schemaType("supportPage")
                           .documentId("supportPage"),
                       ),
-                    S.listItem()
-                      .title("School page legal copy")
-                      .id("siteSettings")
-                      .child(
-                        S.document()
-                          .schemaType("siteSettings")
-                          .documentId("siteSettings"),
-                      ),
                   ]),
+              ),
+            S.listItem()
+              .title("Site settings")
+              .id("siteSettings")
+              .child(
+                S.document()
+                  .schemaType("siteSettings")
+                  .documentId("siteSettings"),
               ),
           ]),
     }),

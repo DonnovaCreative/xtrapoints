@@ -181,8 +181,12 @@ client's team can manage it in one place:
 
 - **Legal Documents** — the `legalPage` list (was "Legal pages").
 - **Customer Support** — the `supportPage` singleton.
-- **School page legal copy** — the `siteSettings` singleton (the school-footer
-  disclaimer).
+
+Site-wide settings live in a separate top-level **Site settings** entry (the
+`siteSettings` singleton): the **Default explainer video** (shown on every school
+page unless a school sets its own `videoUrl`) + the **school-page footer legal
+copy**. (It moved out of the Legal & Compliance group once it held more than legal
+copy.)
 
 ### Legal Documents (`legalPage`) — `/terms`, `/privacy-policy`, `/refund-policy`, `/cookie-policy`
 

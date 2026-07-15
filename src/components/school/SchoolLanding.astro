@@ -54,12 +54,25 @@ function videoEmbed(url?: string) {
   if (vm) return { kind: "iframe" as const, src: `https://player.vimeo.com/video/${vm[1]}` };
   return { kind: "file" as const, src: url };
 }
-const video = videoEmbed(school.videoUrl);
+// Per-school video overrides the site-wide default explainer video.
+const video = videoEmbed(school.videoUrl || settings.defaultVideoUrl);
+const videoHeading = school.videoHeading || "See how round-up giving works";
+const videoCaption =
+  school.videoCaption ||
+  "A quick look at how your everyday round-ups turn into real support.";
 
 // Split the optional custom "why give" body into paragraphs (blank-line delimited).
 const whyGiveParas = school.whyGiveBody
   ? school.whyGiveBody.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
   : [];
+// Supporting photo for the custom "why give" layout — prefer photos not already
+// used elsewhere on the donor page (hero=team, spirit band=celebrate, callout=fans).
+const whyGivePhoto =
+  school.photos?.action ||
+  school.photos?.mascot ||
+  school.photos?.celebrate ||
+  school.photos?.fans ||
+  school.photos?.team;
 ---
 
 <Layout
@@ -149,9 +162,16 @@ const whyGiveParas = school.whyGiveBody
       <!-- ===================== EXPLAINER VIDEO (optional) ===================== -->
       {video && (
         <section class="relative overflow-hidden bg-white pb-20 lg:pb-28">
-          <div class="relative z-10 mx-auto max-w-4xl px-6 lg:px-10">
+          <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">
+            <div class="reveal max-w-3xl">
+              <Eyebrow index="▶" label="Watch" />
+              <h2 class="font-display mt-4 text-[clamp(2rem,5vw,3.25rem)] uppercase leading-[0.95] tracking-[-0.015em] text-gray-900">
+                {videoHeading}
+              </h2>
+              <p class="mt-4 text-lg leading-relaxed text-gray-600">{videoCaption}</p>
+            </div>
             <div
-              class="reveal overflow-hidden rounded-3xl bg-ink shadow-2xl ring-1 ring-gray-200/60"
+              class="reveal mt-10 overflow-hidden rounded-3xl bg-ink shadow-2xl ring-1 ring-gray-200/60"
               style="aspect-ratio:16/9"
             >
               {video.kind === "file" ? (
@@ -159,7 +179,7 @@ const whyGiveParas = school.whyGiveBody
               ) : (
                 <iframe
                   src={video.src}
-                  title="How round-up giving works"
+                  title={videoHeading}
                   loading="lazy"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowfullscreen
@@ -188,14 +208,37 @@ const whyGiveParas = school.whyGiveBody
       <!-- ===================== WHY GIVE / ADVANTAGES ===================== -->
       <section class="relative overflow-hidden bg-gray-50 py-20 lg:py-28">
         <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">
-          <div class="reveal max-w-3xl">
-            <Eyebrow index="02" label="Why round up" />
-            {whyGiveParas.length > 0 ? (
-              <h2 class="font-display mt-4 max-w-[20ch] text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900">
-                {school.whyGiveHeading ?? "Why your support matters"}
-              </h2>
-            ) : (
-              <Fragment>
+          {whyGiveParas.length > 0 ? (
+            <div
+              class:list={[
+                "grid gap-10 lg:gap-16",
+                whyGivePhoto && "lg:grid-cols-[1.05fr_0.95fr] lg:items-center",
+              ]}
+            >
+              <div class="reveal max-w-3xl">
+                <Eyebrow index="02" label="Why round up" />
+                <h2 class="font-display mt-4 max-w-[20ch] text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900">
+                  {school.whyGiveHeading ?? "Why your support matters"}
+                </h2>
+                <div class="mt-6 space-y-5 text-lg leading-relaxed text-gray-600">
+                  {whyGiveParas.map((para) => <p>{para}</p>)}
+                </div>
+              </div>
+              {whyGivePhoto && (
+                <div class="reveal-right">
+                  <img
+                    src={whyGivePhoto}
+                    alt=""
+                    loading="lazy"
+                    class="aspect-[4/3] w-full rounded-3xl object-cover shadow-2xl ring-1 ring-gray-200/60"
+                  />
+                </div>
+              )}
+            </div>
+          ) : (
+            <Fragment>
+              <div class="reveal max-w-3xl">
+                <Eyebrow index="02" label="Why round up" />
                 <h2 class="font-display mt-4 max-w-[20ch] text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900">
                   Tiny change, <span class="ed ed-dark">Real impact</span>.
                 </h2>
@@ -204,25 +247,19 @@ const whyGiveParas = school.whyGiveBody
                   change from purchases you're already making becomes steady support
                   {" "}{school.beneficiary} can count on all season long.
                 </p>
-              </Fragment>
-            )}
-          </div>
-          {whyGiveParas.length > 0 ? (
-            <div class="reveal mt-8 max-w-3xl space-y-5 text-lg leading-relaxed text-gray-600">
-              {whyGiveParas.map((para) => <p>{para}</p>)}
-            </div>
-          ) : (
-            <div class="stagger mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {advantages.map((a) => (
-                <div class="rounded-2xl border border-gray-200 bg-white p-7">
-                  <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-lime-soft text-lime-dark">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
-                  </span>
-                  <h3 class="mt-4 text-lg font-bold tracking-tight text-gray-900">{a.title}</h3>
-                  <p class="mt-2 leading-relaxed text-gray-600">{a.body}</p>
-                </div>
-              ))}
-            </div>
+              </div>
+              <div class="stagger mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {advantages.map((a) => (
+                  <div class="rounded-2xl border border-gray-200 bg-white p-7">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-lime-soft text-lime-dark">
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
+                    </span>
+                    <h3 class="mt-4 text-lg font-bold tracking-tight text-gray-900">{a.title}</h3>
+                    <p class="mt-2 leading-relaxed text-gray-600">{a.body}</p>
+                  </div>
+                ))}
+              </div>
+            </Fragment>
           )}
         </div>
       </section>

@@ -124,8 +124,24 @@ export default defineType({
       type: "url",
       group: "content",
       description:
-        "Optional. A short video explaining round-up giving (YouTube, Vimeo, or an MP4). Shown under the sign-up steps. Leave empty to fall back to the standard XtraPoint explainer once it's available.",
+        "Optional. A short video for THIS school (YouTube, Vimeo, or an MP4) — e.g. a testimonial. Overrides the site-wide default explainer (set under Site settings). Leave empty to use the default.",
       validation: (r) => r.uri({ scheme: ["http", "https"] }),
+    }),
+    defineField({
+      name: "videoHeading",
+      title: "Video heading",
+      type: "string",
+      group: "content",
+      description:
+        'Optional. Heading above the video. Defaults to "See how round-up giving works". Set it to match a custom video (e.g. "Hear from the Bearkats").',
+    }),
+    defineField({
+      name: "videoCaption",
+      title: "Video caption",
+      type: "string",
+      group: "content",
+      description:
+        "Optional. One line under the heading. Defaults to a short explainer line; set it to match a custom video.",
     }),
 
     // ── Logos & marks ────────────────────────────────────────────────────────

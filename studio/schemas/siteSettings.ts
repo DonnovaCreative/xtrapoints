@@ -8,6 +8,14 @@ export default defineType({
   type: "document",
   fields: [
     defineField({
+      name: "defaultVideoUrl",
+      title: "Default explainer video",
+      type: "url",
+      description:
+        "The standard XtraPoint explainer video (YouTube, Vimeo, or MP4), shown on every school page by default. A school can override it with its own video on the school doc (Page copy & media → Explainer video URL). Leave empty for no default.",
+      validation: (r) => r.uri({ scheme: ["http", "https"] }),
+    }),
+    defineField({
       name: "legalCopy",
       title: "School page legal copy",
       type: "text",

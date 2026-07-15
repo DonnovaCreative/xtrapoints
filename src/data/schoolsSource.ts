@@ -31,6 +31,8 @@ interface SchoolDoc {
   whyGiveHeading: string | null;
   whyGiveBody: string | null;
   videoUrl: string | null;
+  videoHeading: string | null;
+  videoCaption: string | null;
   mark: string | null;
   avatar: string | null;
   photos: Partial<
@@ -54,7 +56,7 @@ const VALID = `_type == "school" && !(_id in path("drafts.**")) && defined(slug.
 const PROJECTION = `{
   "slug": slug.current,
   name, short, mascot, fund, city, state,
-  fundShort, beneficiary, whyGiveHeading, whyGiveBody, videoUrl,
+  fundShort, beneficiary, whyGiveHeading, whyGiveBody, videoUrl, videoHeading, videoCaption,
   logoBadge, whiteHeader, logoLockup, logoSize, logoHeight, headerHug, headerPadding,
   "logo": logo.asset->url,
   "mark": mark.asset->url,
@@ -89,11 +91,6 @@ const LOGO_SIZE_PX: Record<string, number> = {
 const DEFAULT_HEADER_H = 68; // the fixed bar, matches --header-h (4.25rem)
 const HEADER_PAD = 16; // standard vertical padding per side (hug mode)
 const CTA_MIN = 44; // keep the header tall enough for the CTA/nav when hugging
-
-// The one XP-branded explainer video, reused across all schools once it exists.
-// Set this to the hosted URL and every page gets it (schools can still override
-// per-doc). Empty = no default video renders yet.
-const DEFAULT_EXPLAINER_VIDEO = "";
 
 /**
  * Resolve the naming used in copy. `fundShort` (e.g. "KatFund") is an optional
@@ -161,9 +158,9 @@ const toSchool = (doc: SchoolDoc): School => ({
   ...naming(doc),
   ...(doc.whyGiveHeading ? { whyGiveHeading: doc.whyGiveHeading } : {}),
   ...(doc.whyGiveBody ? { whyGiveBody: doc.whyGiveBody } : {}),
-  ...(doc.videoUrl || DEFAULT_EXPLAINER_VIDEO
-    ? { videoUrl: doc.videoUrl || DEFAULT_EXPLAINER_VIDEO }
-    : {}),
+  ...(doc.videoUrl ? { videoUrl: doc.videoUrl } : {}),
+  ...(doc.videoHeading ? { videoHeading: doc.videoHeading } : {}),
+  ...(doc.videoCaption ? { videoCaption: doc.videoCaption } : {}),
   ...(doc.mark ? { mark: doc.mark } : {}),
   ...(doc.avatar ? { avatar: doc.avatar } : {}),
   ...(mapPhotos(doc.photos) ? { photos: mapPhotos(doc.photos) } : {}),
@@ -216,10 +213,16 @@ export async function getSchoolDraft(
 /** Site-wide settings singleton (shared across all school pages). */
 export interface SiteSettings {
   legalCopy?: string;
+  /** The default explainer video, used unless a school sets its own `videoUrl`. */
+  defaultVideoUrl?: string;
 }
 export async function getSiteSettings(): Promise<SiteSettings> {
-  const s = await sanityClient.fetch<{ legalCopy?: string } | null>(
-    `*[_id == "siteSettings"][0]{ legalCopy }`,
-  );
-  return { legalCopy: s?.legalCopy || undefined };
+  const s = await sanityClient.fetch<{
+    legalCopy?: string;
+    defaultVideoUrl?: string;
+  } | null>(`*[_id == "siteSettings"][0]{ legalCopy, defaultVideoUrl }`);
+  return {
+    legalCopy: s?.legalCopy || undefined,
+    defaultVideoUrl: s?.defaultVideoUrl || undefined,
+  };
 }

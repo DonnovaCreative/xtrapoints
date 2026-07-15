@@ -124,7 +124,8 @@ officially-approved file**, and Publish.
 | `avatar` | image | Optional full-color square logo for the app avatar (beats `mark`). |
 | `photos.*` | images | `team` / `celebrate` / `fans` / `action` / `mascot` — each optional; pages degrade gracefully. |
 | `whyGiveHeading` / `whyGiveBody` | text | **Optional** (Page copy & media). A fund's own "why give" pitch — when the body is set it replaces the default value-prop cards in the "Why round up" section. One paragraph per blank line. Empty → the standard donor-focused default. |
-| `videoUrl` | URL | **Optional** explainer video (YouTube / Vimeo / MP4) shown under the sign-up steps. Empty → the standard XtraPoint explainer once it exists (set the `DEFAULT_EXPLAINER_VIDEO` constant in `schoolsSource.ts`). |
+| `videoUrl` | URL | **Optional** per-school explainer video (YouTube / Vimeo / MP4) shown under the sign-up steps — e.g. a testimonial. **Overrides** the site-wide default (set in **Site settings → Default explainer video**). Empty → the site default. |
+| `videoHeading` / `videoCaption` | text | **Optional** heading + one-line caption above the video. Default to generic explainer copy; set them to match a custom video (e.g. "Hear from the Bearkats"). |
 
 ### Brand colors
 

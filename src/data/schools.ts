@@ -55,8 +55,11 @@ export interface School {
   /** Optional custom "Why give" heading + body (fund's own donor pitch). */
   whyGiveHeading?: string;
   whyGiveBody?: string;
-  /** Optional explainer video URL (per-school override or the XP default). */
+  /** Optional per-school explainer video URL (overrides the site default). */
   videoUrl?: string;
+  /** Optional heading/caption for the video block (default when empty). */
+  videoHeading?: string;
+  videoCaption?: string;
   /** Mono/white logo for the dark co-brand header. Empty → styled wordmark. */
   logo?: string;
   /** Set true for a COLORED logo (e.g. dark-maned) — renders it on a white
