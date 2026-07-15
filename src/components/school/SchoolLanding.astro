@@ -29,17 +29,17 @@ const ambassadorUrl = `/schools/${school.slug}/ambassadors`;
 
 // Simple, donor-facing "how to sign up" steps (the step-by-step the page should push).
 const steps = [
-  { n: "01", title: "Download the app.", body: `Get the ${brand.name} app, free, and pick the ${school.mascot}. (Coming soon to the App Store & Google Play.)` },
-  { n: "02", title: "Link a card securely.", body: "Connect a card in seconds — verified in real time by Plaid. Your bank login is never shared with us." },
-  { n: "03", title: "Round up for the team.", body: `Every purchase rounds up to the nearest dollar, and your spare change becomes a gift to the ${school.fund}.` },
+  { n: "01", title: "Download the app.", body: `Get the ${brand.name} app and pick the ${school.mascot}. (Coming soon to the App Store & Google Play.)` },
+  { n: "02", title: "Link your bank account.", body: "Connect your bank account in seconds — verified in real time by Plaid. Your login is never shared with us." },
+  { n: "03", title: "Round up for the team.", body: `Every purchase rounds up to the nearest dollar — a $3.50 coffee becomes $4 — and the spare change becomes a gift to the ${school.fund}. It happens automatically, across everything you buy.` },
 ];
 
 // Donor-facing advantages.
 const advantages = [
   { title: "Effortless", body: "Round-ups happen automatically in the background. Set it once and forget it." },
-  { title: "Free to give", body: "No fees to participate — you decide how much you round up each month." },
+  { title: "You're in control", body: "Choose how much you round up, set a monthly cap, and change or pause it anytime." },
   { title: "It adds up", body: `Spare change from everyday spending becomes steady, recurring support for the ${school.fund}.` },
-  { title: "Bank-level security", body: "Card connections are verified and protected by Plaid. Your details stay safe." },
+  { title: "Secure by design", body: "Your bank connection is verified and protected by Plaid — your login is never shared with us." },
   { title: "Cancel anytime", body: "Pause or stop whenever you like — right from the app, no questions asked." },
   { title: "Anyone can join", body: "Students, alumni, family, friends, and local fans can all pitch in for the team." },
 ];
@@ -47,7 +47,7 @@ const advantages = [
 
 <Layout
   title={`${school.short} × ${brand.name} — Round-Up Giving`}
-  description={`Round-up giving for the ${school.fund}: your everyday spare change supports the ${school.mascot}, free. From ${brand.name} — launching soon.`}
+  description={`Round-up giving for the ${school.fund}: your everyday spare change supports the ${school.mascot}. From ${brand.name} — launching soon.`}
   ogImage={`/schools/${school.slug}/og.png`}
 >
   <div style={`${themeStyle}--header-h:${school.headerHeightPx ?? 68}px;`}>
@@ -90,13 +90,13 @@ const advantages = [
             </h1>
             <div class="reveal">
               <p class="mt-6 max-w-xl text-lg leading-relaxed text-white/75">
-                Soon you'll link a card once and your everyday spending will round
-                up into automatic gifts for the {school.fund} — powered by
-                {" "}{brand.name}. No cost to you, and it takes about two minutes.
+                Soon you'll link your bank account once and your everyday spending
+                will round up into automatic gifts for the {school.fund} — powered
+                by {" "}{brand.name}. Setup takes less than a minute.
               </p>
               <div class="mt-8 flex flex-wrap items-center gap-4">
                 <CtaButton href="#start" variant="lime" glow={false}>Get early access</CtaButton>
-                <span class="font-mono text-xs uppercase tracking-[0.04em] text-white/50">Free · Round up · Cancel anytime</span>
+                <span class="font-mono text-xs uppercase tracking-[0.04em] text-white/50">Automatic · Round up · Cancel anytime</span>
               </div>
             </div>
           </div>
@@ -147,13 +147,14 @@ const advantages = [
       <section class="relative overflow-hidden bg-gray-50 py-20 lg:py-28">
         <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">
           <div class="reveal max-w-3xl">
-            <Eyebrow index="02" label="Why give this way" />
+            <Eyebrow index="02" label="Why round up" />
             <h2 class="font-display mt-4 max-w-[20ch] text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900">
               Tiny change, <span class="ed ed-dark">Real impact</span>.
             </h2>
             <p class="mt-5 text-lg leading-relaxed text-gray-600">
-              Round-up giving turns the everyday into something the {school.mascot}
-              feel all season long.
+              Recurring, everyday giving is the kind a program can build on — spare
+              change from purchases you're already making becomes steady support the
+              {school.mascot} can count on all season long.
             </p>
           </div>
           <div class="stagger mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -212,9 +213,9 @@ const advantages = [
                 among the first {school.mascot} fans to start giving.
               </p>
               <ul class="mt-8 flex flex-col gap-3 text-gray-700">
-                <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>Free to join · you choose how much you round up</li>
+                <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>You choose how much you round up · cap it anytime</li>
                 <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>Set it once · cancel anytime</li>
-                <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>Card connections secured by Plaid</li>
+                <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>Bank connections secured by Plaid</li>
               </ul>
             </div>
             <div class="reveal-right rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-gray-200 sm:p-8 lg:p-10">

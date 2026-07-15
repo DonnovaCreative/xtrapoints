@@ -27,28 +27,27 @@ const t = school.theme;
 const themeStyle = schoolThemeVars(t);
 const donorUrl = `/schools/${school.slug}`;
 
-// ⚠ Placeholder until the online application is built (Plaid + university approval pending).
+// ⚠ Placeholder until the online application is built (Plaid + fund approval pending).
 const enrollEmail = "enrollment@xtrapoint.com";
 
 const whatTheyDo = [
   "Share your referral link & QR codes",
   "Promote the app on social (Instagram, TikTok)",
   "Represent it at tailgates, orientation & club events",
-  "Educate fans on round-up giving",
-  "Recruit and mentor new ambassadors",
+  "Get fans excited about round-up giving",
 ];
 
 const steps = [
-  { n: "01", title: "Apply & onboard", body: `Submit a short application. Once ${school.short} approves you, complete a quick online training.` },
+  { n: "01", title: "Apply & onboard", body: `Submit a short application. Once ${school.fund} approves you, complete a quick online training.` },
   { n: "02", title: "Get your toolkit", body: "Your own referral link, QR codes, social templates, scripts & FAQs — everything done for you." },
   { n: "03", title: "Promote on campus", body: "Spread the word across campus, your network, and social channels." },
   { n: "04", title: "Advance through tiers", body: "As you sign up donors, climb from Bronze to Gold and unlock bigger rewards." },
 ];
 
 const criteria = [
-  { title: "Current student", body: `Enrolled at ${school.short} and in good standing.` },
-  { title: "University-approved", body: `Applications are reviewed and approved by ${school.short}.` },
-  { title: "A few hours a month", body: "Roughly 1–6 hours per month, depending on your tier." },
+  { title: "Current students", body: `Enrolled at ${school.short} and in good standing.` },
+  { title: "Reviewed & approved", body: `Applications are reviewed and approved by ${school.fund}.` },
+  { title: "Flexible & low-key", body: "Go at your own pace — no quotas, no set hours. Do what you can, when you can." },
   { title: `${school.mascot} at heart`, body: "Love for the team and a knack for connecting with people." },
 ];
 
@@ -56,21 +55,18 @@ const tiers = [
   {
     name: "Bronze",
     role: "Getting started",
-    time: "~1–2 hrs / month",
     perks: ["Welcome kit", "Branded apparel & swag", "Digital recognition + LinkedIn badge"],
     highlight: false,
   },
   {
     name: "Silver",
     role: "Consistent contributor",
-    time: "~2–4 hrs / month",
     perks: ["Premium apparel", "Early access", "Gift cards", "Social spotlight"],
     highlight: false,
   },
   {
     name: "Gold",
     role: "Top performer & leader",
-    time: "~4–6 hrs / month",
     perks: ["VIP experiences", "Networking events", "Leadership recognition", "Internship consideration"],
     highlight: true,
   },
@@ -245,8 +241,7 @@ const recognition = [
                   <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5"/><path d="M9 12.5L7 22l5-3 5 3-2-9.5"/></svg>
                 </div>
                 <p class={`mt-1 font-mono text-[0.6875rem] font-bold uppercase tracking-[0.1em] ${tier.highlight ? "text-on-accent/70" : "text-lime"}`}>{tier.role}</p>
-                <p class={`mt-4 text-sm font-semibold ${tier.highlight ? "text-on-accent/80" : "text-white/60"}`}>{tier.time}</p>
-                <ul class="mt-5 flex flex-col gap-2.5">
+                <ul class="mt-6 flex flex-col gap-2.5">
                   {tier.perks.map((p) => (
                     <li class="flex items-start gap-2.5 text-[0.9375rem]">
                       <svg class={`mt-0.5 h-4 w-4 shrink-0 ${tier.highlight ? "text-on-accent" : "text-lime"}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
@@ -280,7 +275,7 @@ const recognition = [
             </h2>
             <p class="mt-5 text-lg leading-relaxed text-gray-600">
               The online ambassador application is on its way — every applicant is
-              reviewed and approved by {school.short}. Join the waitlist and we'll
+              reviewed and approved by {school.fund}. Join the waitlist and we'll
               email you the moment enrollment opens.
             </p>
             <div class="mx-auto mt-8 max-w-md">
