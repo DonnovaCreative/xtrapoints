@@ -39,8 +39,11 @@ For one-off additions by anyone, technical or not:
    only (ESPN doesn't list K-12 / non-football schools).
 4. **Preview before you publish:** use the **"Open preview"** action (the ⋯ menu
    on the document) to see the draft rendered on the real donor page in a new tab.
-5. **Publish.** Within seconds the webhook rebuilds staging + production, and the
-   two pages + share image go live.
+5. **Publish.** Within seconds the webhook rebuilds **staging** — the two pages
+   + share image go live there first. **Production doesn't auto-update** — when
+   you're happy with it on staging, use the **"Promote to production"** button
+   (top-level tool in the Studio's left sidebar) to make it live on
+   `xtrapoint.com`.
 
 > The **Auto-fill from ESPN** button is the browser version of path 3 (the
 > terminal `seed:college`). It calls the site's `/api/seed-college` endpoint. To
@@ -122,10 +125,25 @@ officially-approved file**, and Publish.
 | `headerPadding` | toggle | Only when `headerHug` is ON. ON (default) adds standard space above/below the logo; turn OFF when the logo file already has margin baked in (header sits tight to it). |
 | `mark` | image | Optional single-color icon (e.g. a paw) for the app avatar; tinted to the accent. |
 | `avatar` | image | Optional full-color square logo for the app avatar (beats `mark`). |
-| `photos.*` | images | `team` / `celebrate` / `fans` / `action` / `mascot` — each optional; pages degrade gracefully. |
+| `photos.*` | images | `team` / `celebrate` / `fans` / `action` / `mascot` — each optional; pages degrade gracefully. Each photo has an optional **Photo credit** field (photographer/source, e.g. "Jane Doe") shown as a small caption on the photo — leave empty to show none. |
 | `whyGiveHeading` / `whyGiveBody` | text | **Optional** (Page copy & media). A fund's own "why give" pitch — when the body is set it replaces the default value-prop cards in the "Why round up" section. One paragraph per blank line. Empty → the standard donor-focused default. |
 | `videoUrl` | URL | **Optional** per-school explainer video (YouTube / Vimeo / MP4) shown under the sign-up steps — e.g. a testimonial. **Overrides** the site-wide default (set in **Site settings → Default explainer video**). Empty → the site default. |
 | `videoHeading` / `videoCaption` | text | **Optional** heading + one-line caption above the video. Default to generic explainer copy; set them to match a custom video (e.g. "Hear from the Bearkats"). |
+
+### Ambassador program (tiers & recognition)
+
+The Ambassador page's three-tier incentive section and the small recognition
+cards ("Ambassador of the Month", "Seasonal campaigns", etc.) default to the
+standard XtraPoint copy, but each school can customize them under the
+**Ambassador program** tab:
+
+- **Ambassador tiers** — one entry per tier (name, subtitle, a list of perks,
+  and an optional "highlight" toggle for the featured tier). Add, remove, or
+  reorder tiers freely — it's not locked to exactly three. Leave the whole
+  list empty to keep the standard Bronze/Silver/Gold tiers.
+- **Recognition & programs** — the small cards below the tiers (title +
+  one-line description). Leave empty to keep the standard set (Leaderboards,
+  Ambassador of the Month, End-of-year recognition, Seasonal campaigns).
 
 ### Brand colors
 

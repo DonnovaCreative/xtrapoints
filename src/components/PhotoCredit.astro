@@ -1,0 +1,18 @@
+---
+// Small, unobtrusive photographer/source credit caption for game-day photos
+// (school.photos.*). Renders nothing when no credit is set. Position it inside
+// a `relative` ancestor — it's absolutely positioned to the bottom-right corner.
+export interface Props {
+  credit?: string;
+  class?: string;
+}
+const { credit, class: className = "" } = Astro.props;
+---
+
+{credit && (
+  <p
+    class={`absolute bottom-3 right-3 z-10 rounded-full bg-black/45 px-2.5 py-1 font-mono text-[0.625rem] leading-none text-white/80 backdrop-blur-sm ${className}`}
+  >
+    Photo: {credit}
+  </p>
+)}

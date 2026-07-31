@@ -10,6 +10,7 @@ import {
   supportPreview,
 } from "./previewAction";
 import { collegeAutofillAction } from "./collegeAutofillAction";
+import { promoteTool } from "./promoteTool";
 
 export default defineConfig({
   name: "default",
@@ -61,6 +62,8 @@ export default defineConfig({
     }),
     visionTool(),
   ],
+
+  tools: (prev) => [...prev, promoteTool],
 
   document: {
     // Keep the singletons out of the global "create new" menu.

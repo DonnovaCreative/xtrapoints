@@ -9,7 +9,7 @@ and say: _"Read docs/HANDOFF.md and README.md, then let's continue."_
 > [deploys-and-indexing.md](deploys-and-indexing.md) (envs + SEO),
 > [DECISIONS.md](DECISIONS.md) (why). This file is **current state**.
 
-_Last updated: 2026-07-03._
+_Last updated: 2026-07-31._
 
 ---
 
@@ -95,6 +95,23 @@ the repo.
   `SchoolPhotoBand` (spirit band), `SchoolFooter` (black; CMS `legalCopy`).
   Photos degrade to solid color when unset; the ambassador callout falls back to
   `/images/ambassador-default.png`.
+- **Photo credits** — each `photos.*` image field has an optional nested
+  `credit` string (Studio: set it right on the image). Surfaced via
+  `school.photos.credits?.<key>` (`schoolsSource.ts` `mapPhotos`) and rendered
+  by a shared `src/components/PhotoCredit.astro` (small bottom-right corner
+  caption, "Photo: X") dropped into every `photos.*` usage — both hero
+  backgrounds, both `SchoolPhotoBand` calls, the dynamic "why give" photo, and
+  the ambassador callout. No credit set → renders nothing. See DECISIONS.md
+  2026-07-31.
+- **Ambassador page tiers/programs** — the three-tier incentive structure
+  (Bronze/Silver/Gold + perks) and the recognition cards ("Ambassador of the
+  Month", "Seasonal campaigns", etc.) are optional CMS arrays,
+  `school.ambassadorTiers` (`name`/`role`/`perks[]`/`highlight`) and
+  `school.ambassadorPrograms` (`title`/`body`), group "Ambassador program" in
+  the Studio. Flexible length — a school can add/remove/reorder, not just edit
+  copy in fixed slots. Empty → `DEFAULT_TIERS`/`DEFAULT_PROGRAMS` in
+  `SchoolAmbassadors.astro` (the original hardcoded copy). See DECISIONS.md
+  2026-07-31.
 - **OG images** — on-demand: `src/pages/schools/[school]/og.png.ts`
   (`prerender = false`) + `src/og/renderSchoolOg.ts` (satori + `@resvg/resvg-js`;
   fonts in `src/og/fonts/` bundled via `includeFiles` in `astro.config.mjs`;
@@ -167,11 +184,24 @@ the repo.
    `studio/scripts/seed-college.ts`. All run via `sanity exec --with-user-token`
    (operator's login — no separate write token).
 
-### Publish → rebuild
+### Publish → rebuild (staging auto, production manual)
 
-Sanity **publish webhooks** → **Vercel Deploy Hooks** (one for `staging`, one for
-`main`), filtered to `school` docs (drafts excluded). Publishing rebuilds both
-sites — no code/git. (Content pipeline; code still ships via staging→main merge.)
+Publishing no longer goes live everywhere at once. A Sanity **publish webhook**
+→ **Vercel Deploy Hook** rebuilds **staging only**, filtered to `school`/
+`legalPage` docs (drafts excluded) — instant, no review step. **Production does
+NOT auto-rebuild** — the old "Rebuild production" webhook was deleted (see
+DECISIONS.md 2026-07-31). To go live on `xtrapoint.com`, an editor reviews the
+content on staging, then clicks **"Promote to production"** — a top-level
+Studio tool (`studio/promoteTool.tsx`) that POSTs straight to the production
+Vercel Deploy Hook (same hook the deleted webhook used to call).
+
+- Config: `SANITY_STUDIO_PRODUCTION_DEPLOY_HOOK_URL` (`studio/.env`, baked in at
+  `sanity deploy`) — the Vercel Deploy Hook URL for the `main`/production
+  deploy. Obscurity-level secret, same posture as `SANITY_STUDIO_PREVIEW_SECRET`.
+- To restore auto-publish-to-production (not recommended — this was the
+  behavior the client asked to remove): recreate a Sanity webhook pointed at
+  that same Deploy Hook URL with the filter
+  `_type in ["school","legalPage"] && !(_id in path("drafts.**"))`.
 
 ## 📄 Legal & Compliance (legal docs + support + school legal copy)
 

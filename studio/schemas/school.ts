@@ -1,10 +1,20 @@
-import { defineType, defineField } from "sanity";
+import { defineType, defineField, defineArrayMember } from "sanity";
 import { ColorInput } from "../components/ColorInput";
 import { FundInput } from "../components/FundInput";
 import { LogoHeightInput } from "../components/LogoHeightInput";
 
 const HEX_RULE = (r: import("sanity").StringRule) =>
   r.regex(/^#[0-9a-fA-F]{6}$/, { name: "hex color (e.g. #aaf10a)" });
+
+// Shared "photo credit" field, appended to each photo below so editors can
+// credit the photographer/source. Shown as a small caption on the photo.
+const CREDIT_FIELD = defineField({
+  name: "credit",
+  title: "Photo credit",
+  type: "string",
+  description:
+    'Photographer or source credit, e.g. "Jane Doe" or "@handle". Shown as a small caption on the photo. Leave empty to show none.',
+});
 
 // One document = one co-branded school. Mirrors the fields the Astro templates
 // consume (see src/data/schools.ts `School`). The hover/darker/soft accent
@@ -18,6 +28,7 @@ export default defineType({
     { name: "branding", title: "Logos & marks" },
     { name: "photos", title: "Photos" },
     { name: "content", title: "Page copy & media" },
+    { name: "ambassador", title: "Ambassador program" },
     { name: "theme", title: "Brand colors" },
   ],
   fields: [
@@ -144,6 +155,87 @@ export default defineType({
         "Optional. One line under the heading. Defaults to a short explainer line; set it to match a custom video.",
     }),
 
+    // ── Ambassador program (all optional — defaults to the standard 3-tier
+    // Bronze/Silver/Gold structure + recognition cards when left empty) ──────
+    defineField({
+      name: "ambassadorTiers",
+      title: "Ambassador tiers",
+      type: "array",
+      group: "ambassador",
+      description:
+        "Optional. Customize the reward tiers on the Ambassador page's incentive section. Leave empty to use the standard Bronze/Silver/Gold tiers.",
+      of: [
+        defineArrayMember({
+          type: "object",
+          name: "tier",
+          fields: [
+            defineField({
+              name: "name",
+              title: "Tier name",
+              type: "string",
+              description: 'e.g. "Bronze".',
+              validation: (r) => r.required(),
+            }),
+            defineField({
+              name: "role",
+              title: "Subtitle",
+              type: "string",
+              description: 'Short descriptor under the name, e.g. "Getting started".',
+            }),
+            defineField({
+              name: "perks",
+              title: "Perks",
+              type: "array",
+              of: [{ type: "string" }],
+              description: "One entry per perk, e.g. \"Welcome kit\".",
+            }),
+            defineField({
+              name: "highlight",
+              title: "Highlight this tier",
+              type: "boolean",
+              initialValue: false,
+              description: "Visually features this tier (e.g. the top tier).",
+            }),
+          ],
+          preview: {
+            select: { title: "name", subtitle: "role" },
+          },
+        }),
+      ],
+      validation: (r) => r.max(6),
+    }),
+    defineField({
+      name: "ambassadorPrograms",
+      title: "Recognition & programs",
+      type: "array",
+      group: "ambassador",
+      description:
+        'Optional. Customize the small recognition cards below the tiers (e.g. "Ambassador of the Month", "Seasonal campaigns"). Leave empty to use the standard set.',
+      of: [
+        defineArrayMember({
+          type: "object",
+          name: "program",
+          fields: [
+            defineField({
+              name: "title",
+              title: "Title",
+              type: "string",
+              validation: (r) => r.required(),
+            }),
+            defineField({
+              name: "body",
+              title: "Description",
+              type: "string",
+            }),
+          ],
+          preview: {
+            select: { title: "title", subtitle: "body" },
+          },
+        }),
+      ],
+      validation: (r) => r.max(8),
+    }),
+
     // ── Logos & marks ────────────────────────────────────────────────────────
     defineField({
       name: "logo",
@@ -264,30 +356,35 @@ export default defineType({
           title: "Team — donor hero background",
           type: "image",
           options: { hotspot: true },
+          fields: [CREDIT_FIELD],
         }),
         defineField({
           name: "celebrate",
           title: "Celebrate — donor spirit band",
           type: "image",
           options: { hotspot: true },
+          fields: [CREDIT_FIELD],
         }),
         defineField({
           name: "fans",
           title: "Fans — ambassador callout",
           type: "image",
           options: { hotspot: true },
+          fields: [CREDIT_FIELD],
         }),
         defineField({
           name: "action",
           title: "Action — ambassador hero background",
           type: "image",
           options: { hotspot: true },
+          fields: [CREDIT_FIELD],
         }),
         defineField({
           name: "mascot",
           title: "Mascot — ambassador spirit band",
           type: "image",
           options: { hotspot: true },
+          fields: [CREDIT_FIELD],
         }),
       ],
     }),

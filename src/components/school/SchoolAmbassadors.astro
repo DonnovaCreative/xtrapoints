@@ -11,6 +11,7 @@ import SchoolFooter from "@/components/school/SchoolFooter.astro";
 import CtaButton from "@/components/CtaButton.astro";
 import Eyebrow from "@/components/Eyebrow.astro";
 import PlaybookMark from "@/components/PlaybookMark.astro";
+import PhotoCredit from "@/components/PhotoCredit.astro";
 import DotField from "@/components/islands/DotField.tsx";
 import SideRays from "@/components/islands/SideRays.tsx";
 import WaitlistForm from "@/components/islands/WaitlistForm.tsx";
@@ -51,7 +52,9 @@ const criteria = [
   { title: `${school.mascot} at heart`, body: "Love for the team and a knack for connecting with people." },
 ];
 
-const tiers = [
+// Standard tiers/recognition — used unless a school customizes them in the
+// CMS (school.ambassadorTiers / school.ambassadorPrograms).
+const DEFAULT_TIERS = [
   {
     name: "Bronze",
     role: "Getting started",
@@ -72,12 +75,17 @@ const tiers = [
   },
 ];
 
-const recognition = [
+const DEFAULT_PROGRAMS = [
   { title: "Leaderboards", body: "Friendly competition across campus." },
   { title: "Ambassador of the Month", body: "Plus recurring social spotlights." },
   { title: "End-of-year recognition", body: "A banquet celebrating top ambassadors." },
   { title: "Seasonal campaigns", body: "Tied to football, basketball, orientation & giving days." },
 ];
+
+const tiers = school.ambassadorTiers?.length ? school.ambassadorTiers : DEFAULT_TIERS;
+const recognition = school.ambassadorPrograms?.length
+  ? school.ambassadorPrograms
+  : DEFAULT_PROGRAMS;
 ---
 
 <Layout
@@ -101,6 +109,7 @@ const recognition = [
             <div class="absolute inset-0 bg-gradient-to-b from-ink/70 via-ink/80 to-ink"></div>
           </div>
         )}
+        <PhotoCredit credit={school.photos?.credits?.action} />
         <!-- Side rays (accent-tinted, animated) — layered UNDER the dots. -->
         <div class="absolute inset-0 z-0" aria-hidden="true">
           <SideRays client:only="react" rayColor1={t.primary} rayColor2={t.hasSecondary ? t.secondary : t.primary} intensity={1.4} saturation={1.3} origin="top-right" />
@@ -187,7 +196,7 @@ const recognition = [
 
       <!-- ===================== SPIRIT BAND ===================== -->
       {school.photos?.mascot && (
-        <SchoolPhotoBand src={school.photos.mascot} position="center 30%">
+        <SchoolPhotoBand src={school.photos.mascot} position="center 30%" credit={school.photos?.credits?.mascot}>
           <p class="font-mono text-xs font-bold uppercase tracking-[0.16em] text-lime">Lead the charge</p>
           <h2 class="font-display mt-4 text-[clamp(2.5rem,6vw,4.5rem)] uppercase leading-[0.95] tracking-tight text-white">
             Be the face of the <span class="ed">movement</span>.
@@ -242,7 +251,7 @@ const recognition = [
                 </div>
                 <p class={`mt-1 font-mono text-[0.6875rem] font-bold uppercase tracking-[0.1em] ${tier.highlight ? "text-on-accent/70" : "text-lime"}`}>{tier.role}</p>
                 <ul class="mt-6 flex flex-col gap-2.5">
-                  {tier.perks.map((p) => (
+                  {(tier.perks ?? []).map((p) => (
                     <li class="flex items-start gap-2.5 text-[0.9375rem]">
                       <svg class={`mt-0.5 h-4 w-4 shrink-0 ${tier.highlight ? "text-on-accent" : "text-lime"}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
                       <span class={tier.highlight ? "text-on-accent/90" : "text-white/85"}>{p}</span>

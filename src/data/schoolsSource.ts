@@ -38,6 +38,13 @@ interface SchoolDoc {
   photos: Partial<
     Record<"team" | "fans" | "celebrate" | "mascot" | "action", string | null>
   > | null;
+  photoCredits: Partial<
+    Record<"team" | "fans" | "celebrate" | "mascot" | "action", string | null>
+  > | null;
+  ambassadorTiers:
+    | { name: string; role: string | null; perks: string[] | null; highlight: boolean | null }[]
+    | null;
+  ambassadorPrograms: { title: string; body: string | null }[] | null;
   theme: {
     primary: string | null;
     secondary: string | null;
@@ -68,6 +75,15 @@ const PROJECTION = `{
     "mascot": photos.mascot.asset->url,
     "action": photos.action.asset->url
   },
+  "photoCredits": {
+    "team": photos.team.credit,
+    "fans": photos.fans.credit,
+    "celebrate": photos.celebrate.credit,
+    "mascot": photos.mascot.credit,
+    "action": photos.action.credit
+  },
+  ambassadorTiers[]{ name, role, perks, highlight },
+  ambassadorPrograms[]{ title, body },
   "theme": {
     "primary": theme.primary,
     "secondary": theme.secondary,
@@ -130,17 +146,41 @@ function headerMetrics(doc: SchoolDoc) {
   return { logoHeightPx, headerHug, headerPadPx, headerHeightPx };
 }
 
-/** Drop null/empty photo entries so `school.photos?.team` behaves like before. */
-const mapPhotos = (photos: SchoolDoc["photos"]): School["photos"] => {
+/** Drop null/empty photo (+ credit) entries so `school.photos?.team` behaves like before. */
+const mapPhotos = (
+  photos: SchoolDoc["photos"],
+  photoCredits: SchoolDoc["photoCredits"],
+): School["photos"] => {
   if (!photos) return undefined;
   const entries = Object.entries(photos).filter(([, v]) => Boolean(v)) as [
-    keyof NonNullable<School["photos"]>,
+    keyof Omit<NonNullable<School["photos"]>, "credits">,
     string,
   ][];
-  return entries.length
-    ? Object.fromEntries(entries)
-    : undefined;
+  if (!entries.length) return undefined;
+  const result: NonNullable<School["photos"]> = Object.fromEntries(entries);
+  const creditEntries = Object.entries(photoCredits ?? {}).filter(([, v]) =>
+    Boolean(v),
+  ) as [keyof NonNullable<NonNullable<School["photos"]>["credits"]>, string][];
+  if (creditEntries.length) result.credits = Object.fromEntries(creditEntries);
+  return result;
 };
+
+const mapTiers = (tiers: SchoolDoc["ambassadorTiers"]): School["ambassadorTiers"] =>
+  tiers?.length
+    ? tiers.map((t) => ({
+        name: t.name,
+        ...(t.role ? { role: t.role } : {}),
+        ...(t.perks?.length ? { perks: t.perks } : {}),
+        ...(t.highlight ? { highlight: true } : {}),
+      }))
+    : undefined;
+
+const mapPrograms = (
+  programs: SchoolDoc["ambassadorPrograms"],
+): School["ambassadorPrograms"] =>
+  programs?.length
+    ? programs.map((p) => ({ title: p.title, ...(p.body ? { body: p.body } : {}) }))
+    : undefined;
 
 const toSchool = (doc: SchoolDoc): School => ({
   slug: doc.slug!,
@@ -163,7 +203,15 @@ const toSchool = (doc: SchoolDoc): School => ({
   ...(doc.videoCaption ? { videoCaption: doc.videoCaption } : {}),
   ...(doc.mark ? { mark: doc.mark } : {}),
   ...(doc.avatar ? { avatar: doc.avatar } : {}),
-  ...(mapPhotos(doc.photos) ? { photos: mapPhotos(doc.photos) } : {}),
+  ...(mapPhotos(doc.photos, doc.photoCredits)
+    ? { photos: mapPhotos(doc.photos, doc.photoCredits) }
+    : {}),
+  ...(mapTiers(doc.ambassadorTiers)
+    ? { ambassadorTiers: mapTiers(doc.ambassadorTiers) }
+    : {}),
+  ...(mapPrograms(doc.ambassadorPrograms)
+    ? { ambassadorPrograms: mapPrograms(doc.ambassadorPrograms) }
+    : {}),
   theme: deriveSchoolTheme({
     primary: doc.theme?.primary ?? undefined,
     secondary: doc.theme?.secondary ?? undefined,

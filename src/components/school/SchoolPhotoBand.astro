@@ -1,13 +1,17 @@
 ---
 // Full-bleed cinematic photo band — drops real game-day photography between
 // content sections to bring school spirit. Heading content via the default slot.
+import PhotoCredit from "@/components/PhotoCredit.astro";
+
 export interface Props {
   src: string;
   /** object-position for the photo (e.g. "center", "center 30%"). */
   position?: string;
+  /** Optional photographer/source credit, shown as a small corner caption. */
+  credit?: string;
   class?: string;
 }
-const { src, position = "center", class: className = "" } = Astro.props;
+const { src, position = "center", credit, class: className = "" } = Astro.props;
 ---
 
 <section class={`relative overflow-hidden bg-ink ${className}`}>
@@ -22,6 +26,7 @@ const { src, position = "center", class: className = "" } = Astro.props;
   <!-- legibility overlays -->
   <div class="absolute inset-0 bg-ink/55" aria-hidden="true"></div>
   <div class="absolute inset-0 bg-gradient-to-t from-ink via-ink/30 to-ink/60" aria-hidden="true"></div>
+  <PhotoCredit credit={credit} />
   <div class="relative z-10 mx-auto max-w-4xl px-6 py-24 text-center lg:px-10 lg:py-32">
     <slot />
   </div>

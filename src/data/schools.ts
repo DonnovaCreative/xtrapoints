@@ -89,7 +89,20 @@ export interface School {
     celebrate?: string; // player celebration
     mascot?: string; // mascot
     action?: string; // extra action / celebration shot
+    /** Photographer/source credit per photo, keyed the same as above. */
+    credits?: Partial<Record<"team" | "fans" | "celebrate" | "mascot" | "action", string>>;
   };
+  /** Optional custom Ambassador page reward tiers. Empty → the standard
+   *  Bronze/Silver/Gold defaults (see SchoolAmbassadors.astro). */
+  ambassadorTiers?: {
+    name: string;
+    role?: string;
+    perks?: string[];
+    highlight?: boolean;
+  }[];
+  /** Optional custom Ambassador page recognition cards (e.g. "Ambassador of
+   *  the Month"). Empty → the standard defaults. */
+  ambassadorPrograms?: { title: string; body?: string }[];
   theme: SchoolTheme;
 }
 

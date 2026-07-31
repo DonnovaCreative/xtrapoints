@@ -4,6 +4,103 @@ Short log of non-obvious engineering decisions. Newest first.
 
 ---
 
+## 2026-07-31 — Photo credits: nested `credit` field on each image, not a parallel object
+
+**Context:** Schools want to credit the photographer for game-day photos used on
+their pages (`school.photos.team/celebrate/fans/action/mascot`).
+
+**Decision:** Add an optional `credit` string field **nested inside each image
+field** (`fields: [CREDIT_FIELD]` in `studio/schemas/school.ts`), not a separate
+top-level "credits" object in the Studio. In GROQ it's pulled as a sibling
+projection (`"photoCredits": { team: photos.team.credit, ... }`) and merged back
+onto `school.photos.credits.<key>` in `schoolsSource.ts` — so `school.photos.team`
+stays a plain URL string (no template call-site changes) while
+`school.photos.credits?.team` carries the caption. A new `PhotoCredit.astro`
+component renders a small bottom-right corner caption ("Photo: X") and is dropped
+into every place a `photos.*` image renders (both hero backgrounds, both
+`SchoolPhotoBand` usages, the dynamic "why give" photo, and the ambassador
+callout). No credit set → nothing renders, byte-identical to before.
+
+**Why:** Keeping `photos.<key>` as a string (rather than promoting it to
+`{url, credit}`) avoided touching every existing call site
+(`school.photos.team`, `<SchoolPhotoBand src={...}>`, etc.) across
+`SchoolLanding.astro` / `SchoolAmbassadors.astro`. The credit lives with the
+image in the Studio (natural editing UX — you set it right where you upload the
+photo) without forcing a breaking type change everywhere the URL is consumed.
+
+---
+
+## 2026-07-31 — Ambassador tiers/programs moved from hardcoded arrays to optional CMS arrays
+
+**Context:** The Ambassador page's three-tier incentive structure (Bronze/Silver/
+Gold + perks) and the recognition cards ("Ambassador of the Month", "Seasonal
+campaigns", etc.) were hardcoded in `SchoolAmbassadors.astro`. Each school will
+want to set its own incentives per tier.
+
+**Decision:** Two optional array fields on `school` (group "Ambassador
+program"): `ambassadorTiers` (`name`, `role`, `perks[]`, `highlight`) and
+`ambassadorPrograms` (`title`, `body`). Both are **flexible arrays, not fixed
+3/4-slot objects** — a school can add, remove, or reorder tiers/cards, not just
+edit copy within a locked structure. The old hardcoded arrays become
+`DEFAULT_TIERS` / `DEFAULT_PROGRAMS` constants in `SchoolAmbassadors.astro`;
+the template uses the CMS arrays only when non-empty
+(`school.ambassadorTiers?.length ? school.ambassadorTiers : DEFAULT_TIERS`).
+
+**Why:** Matches the project's established "zero required per-school authoring"
+pattern (see the 2026-07-08 naming-model decision below) — every school that
+doesn't touch these fields renders exactly the prior copy. Flexible-length
+arrays cost nothing extra over fixed slots and avoid a future re-migration if a
+school wants a 2- or 4-tier structure instead of 3.
+
+---
+
+## 2026-07-31 — Independent staging/production publishing: drop the auto-webhook, add a manual promote button
+
+**Context:** One Sanity dataset feeds both `staging.xtrapoint.com` and
+`xtrapoint.com` — there was never a content-level split between the two, only
+two Sanity webhooks ("Rebuild staging", "Rebuild production") listening to the
+identical publish event (`school`/`legalPage`, drafts excluded) and firing two
+different Vercel Deploy Hooks. Every publish therefore went live on production
+immediately, with no review window — the client wanted staging and production
+publishing decoupled.
+
+**Decision:** Deleted the "Rebuild production" Sanity webhook (id
+`vneMqIKAZLwK6nEk`) via `sanity hook delete`. "Rebuild staging" is untouched, so
+publishing still auto-rebuilds staging instantly. Added a **"Promote to
+production" Studio tool** (`studio/promoteTool.tsx`, registered as a top-level
+Studio tool, not a per-document action — it promotes *all* currently published
+content, not one doc) that POSTs directly to the same production Vercel Deploy
+Hook the webhook used to call, bypassing Sanity's webhook layer entirely. An
+editor reviews content on staging, then clicks Promote when it's ready to go
+live.
+
+**Alternatives considered:**
+- *Two Sanity datasets (staging + production) with a copy/sync step* — true
+  content-level independence (staging content could differ from prod content,
+  not just timing), but a much bigger lift: doubled asset storage, a dataset
+  switcher in the Studio, promote/export tooling, and re-plumbing every GROQ
+  query to pick a dataset per environment. Rejected as disproportionate — the
+  ask was about *when* content goes live, not needing genuinely different
+  content per environment.
+- *Manual curl/Vercel-dashboard promote, no Studio button* — same webhook
+  change, zero new code, but every promotion needs a developer. Rejected in
+  favor of a button so the client's non-technical editors stay self-serve,
+  matching the existing pattern of client-facing Studio actions (draft preview,
+  ESPN auto-fill).
+
+**Non-obvious gotchas:**
+- The Sanity management API rejects `PATCH .../hooks/.../{id} {isDisabled:true}`
+  from a CLI user token ("A service session is required to set `isDisabled`") —
+  disabling via that route needs a browser session. `sanity hook delete` (the
+  supported CLI/user-token flow) works fine and was used instead; the Vercel
+  Deploy Hook itself is untouched, so nothing needs to change on Vercel's side.
+- The promote button's URL is bundled into the (publicly served) Studio JS via
+  `SANITY_STUDIO_PRODUCTION_DEPLOY_HOOK_URL` — same obscurity-level posture
+  already accepted for `SANITY_STUDIO_PREVIEW_SECRET`. Anyone with it can
+  trigger a production *rebuild*, not read/write content.
+
+---
+
 ## 2026-07-08 — School copy: scalable naming model + optional custom blocks
 
 **Context:** Client/school feedback (SHSU/KatFund) wanted per-school phrasing —
