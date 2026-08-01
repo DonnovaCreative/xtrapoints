@@ -2,6 +2,10 @@ import { defineType, defineField, defineArrayMember } from "sanity";
 import { ColorInput } from "../components/ColorInput";
 import { FundInput } from "../components/FundInput";
 import { LogoHeightInput } from "../components/LogoHeightInput";
+import {
+  DEFAULT_AMBASSADOR_TIERS,
+  DEFAULT_AMBASSADOR_PROGRAMS,
+} from "../lib/ambassadorDefaults";
 
 const HEX_RULE = (r: import("sanity").StringRule) =>
   r.regex(/^#[0-9a-fA-F]{6}$/, { name: "hex color (e.g. #aaf10a)" });
@@ -25,6 +29,7 @@ export default defineType({
   type: "document",
   groups: [
     { name: "details", title: "Details", default: true },
+    { name: "publishing", title: "Publishing" },
     { name: "branding", title: "Logos & marks" },
     { name: "photos", title: "Photos" },
     { name: "content", title: "Page copy & media" },
@@ -111,6 +116,17 @@ export default defineType({
         "Not currently shown on the pages and not required — metadata only (2-letter code, e.g. “TX”).",
     }),
 
+    // ── Publishing (per-environment visibility) ────────────────────────────
+    defineField({
+      name: "hiddenFromProduction",
+      title: "Hide from production",
+      type: "boolean",
+      group: "publishing",
+      initialValue: false,
+      description:
+        'ON: this school stays published and visible on staging, but is left OUT of production (xtrapoint.com) the next time someone clicks "Promote to production" in the Studio sidebar. Use this to pull a school off production (e.g. a test/placeholder school) without touching its staging content or unpublishing it. Turn back OFF + promote again to bring it back. To take a school off BOTH staging and production, use the normal Unpublish action instead (then promote once more to clear it from production too).',
+    }),
+
     // ── Page copy & media (all optional — strong defaults render when empty) ──
     defineField({
       name: "whyGiveHeading",
@@ -163,7 +179,8 @@ export default defineType({
       type: "array",
       group: "ambassador",
       description:
-        "Optional. Customize the reward tiers on the Ambassador page's incentive section. Leave empty to use the standard Bronze/Silver/Gold tiers.",
+        "Pre-filled with the standard Bronze/Silver/Gold tiers — edit, add, remove, or reorder to customize. Clear the whole list to fall back to the site's default tiers.",
+      initialValue: DEFAULT_AMBASSADOR_TIERS,
       of: [
         defineArrayMember({
           type: "object",
@@ -210,7 +227,8 @@ export default defineType({
       type: "array",
       group: "ambassador",
       description:
-        'Optional. Customize the small recognition cards below the tiers (e.g. "Ambassador of the Month", "Seasonal campaigns"). Leave empty to use the standard set.',
+        'Pre-filled with the standard recognition cards ("Ambassador of the Month", "Seasonal campaigns", etc.) — edit, add, remove, or reorder. Clear the whole list to fall back to the site\'s default set.',
+      initialValue: DEFAULT_AMBASSADOR_PROGRAMS,
       of: [
         defineArrayMember({
           type: "object",

@@ -8,6 +8,7 @@
 // =============================================================================
 import { sanityClient } from "@/config/sanity";
 import { deriveSchoolTheme, type School } from "@/data/schools";
+import { isProduction } from "@/config/site-env";
 
 // Shape returned by the GROQ projection below (before mapping to `School`).
 interface SchoolDoc {
@@ -58,7 +59,15 @@ interface SchoolDoc {
 // Exclude drafts — the build authenticates with a token, so unpublished drafts
 // (`drafts.school.*`, created whenever an editor opens a doc in the Studio)
 // would otherwise be returned alongside the published version and render twice.
-const VALID = `_type == "school" && !(_id in path("drafts.**")) && defined(slug.current)`;
+//
+// On a PRODUCTION build only, also exclude schools with `hiddenFromProduction`
+// set — this lets a school stay published (visible on staging) while being
+// deliberately left out of production, independent of its publish state. See
+// docs/DECISIONS.md ("Hide from production" toggle). Staging/preview/local
+// builds ignore the flag entirely.
+const VALID = `_type == "school" && !(_id in path("drafts.**")) && defined(slug.current)${
+  isProduction ? " && hiddenFromProduction != true" : ""
+}`;
 
 const PROJECTION = `{
   "slug": slug.current,

@@ -13,7 +13,8 @@
     "seed:college": "sanity exec scripts/seed-college.ts --with-user-token",
     "seed:legal": "sanity exec scripts/seed-legal.ts --with-user-token",
     "seed:legal-extra": "sanity exec scripts/seed-legal-extra.ts --with-user-token",
-    "seed:support": "sanity exec scripts/seed-support.ts --with-user-token"
+    "seed:support": "sanity exec scripts/seed-support.ts --with-user-token",
+    "backfill:ambassador-defaults": "sanity exec scripts/backfill-ambassador-defaults.ts --with-user-token"
   },
   "dependencies": {
     "@sanity/icons": "^3.8.0",

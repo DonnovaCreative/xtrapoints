@@ -44,6 +44,14 @@ For one-off additions by anyone, technical or not:
    you're happy with it on staging, use the **"Promote to production"** button
    (top-level tool in the Studio's left sidebar) to make it live on
    `xtrapoint.com`.
+   - **Removing a school works the same way.** Clicking **Unpublish** takes it
+     off staging right away, but production won't drop it until you click
+     **Promote to production** again — that's expected, not a bug (promoting
+     also carries removals live, not just additions).
+   - **Want it live on staging but not production** (e.g. a placeholder/test
+     school)? Toggle **"Hide from production"** on the school (under the
+     Publishing tab) instead of unpublishing, then promote. Flip it back off
+     + promote again to bring it back.
 
 > The **Auto-fill from ESPN** button is the browser version of path 3 (the
 > terminal `seed:college`). It calls the site's `/api/seed-college` endpoint. To
@@ -144,6 +152,11 @@ standard XtraPoint copy, but each school can customize them under the
 - **Recognition & programs** — the small cards below the tiers (title +
   one-line description). Leave empty to keep the standard set (Leaderboards,
   Ambassador of the Month, End-of-year recognition, Seasonal campaigns).
+
+Both come **pre-filled with the standard defaults** — every school (new or
+existing) already has them, so customizing means editing or removing the
+entries that don't fit, not retyping the whole list. Clear a list entirely to
+fall back to the site's built-in defaults.
 
 ### Brand colors
 

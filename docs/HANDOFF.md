@@ -110,8 +110,13 @@ the repo.
   `school.ambassadorPrograms` (`title`/`body`), group "Ambassador program" in
   the Studio. Flexible length — a school can add/remove/reorder, not just edit
   copy in fixed slots. Empty → `DEFAULT_TIERS`/`DEFAULT_PROGRAMS` in
-  `SchoolAmbassadors.astro` (the original hardcoded copy). See DECISIONS.md
-  2026-07-31.
+  `SchoolAmbassadors.astro` (the original hardcoded copy). **Pre-filled** with
+  those same defaults for every school — `initialValue` in `school.ts` for new
+  Studio-created docs (shared constants in `studio/lib/ambassadorDefaults.ts`,
+  also wired into `scripts/_lib.ts`'s `writeSchool` for ESPN-seed/bulk-import),
+  plus a one-time backfill (`npm run backfill:ambassador-defaults`, safe to
+  re-run) for schools that predate the fields. Editors tweak/delete individual
+  entries rather than typing from scratch. See DECISIONS.md 2026-07-31.
 - **OG images** — on-demand: `src/pages/schools/[school]/og.png.ts`
   (`prerender = false`) + `src/og/renderSchoolOg.ts` (satori + `@resvg/resvg-js`;
   fonts in `src/og/fonts/` bundled via `includeFiles` in `astro.config.mjs`;
@@ -202,6 +207,21 @@ Vercel Deploy Hook (same hook the deleted webhook used to call).
   behavior the client asked to remove): recreate a Sanity webhook pointed at
   that same Deploy Hook URL with the filter
   `_type in ["school","legalPage"] && !(_id in path("drafts.**"))`.
+- **⚠ Unpublish is global, not per-environment.** Clicking the Studio's native
+  **Unpublish** on a school converts it to a draft — it disappears from
+  staging right away (auto webhook), but production keeps serving its last
+  build until someone clicks **Promote to production** again. Promoting
+  rebuilds production from whatever is *currently* published (and not
+  hidden), so it's also how removals go live, not just additions — the
+  promote tool's own UI says this. If you unpublish something and production
+  still shows it, that's expected until the next promote, not a bug.
+- **Want a school live on staging but excluded from production specifically?**
+  Toggle **"Hide from production"** on the school doc (group "Publishing")
+  and promote — `schoolsSource.ts`'s `VALID` filter excludes
+  `hiddenFromProduction` docs only when `VERCEL_ENV === "production"`
+  (`isProduction`, `site-env.ts`); staging/preview builds ignore it. Good for
+  taking a placeholder/test school off production without touching its
+  staging content. See DECISIONS.md.
 
 ## 📄 Legal & Compliance (legal docs + support + school legal copy)
 

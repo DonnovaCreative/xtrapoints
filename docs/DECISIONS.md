@@ -4,6 +4,60 @@ Short log of non-obvious engineering decisions. Newest first.
 
 ---
 
+## 2026-07-31 (follow-up) — "Hide from production" toggle, and pre-filled Ambassador defaults
+
+**Context:** Client feedback on the same-day promote-tool work (above): (1)
+clicking Sanity's native **Unpublish** only visibly affects staging (it
+auto-rebuilds); production is a static build that only changes when someone
+clicks "Promote to production," so an unpublished school appeared to "still be
+live" until that next promote — the client wanted an explicit way to pull a
+school off production specifically. (2) The new `ambassadorTiers`/
+`ambassadorPrograms` fields shipped empty on every existing school, so
+customizing one tier meant retyping the whole default structure from scratch.
+
+**Decision (production visibility):** Added `hiddenFromProduction` (boolean,
+new "Publishing" group) to `school`. `schoolsSource.ts`'s `VALID` GROQ filter
+excludes `hiddenFromProduction == true` docs **only when `VERCEL_ENV ===
+"production"`** (`isProduction` from `site-env.ts`) — staging/preview/local
+builds ignore the flag entirely. This gives three independent lifecycle
+actions matching what the client asked for: **Unpublish** (native Sanity
+action — removes it everywhere, staging immediately, production on the next
+promote), **Hide from production** (stays published/visible on staging,
+excluded from production only, on the next promote), and **Promote to
+production** now explicitly documented (in its own UI copy) as the mechanism
+that also carries removals live, not just additions.
+
+**Decision (pre-filled defaults):** `ambassadorTiers`/`ambassadorPrograms` get
+`initialValue: DEFAULT_AMBASSADOR_TIERS/PROGRAMS` (new `studio/lib/
+ambassadorDefaults.ts`, shared with `scripts/_lib.ts`'s `writeSchool` so
+ESPN-seeded and bulk-imported schools are pre-filled too) — covers schools
+created **going forward**. For the ~80 school documents (5 published, 75
+drafts — mostly test/scratch content from earlier ESPN-seed experiments)
+already in the dataset, ran a one-time migration
+(`scripts/backfill-ambassador-defaults.ts`, `npm run
+backfill:ambassador-defaults`) that `setIfMissing`-patches every existing
+school (published + draft) in a **single transaction** — verified against
+`westminster`'s published doc before/after. `setIfMissing` means re-running it
+is always safe and never clobbers a school that's since customized these
+fields.
+
+**Non-obvious gotchas:**
+- Sanity's array `initialValue` only applies when a document is created
+  through the Studio's own "Create new" form — it does **not** retroactively
+  backfill existing docs (hence the separate migration script) and does
+  **not** apply to docs created via the CLI/API (`seed-college.ts`,
+  `import.ts`) unless those code paths set the fields themselves — done here
+  by injecting the defaults in the shared `writeSchool` helper.
+- A single transaction batching many patches fires the "Rebuild staging"
+  webhook **once** (per transaction), not once per document — important given
+  the existing Vercel deploy-rate-limit gotcha (HANDOFF.md) when touching many
+  schools at once.
+- Object-type array members (the tier/program objects) need `_key` (+ `_type`
+  matching the array member's schema `name`) for the Studio's array editor;
+  the plain-string `perks` array does not.
+
+---
+
 ## 2026-07-31 — Photo credits: nested `credit` field on each image, not a parallel object
 
 **Context:** Schools want to credit the photographer for game-day photos used on

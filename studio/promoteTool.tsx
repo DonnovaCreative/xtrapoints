@@ -53,6 +53,14 @@ function PromoteTool() {
               them live, click promote — it triggers a production rebuild
               (usually live within a couple of minutes).
             </Text>
+            <Text size={1} muted>
+              This also removes anything from production that's been{" "}
+              <strong>unpublished</strong> or toggled{" "}
+              <strong>"Hide from production"</strong> since the last promote —
+              promoting rebuilds production from whatever is currently
+              published (and not hidden), so it's how removals go live too,
+              not just additions.
+            </Text>
 
             {!HOOK_URL && (
               <Card padding={3} radius={2} tone="critical">

@@ -8,6 +8,10 @@ import { readFile } from "node:fs/promises";
 import { readFileSync, existsSync } from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
+import {
+  DEFAULT_AMBASSADOR_TIERS,
+  DEFAULT_AMBASSADOR_PROGRAMS,
+} from "../lib/ambassadorDefaults.ts";
 
 // Load the site repo's .env (one level up from studio/) so scripts can read
 // keys like DATAGOV_API_KEY without exporting them each run. Inline env vars
@@ -37,6 +41,13 @@ export type SanityClient = {
   createOrReplace: (doc: Record<string, unknown>) => Promise<{ _id: string }>;
   delete: (id: string) => Promise<unknown>;
   fetch: <T>(query: string, params?: Record<string, unknown>) => Promise<T>;
+  // Loosely typed — only used by the one-off backfill script for a bulk
+  // setIfMissing patch across many documents in a single transaction.
+  patch: (id: string) => unknown;
+  transaction: () => {
+    patch: (id: string, patcher: (p: any) => unknown) => unknown;
+    commit: () => Promise<unknown>;
+  };
 };
 
 export const getClient = (): SanityClient =>
@@ -102,5 +113,15 @@ export async function writeSchool(
   publish: boolean,
 ) {
   const _id = `${publish ? "" : "drafts."}school.${slug}`;
-  return client.createOrReplace({ _id, _type: "school", ...body });
+  return client.createOrReplace({
+    _id,
+    _type: "school",
+    // Pre-fill the standard Ambassador tiers/programs (see the Studio's
+    // `initialValue`, which this mirrors for schools created via script
+    // rather than the "Create new" form) — `...body` still wins if a manifest
+    // ever sets these explicitly.
+    ambassadorTiers: DEFAULT_AMBASSADOR_TIERS,
+    ambassadorPrograms: DEFAULT_AMBASSADOR_PROGRAMS,
+    ...body,
+  });
 }
