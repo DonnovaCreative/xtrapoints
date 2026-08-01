@@ -61,6 +61,12 @@ function PromoteTool() {
               published (and not hidden), so it's how removals go live too,
               not just additions.
             </Text>
+            <Text size={1} muted>
+              This only updates <strong>content</strong> — school info, copy,
+              photos, etc. If something the dev team just built isn't showing
+              up here after promoting, that's a separate code deploy they need
+              to do first, not something this button controls.
+            </Text>
 
             {!HOOK_URL && (
               <Card padding={3} radius={2} tone="critical">

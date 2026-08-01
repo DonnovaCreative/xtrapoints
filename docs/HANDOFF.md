@@ -9,17 +9,32 @@ and say: _"Read docs/HANDOFF.md and README.md, then let's continue."_
 > [deploys-and-indexing.md](deploys-and-indexing.md) (envs + SEO),
 > [DECISIONS.md](DECISIONS.md) (why). This file is **current state**.
 
-_Last updated: 2026-07-31._
+_Last updated: 2026-08-01._
 
 ---
 
 ## Where things stand (git / deploy)
 
-- **`main` and `staging` are in sync** and both **live**:
+- **`main` and `staging` are in sync** (as of 2026-08-01) and both **live**:
   - **Production** = `xtrapoint.com` (apex → `www`), builds from **`main`**.
   - **Staging** = `staging.xtrapoint.com`, builds from the **`staging`** branch.
 - **Promotion flow**: `git checkout main && git merge --ff-only staging && git push origin main`
   (then `git checkout staging`). Keep them in sync.
+- **⚠ "Promote to production" (the Studio tool) is CONTENT-only — it does NOT
+  deploy code.** It reruns a production build using whatever code is *already*
+  on `main`, with current Sanity content. If `main` is behind `staging` (code
+  changes only ever land on `staging` first — see COMMANDS.md), clicking it
+  will NOT bring those code changes to production, no matter how many times
+  you click it — you'll just get a fresh build of the *old* code. This bit us
+  once already: `main` sat 5 commits behind `staging` for a while (including a
+  copy pass from before this promote/hide-from-production/ambassador-tiers
+  work existed), so production kept serving stale copy and none of the new CMS
+  fields worked there, even though "Promote to production" appeared to run
+  fine. **Check `git log main..staging --oneline` before assuming a promote
+  will show what you expect** — if it lists anything, merge `staging` → `main`
+  (above) first, *then* promote (or just push to `main`, which triggers its
+  own production build via Vercel's git integration — no separate promote
+  needed after a code merge).
 - **Deploy gotcha:** a Vercel build occasionally gets **stuck/superseded** and
   doesn't publish. If prod doesn't update after ~a few minutes (earlier deploys
   were ~80s), re-trigger with an empty commit (`git commit --allow-empty`) or the

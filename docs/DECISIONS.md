@@ -4,6 +4,43 @@ Short log of non-obvious engineering decisions. Newest first.
 
 ---
 
+## 2026-08-01 — Incident: "Promote to production" looked broken; `main` was just stale code
+
+**Context:** Client reported unpublishing a school (Example State) in Sanity
+"worked on both staging and production" per their read, but production kept
+showing old content — the "Promote to production" button appeared to do
+nothing. Investigation (diffing the actual served HTML) found production's
+meta description still had wording (", free") that was removed by the very
+first "held pending sign-off" copy-pass commit — i.e. **production was running
+code from before this whole feature set existed.** `main` had not been merged
+forward since before this project's promote-tool/hide-from-production/
+ambassador-tiers/photo-credit work started; it was still 5 commits behind
+`staging` (`git log main..staging --oneline` showed all of them).
+
+**Root cause:** "Promote to production" only ever rebuilds whatever **code**
+is on `main`, against **current Sanity content**. It is a content-promotion
+tool, not a code-deploy tool. Since `main` never got the code that adds (a)
+the `hiddenFromProduction` GROQ filter, (b) the ambassador tier/program CMS
+fields, and (c) photo credits, none of it could possibly work on production —
+promoting just produced a fresh build of the old code, which looked identical
+to "not working."
+
+**Fix:** Fast-forwarded `main` to `staging` (`git merge --ff-only staging`)
+and pushed — this itself triggers a production rebuild via Vercel's git
+integration (independent of any Sanity webhook), bringing the code current.
+Verified via the served meta description losing the old ", free" wording.
+Confirmed with the client before merging, since 3 of those 5 commits were the
+previously-held copy-pass work — merging is all-or-nothing (fast-forward), not
+cherry-pickable, so holding one commit while shipping another isn't a normal
+option without a more involved rebase.
+
+**Takeaway / gotcha for later:** the promote tool's UI and the docs now say
+explicitly that it's content-only — check `git log main..staging --oneline`
+before trusting a promote to reflect a recent code change. See the added
+warning in HANDOFF.md's "Where things stand" section.
+
+---
+
 ## 2026-07-31 (follow-up) — "Hide from production" toggle, and pre-filled Ambassador defaults
 
 **Context:** Client feedback on the same-day promote-tool work (above): (1)
