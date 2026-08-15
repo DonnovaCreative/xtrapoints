@@ -186,6 +186,10 @@ automatically from the same Sanity data — no manual design per school.
 - **Download the PDF:** `/schools/<slug>/one-pager.pdf` — generated on demand by
   a headless-Chromium serverless function that prints the page above, then
   CDN-cached (same on-demand pattern as the OG image).
+- **Preview image:** `/schools/<slug>/one-pager.png` — a PNG of the sheet, used
+  as the thumbnail in the school's Marketing Portal. Rendered from the same page
+  under print styles, so it always matches the PDF and re-renders itself when the
+  school's logo or colors change. Nothing to generate by hand.
 
 It's built 1:1 from the Figma source and pulls the school **logo, brand colors,
 mascot, fund, and avatar** from Sanity, so the only per-school work is what you
@@ -201,6 +205,93 @@ copy, edit [`src/pages/schools/[school]/one-pager.astro`](../src/pages/schools/[
 > The layout is tuned to fit exactly one Letter page. If you add/lengthen copy,
 > re-check `/schools/<slug>/one-pager` fits on one sheet (the CTA footer should
 > sit flush at the bottom) before shipping.
+
+## The school's Marketing Portal link
+
+Each school gets a private **dashboard** — the Marketing Portal — with a sidebar
+and a page per section:
+
+| Section | What's on it |
+|---|---|
+| **Overview** | Front door; links into everything below |
+| **Your pages** | Their donor + ambassador page URLs, with copy buttons |
+| **Sales one-pager** | Preview + PDF download of their co-branded sell sheet |
+| **Resource library** | The shared template catalog, and a page per template |
+| **Brand kit** | Their logo files and color hexes |
+
+Everything except the resource library is generated from the same Sanity school
+document, so there's nothing extra to maintain per school.
+
+Set it up in the school's **Marketing portal** tab in the Studio:
+
+1. Click **Generate** on "Private portal link" to mint the URL.
+2. Turn **Portal access** on.
+3. **Publish** the school — the link does nothing until you do.
+4. **Copy link** and email it to the school's contact.
+
+There are no logins yet: the link itself is the credential (an unguessable
+token), so it should go to the school directly, not anywhere public. To switch a
+school off, turn **Portal access** off — they get a "not active" notice and the
+same URL works again if you turn it back on. **Regenerate** replaces the link
+(the old one stops working on publish); **Revoke** kills it outright.
+
+Note that an unpublished school — or one hidden from production, on production —
+has no portal there either, since the portal links to pages that wouldn't exist.
+
+## The resource library (Marketing Resources)
+
+The portal carries a **shared library** of XtraPoint-made materials — the same
+catalog for every school, edited under **Marketing Resources** in the Studio.
+Nothing here is per-school, so adding an item publishes it to every school's
+portal at once.
+
+**One resource = one piece, not one file.** "Announcement post" is a single
+resource that ships in Canva, Figma, Illustrator and Photoshop — a school picks
+the piece they want, then the tool they happen to own. Each resource also gets
+its **own page** in the portal, so there's room to explain how to use it.
+
+### The three tabs
+
+**Details** — title, slug (click Generate; it's the page's URL), short
+description for the card, category, preview image, sort order.
+
+**Formats** — one entry per tool. Each is a **Tool** (Canva, Figma, Photoshop, …)
+plus where it comes from:
+
+| Where it comes from | What the button does | Who can add it |
+|---|---|---|
+| **File** | Downloads the file we host | Anyone with Studio access |
+| **Link** | Opens in Canva / Figma / Drive | Anyone with Studio access |
+| **Generated** | Builds it in *their* logo and colors | Developer — needs code |
+
+Files and links are pure content: upload or paste, publish, done. Only
+**Generated** needs a developer, because each one is a real code template (see
+`src/lib/generatedTemplates.ts` — the sales one-pager is the first). That's the
+intended split: grow the library freely with files and links, and add generated
+templates deliberately.
+
+**How to use it** — the resource's page body. **Key details** is the quick-facts
+list (e.g. "Size" / "1080 × 1350", "Best for" / "Instagram feed"); **Overview**
+is the write-up: what it's for, when to post or print it, what to change and what
+to leave alone. Both are optional — with neither, the page still lists the
+formats.
+
+### Practical notes
+
+- **Add a preview image.** Schools are far more likely to use something they can
+  see, and it's clickable — it opens full size, so they can tell what a piece is
+  without downloading it first. Upload the whole piece rather than a detail: the
+  card crops it to a tidy thumbnail, and the full-screen view is where it's judged.
+- **Generated formats get their preview automatically** — rendered from the
+  template in that school's own brand, so there's nothing to upload and it can't
+  go stale. Uploading a preview image overrides it.
+- For links, check the sharing setting — a Canva link that requires access
+  approval is worse than no link.
+- Use **Category** to group items; the portal renders them under those headings.
+  **Sort order** controls position within a category (lower first).
+- A resource with **no usable format** is hidden rather than shown as a dead end,
+  and the library page shows a "request a template" prompt when it's empty — so
+  schools never land on a bare shelf.
 
 ## Assets
 

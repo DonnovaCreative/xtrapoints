@@ -69,7 +69,9 @@ const VALID = `_type == "school" && !(_id in path("drafts.**")) && defined(slug.
   isProduction ? " && hiddenFromProduction != true" : ""
 }`;
 
-const PROJECTION = `{
+// The field list is kept separate from its braces so the portal lookup at the
+// bottom of this file can re-wrap it with the portal's own access fields.
+const PROJECTION_FIELDS = `
   "slug": slug.current,
   name, short, mascot, fund, city, state,
   fundShort, beneficiary, whyGiveHeading, whyGiveBody, videoUrl, videoHeading, videoCaption,
@@ -100,7 +102,8 @@ const PROJECTION = `{
     "onAccent": theme.onAccent,
     "primaryDarkOverride": theme.primaryDarkOverride
   }
-}`;
+`;
+const PROJECTION = `{${PROJECTION_FIELDS}}`;
 
 // Header logo height presets → px (see SchoolHeader, which sets the height
 // inline so the "custom" slider can use any value). Editors also get a custom
@@ -265,6 +268,41 @@ export async function getSchoolDraft(
     { slug },
   );
   return doc ? toSchool(doc) : undefined;
+}
+
+// -----------------------------------------------------------------------------
+// MARKETING PORTAL — the private per-school resource page at /portal/<token>.
+//
+// The token in the URL is the only credential (there are no accounts yet), so
+// the lookup runs the OTHER way round from every query above: we resolve a token
+// to a school rather than a slug to a school. `portalToken` is never projected
+// into the returned `School`, so a token can't leak into rendered HTML.
+//
+// The same `VALID` filter applies, which means a school that is unpublished — or
+// hidden from production, on a production deploy — has no portal on that
+// environment either. That's deliberate: the portal links to the school's live
+// pages, so a portal that outlived them would just serve 404s.
+// -----------------------------------------------------------------------------
+const PORTAL_PROJECTION = `{${PROJECTION_FIELDS}, portalEnabled}`;
+
+export interface SchoolPortal {
+  school: School;
+  /** False → the link is valid but XtraPoint has switched this school off. */
+  enabled: boolean;
+}
+
+/** Resolve a portal token to its school. undefined when no school matches. */
+export async function getSchoolByPortalToken(
+  token: string,
+): Promise<SchoolPortal | undefined> {
+  const doc = await sanityClient.fetch<
+    (SchoolDoc & { portalEnabled: boolean | null }) | null
+  >(
+    `*[${VALID} && defined(portalToken) && portalToken == $token]${PORTAL_PROJECTION}[0]`,
+    { token },
+  );
+  if (!doc) return undefined;
+  return { school: toSchool(doc), enabled: doc.portalEnabled === true };
 }
 
 /** Site-wide settings singleton (shared across all school pages). */

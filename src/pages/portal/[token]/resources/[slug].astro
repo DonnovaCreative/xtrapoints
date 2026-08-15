@@ -1,0 +1,258 @@
+---
+// MARKETING PORTAL → one resource's own page.
+//
+// The library card answers "what is this?"; this page answers "how do I use it,
+// and in what?". Two halves: the editorial overview XtraPoint writes in the
+// Studio, and the list of formats — the same piece in every tool we've built it
+// in, so a school picks the one they already own.
+export const prerender = false;
+
+import PortalLayout from "@/layouts/PortalLayout.astro";
+import { gatePortal } from "@/lib/portalRoute";
+import { getResource, overviewHtml, formatSize } from "@/data/resourcesSource";
+import { getGeneratedTemplate } from "@/lib/generatedTemplates";
+import { brand } from "@/config/brand";
+
+const gate = await gatePortal(Astro);
+if (!gate.ok) return gate.response;
+const { school, base } = gate;
+
+const slug = Astro.params.slug;
+const resource = slug ? await getResource(slug) : undefined;
+
+if (!resource) {
+  return new Response(null, { status: 302, headers: { location: `${base}/resources` } });
+}
+
+const body = overviewHtml(resource.overview);
+
+const img = (url: string, w: number) =>
+  url.includes("cdn.sanity.io") ? `${url}?w=${w}&fit=max&auto=format` : url;
+
+// Resolve each format to the one thing its button does. A "generated" format
+// whose template id has no code behind it is dropped rather than rendered as a
+// dead button (same rule as the registry's contract).
+const formats = resource.formats
+  .map((f) => {
+    if (f.source === "generated") {
+      const template = getGeneratedTemplate(f.templateId);
+      if (!template) return undefined;
+      return {
+        ...f,
+        href: template.downloadHref(school),
+        action: template.downloadLabel,
+        external: false,
+        meta: [`Built in ${school.short}'s colors`, f.note].filter(Boolean).join(" · "),
+        thumbnailHref: template.thumbnailHref?.(school),
+      };
+    }
+    if (f.source === "externalLink") {
+      return {
+        ...f,
+        href: f.externalUrl!,
+        action: "Open template",
+        external: true,
+        meta: f.note,
+        thumbnailHref: undefined,
+      };
+    }
+    return {
+      ...f,
+      href: `${f.file!.url}?dl=${encodeURIComponent(f.file!.originalFilename ?? resource.title)}`,
+      action: "Download",
+      external: false,
+      meta: [f.file?.extension?.toUpperCase(), formatSize(f.file?.size), f.note]
+        .filter(Boolean)
+        .join(" · "),
+      thumbnailHref: undefined,
+    };
+  })
+  .filter((f): f is NonNullable<typeof f> => Boolean(f));
+
+// An uploaded preview wins; otherwise a generated format can show itself
+// rendered in this school's brand.
+const preview =
+  resource.thumbnail ?? formats.map((f) => f.thumbnailHref).find(Boolean);
+---
+
+<PortalLayout
+  school={school}
+  base={base}
+  active="resources"
+  crumb={resource.title}
+  heading={resource.title}
+  blurb={resource.description ?? resource.categoryLabel}
+>
+  <div class="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
+    <!-- ============ Main column ============ -->
+    <div class="min-w-0">
+      {
+        preview && (
+          <a
+            href={img(preview, 2000)}
+            target="_blank"
+            rel="noopener"
+            data-lightbox={img(preview, 2000)}
+            data-lightbox-title={resource.title}
+            class="group relative block overflow-hidden rounded-card border border-gray-200 bg-gray-50"
+          >
+            <img
+              src={img(preview, 1400)}
+              alt={`Preview of ${resource.title}`}
+              class="max-h-[28rem] w-full object-contain"
+            />
+            <span class="pointer-events-none absolute inset-0 flex items-end justify-end p-4 opacity-0 transition duration-200 group-hover:opacity-100 group-focus-visible:opacity-100">
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-gray-900 shadow-sm">
+                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5M11 8v6M8 11h6"/></svg>
+                View full size
+              </span>
+            </span>
+          </a>
+        )
+      }
+
+      {
+        body ? (
+          <div class="prose-portal mt-8" set:html={body} />
+        ) : (
+          <p class="mt-8 text-sm leading-relaxed text-gray-500">
+            No notes on this one yet. Grab the format you work in below — and if
+            you'd like a hand using it, {brand.name}'s marketing team is one email
+            away.
+          </p>
+        )
+      }
+    </div>
+
+    <!-- ============ Sidebar: formats + key details ============ -->
+    <aside class="min-w-0 space-y-6 lg:sticky lg:top-20 lg:self-start">
+      <section class="rounded-card border border-gray-200 bg-white p-5">
+        <h2 class="text-sm font-bold text-gray-900">Get this template</h2>
+        <p class="mt-1 text-xs leading-relaxed text-gray-500">
+          Same piece, {formats.length}
+          {formats.length === 1 ? " format" : " formats"} — use whichever you already
+          have.
+        </p>
+
+        <ul class="mt-4 space-y-2">
+          {
+            formats.map((f) => (
+              <li>
+                <a
+                  href={f.href}
+                  target={f.external ? "_blank" : undefined}
+                  rel={f.external ? "noopener noreferrer" : undefined}
+                  class="block rounded-lg border border-gray-200 p-3 transition-colors hover:border-gray-300 hover:bg-gray-50"
+                >
+                  <span class="flex items-center gap-3">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-lime-soft text-lime-dark">
+                      {f.external ? (
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+                      ) : (
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>
+                      )}
+                    </span>
+                    <span class="min-w-0 flex-1 truncate text-sm font-semibold text-gray-900">
+                      {f.label}
+                    </span>
+                    <span class="shrink-0 text-xs font-semibold text-lime-dark">{f.action}</span>
+                  </span>
+                  {/* Its own row rather than beside the label — "Requires
+                      Photoshop CC 2023+" is the kind of thing that must not be
+                      cut off, and it's the widest text here. */}
+                  {f.meta && (
+                    <span class="mt-2 block font-mono text-[0.625rem] uppercase leading-relaxed tracking-wider text-gray-400">
+                      {f.meta}
+                    </span>
+                  )}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      {
+        resource.specs.length > 0 && (
+          <section class="rounded-card border border-gray-200 bg-white p-5">
+            <h2 class="text-sm font-bold text-gray-900">Key details</h2>
+            <dl class="mt-3 space-y-2.5">
+              {resource.specs.map((spec) => (
+                <div class="flex justify-between gap-4 text-sm">
+                  <dt class="shrink-0 text-gray-500">{spec.label}</dt>
+                  <dd class="min-w-0 text-right font-medium text-gray-900">{spec.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        )
+      }
+
+      <a
+        href={`${base}/resources`}
+        class="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-600 hover:text-gray-900"
+      >
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H4M10 18l-6-6 6-6"/></svg>
+        All resources
+      </a>
+    </aside>
+  </div>
+</PortalLayout>
+
+<style>
+  /* Editors control structure, not presentation — so the overview body is styled
+     here rather than from anything they can set in the Studio, and every
+     resource page reads the same. */
+  .prose-portal :global(h2) {
+    margin-top: 2rem;
+    font-size: 1.125rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--color-gray-900);
+  }
+  .prose-portal :global(h3) {
+    margin-top: 1.5rem;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--color-gray-900);
+  }
+  .prose-portal :global(p),
+  .prose-portal :global(li) {
+    margin-top: 0.75rem;
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--color-gray-600);
+  }
+  .prose-portal :global(ul),
+  .prose-portal :global(ol) {
+    margin-top: 0.75rem;
+    padding-left: 1.25rem;
+  }
+  .prose-portal :global(ul) {
+    list-style: disc;
+  }
+  .prose-portal :global(ol) {
+    list-style: decimal;
+  }
+  .prose-portal :global(li) {
+    margin-top: 0.375rem;
+  }
+  .prose-portal :global(strong) {
+    font-weight: 700;
+    color: var(--color-gray-900);
+  }
+  .prose-portal :global(a) {
+    font-weight: 600;
+    color: var(--color-lime-dark);
+    text-decoration: underline;
+  }
+  .prose-portal :global(blockquote) {
+    margin-top: 1rem;
+    border-left: 3px solid var(--color-lime);
+    padding-left: 1rem;
+    font-style: italic;
+  }
+  .prose-portal :global(:first-child) {
+    margin-top: 0;
+  }
+</style>

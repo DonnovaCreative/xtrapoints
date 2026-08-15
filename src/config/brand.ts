@@ -42,6 +42,10 @@ export const brand = {
     navy: PLURAL
       ? "/assets/xtrapoints-logo-navy.svg"
       : "/assets/xtrapoint-logo-navy.svg",
+    // Square mark, no wordmark — for places too narrow for the lockup (the
+    // portal's collapsed sidebar rail). Same art as the favicon, and it carries
+    // its own lime tile, so it reads on light and dark alike.
+    mark: "/favicon.svg",
     // Native SVG dimensions, for correct aspect ratio / no layout shift.
     width: PLURAL ? 1073 : 1010,
     height: 182,

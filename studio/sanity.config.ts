@@ -31,6 +31,7 @@ export default defineConfig({
           .title("Content")
           .items([
             S.documentTypeListItem("school").title("Schools"),
+            S.documentTypeListItem("resourceTemplate").title("Marketing Resources"),
             S.divider(),
             S.listItem()
               .title("Legal & Compliance")

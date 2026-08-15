@@ -1,0 +1,117 @@
+---
+// The portal's two bits of client behaviour, in one place so every page in the
+// dashboard gets them: copy-to-clipboard buttons and the full-screen image
+// preview. Both are progressive enhancement and both are attribute-driven, so a
+// page opts in just by rendering [data-copy] or [data-lightbox] — nothing to
+// wire up per page.
+---
+
+<!-- Full-screen preview, reused by every thumbnail on the page. Card crops are
+     deliberately tidy and uniform, which means they clip — this is how a school
+     actually sees what a piece looks like before spending time on a download. -->
+<div
+  id="lightbox"
+  class="fixed inset-0 z-50 hidden items-center justify-center bg-black/85 p-4 sm:p-8"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="lightbox-caption"
+>
+  <!-- The backdrop is the click target, so anywhere outside the image closes. -->
+  <button
+    type="button"
+    data-lightbox-close
+    class="absolute inset-0 h-full w-full cursor-zoom-out"
+    aria-label="Close preview"></button>
+  <figure class="pointer-events-none relative flex max-h-full flex-col items-center gap-4">
+    <img
+      id="lightbox-img"
+      src=""
+      alt=""
+      class="max-h-[78vh] w-auto max-w-full rounded-lg bg-white object-contain shadow-2xl"
+    />
+    <figcaption id="lightbox-caption" class="text-center text-sm font-semibold text-white/90">
+    </figcaption>
+  </figure>
+  <button
+    type="button"
+    data-lightbox-close
+    class="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/25"
+    aria-label="Close preview"
+  >
+    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+  </button>
+</div>
+
+<!-- Copy-to-clipboard. Progressive enhancement: with no JS the URLs are still
+     shown as text on the cards and the hexes are labelled, so nothing here is the
+     only route to the information. -->
+<script>
+  document.querySelectorAll<HTMLElement>("[data-copy]").forEach((el) => {
+    el.addEventListener("click", async () => {
+      const value = el.dataset.copy;
+      if (!value) return;
+      try {
+        await navigator.clipboard.writeText(value);
+      } catch {
+        return; // Clipboard blocked (insecure context / denied) — leave the label alone.
+      }
+      // Swatches flip just their name line (data-copy-label) so the hex stays
+      // put; the plain link buttons have no inner label and flip themselves.
+      const label = el.querySelector<HTMLElement>("[data-copy-label]") ?? el;
+      const original = label.textContent;
+      label.textContent = "Copied";
+      setTimeout(() => {
+        label.textContent = original;
+      }, 1500);
+    });
+  });
+</script>
+
+<!-- Each trigger is an <a> pointing at the image itself, so if this never runs
+     the same full-size view still opens in a new tab. -->
+<script>
+  const lb = document.getElementById("lightbox");
+  const lbImg = document.getElementById("lightbox-img") as HTMLImageElement | null;
+  const lbCaption = document.getElementById("lightbox-caption");
+
+  if (lb && lbImg) {
+    // Where focus came from, so closing puts it back on the thumbnail rather
+    // than dumping the user at the top of the page.
+    let opener: HTMLElement | null = null;
+
+    const close = () => {
+      lb.classList.add("hidden");
+      lb.classList.remove("flex");
+      document.body.style.overflow = "";
+      lbImg.removeAttribute("src"); // Stop a large in-flight preview downloading.
+      opener?.focus();
+      opener = null;
+    };
+
+    document.querySelectorAll<HTMLAnchorElement>("[data-lightbox]").forEach((trigger) => {
+      trigger.addEventListener("click", (event) => {
+        const src = trigger.dataset.lightbox;
+        if (!src) return;
+        event.preventDefault(); // Only now that we know we can handle it.
+        const title = trigger.dataset.lightboxTitle ?? "";
+        opener = trigger;
+        lbImg.src = src;
+        lbImg.alt = title;
+        if (lbCaption) lbCaption.textContent = title;
+        lb.classList.remove("hidden");
+        lb.classList.add("flex");
+        // The page behind shouldn't scroll under the overlay.
+        document.body.style.overflow = "hidden";
+        lb.querySelector<HTMLElement>("[data-lightbox-close]")?.focus();
+      });
+    });
+
+    lb.querySelectorAll<HTMLElement>("[data-lightbox-close]").forEach((btn) =>
+      btn.addEventListener("click", close),
+    );
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !lb.classList.contains("hidden")) close();
+    });
+  }
+</script>

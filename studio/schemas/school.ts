@@ -2,6 +2,7 @@ import { defineType, defineField, defineArrayMember } from "sanity";
 import { ColorInput } from "../components/ColorInput";
 import { FundInput } from "../components/FundInput";
 import { LogoHeightInput } from "../components/LogoHeightInput";
+import { PortalLinkInput } from "../components/PortalLinkInput";
 import {
   DEFAULT_AMBASSADOR_TIERS,
   DEFAULT_AMBASSADOR_PROGRAMS,
@@ -30,6 +31,7 @@ export default defineType({
   groups: [
     { name: "details", title: "Details", default: true },
     { name: "publishing", title: "Publishing" },
+    { name: "portal", title: "Marketing portal" },
     { name: "branding", title: "Logos & marks" },
     { name: "photos", title: "Photos" },
     { name: "content", title: "Page copy & media" },
@@ -125,6 +127,36 @@ export default defineType({
       initialValue: false,
       description:
         'ON: this school stays published and visible on staging, but is left OUT of production (xtrapoint.com) the next time someone clicks "Promote to production" in the Studio sidebar. Use this to pull a school off production (e.g. a test/placeholder school) without touching its staging content or unpublishing it. Turn back OFF + promote again to bring it back. To take a school off BOTH staging and production, use the normal Unpublish action instead (then promote once more to clear it from production too).',
+    }),
+
+    // ── Marketing portal (private per-school resource page) ─────────────────
+    // The school's standing marketing hub at /portal/<portalToken> — brand
+    // assets, their live pages, and the co-branded one-pager, all in one place.
+    // There are no accounts yet: the unguessable token in the URL IS the
+    // credential, and `portalEnabled` is the on/off switch for that school.
+    defineField({
+      name: "portalEnabled",
+      title: "Portal access",
+      type: "boolean",
+      group: "portal",
+      initialValue: false,
+      description:
+        "ON: this school's private Marketing Portal link works. OFF (default): the link shows a “this portal has been deactivated” notice instead — use this to switch a school off without destroying their link, so turning it back on restores the same URL. To kill the link outright, use Revoke on the field below.",
+    }),
+    defineField({
+      name: "portalToken",
+      title: "Private portal link",
+      type: "string",
+      group: "portal",
+      components: { input: PortalLinkInput },
+      description:
+        "The school's private portal URL. Anyone with this link can open the portal, so send it to the school's contact directly — don't post it publicly. Generate mints a new link (and retires the old one); Revoke clears it entirely.",
+      // Only ever set by the Generate button — 32 hex chars (128 bits). Rejecting
+      // anything else stops a hand-typed, guessable “token” from becoming the gate.
+      validation: (r) =>
+        r.regex(/^[0-9a-f]{32}$/, {
+          name: "generated portal token — use the Generate button",
+        }),
     }),
 
     // ── Page copy & media (all optional — strong defaults render when empty) ──

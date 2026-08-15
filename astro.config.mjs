@@ -36,9 +36,14 @@ export default defineConfig({
   integrations: [
     react(),
     sitemap({
-      // Exclude noindex collateral: the print/PDF one-pagers and the secret-gated
-      // draft-preview routes.
-      filter: (page) => !page.includes("/one-pager") && !page.includes("/preview/"),
+      // Exclude noindex collateral: the print/PDF one-pagers, the secret-gated
+      // draft-preview routes, and the private per-school marketing portals.
+      // (The latter two are server-rendered, so they shouldn't reach the sitemap
+      // anyway — belt and braces, since a leaked portal URL is a real problem.)
+      filter: (page) =>
+        !page.includes("/one-pager") &&
+        !page.includes("/preview/") &&
+        !page.includes("/portal/"),
     }),
   ],
   // maxDuration covers the one-pager PDF route's Chromium cold-start + render

@@ -4,6 +4,212 @@ Short log of non-obvious engineering decisions. Newest first.
 
 ---
 
+## 2026-08-14 (follow-up 3) — Portal becomes a dashboard; resources become pieces
+
+**Context:** The portal was one long scrolling page, and a resource was one file.
+Both stopped fitting: a school shouldn't scroll past their brand kit to reach a
+template, and a template isn't a file — the same announcement post exists in
+Canva *and* Figma *and* Photoshop, and which one matters depends on what the
+school owns.
+
+**Three changes, one shape:**
+
+**1. A section per page, behind shadcn's `sidebar-07`.** `/portal/<token>` is now
+Overview, with `/pages`, `/one-pager`, `/resources`, `/resources/<slug>` and
+`/brand` beside it. The nav lives in `src/lib/portalNav.ts` so it can't drift
+from the routes.
+
+**2. `resourceTemplate` holds `formats[]`, not one asset.** The document is the
+*piece*; each format is one tool (Canva, Figma, Photoshop, …) plus where it comes
+from (file / link / generated). The old single-asset fields are gone — migrated,
+not dropped, by `studio/scripts/zz-migrate-resources.ts`, which folds each old
+document's asset into a one-item array and guesses its tool from the file
+extension or link host.
+
+**3. Every resource gets its own page**, with an editorial body (portable text)
+and a "Key details" spec list, alongside the format list.
+
+**Why every route re-validates the token.** The URL *is* the credential, so a
+six-page portal is six chances to forget that. `gatePortal` in
+`src/lib/portalRoute.ts` owns validation, the noindex/no-referrer headers, and
+the 404 — a new page can't ship without them by construction. Only the root
+route renders a switched-off school; the rest redirect there, so the "not active"
+notice is written once.
+
+**The Astro/React seam.** The sidebar and the page content must share
+`SidebarProvider`'s context — the trigger and the collapse state live there — so
+splitting them into separate islands would leave the trigger toggling nothing.
+Instead **one** island wraps everything: Astro renders each page's body to HTML
+and passes it as `children`, which React keeps as static markup inside
+`SidebarInset`. Pages stay ordinary Astro, and their own `<script>` tags (the
+lightbox) keep working. Because props cross that boundary, they must be
+serializable — which is why `portalNav` carries icon *names* and PortalShell maps
+them to lucide components on its side.
+
+**Sidebar re-skinned per school.** shadcn ships a light-neutral rail; the portal
+reads as *theirs* when it's their dark brand color, so `PortalLayout` overrides
+the `--sidebar-*` variables from `schoolThemeVars`. One knock-on: the XtraPoint
+wordmark is far too wide for the 3rem collapsed rail and sits clipped mid-letter,
+so `brand.logo.mark` (the square favicon art) takes over there.
+
+**Two card targets, deliberately.** On a library card the image opens the
+full-size preview and everything else opens the resource's page. Those are
+genuinely different jobs, and the hover label says which is which — better than
+picking one and making the other unreachable.
+
+---
+
+## 2026-08-14 (follow-up 2) — Portal previews: render them, don't upload them
+
+**Context:** Testing the portal surfaced two gaps. Card thumbnails are cropped to
+a uniform 4:3 box, so a tall piece (a 1080×1350 social post) is clipped — you
+couldn't tell what an asset was without downloading it. And the generated
+one-pager had no image at all, which is the item most worth seeing.
+
+**Decision:** Every thumbnail opens a **full-screen preview** on click, and the
+generated one-pager gets a thumbnail **rendered from the template itself** at
+`/schools/<slug>/one-pager.png`.
+
+**Why render rather than upload a screenshot:** a stored image is a second copy
+of the design that silently goes stale the moment a school changes its logo or
+colors — and the one-pager's whole point is that it re-skins itself. The PNG
+route prints the same HTML page the PDF does, so the preview cannot drift from
+the file a school actually downloads. It's the on-demand + CDN-cached pattern
+already used by `og.png.ts` and `one-pager.pdf.ts`, so build time stays flat.
+
+**The non-obvious part — screenshot under `print` media, not `screen`.** Two
+problems solve themselves at once with `page.emulateMediaType("print")`:
+- On screen the sheet sits in a centred flex row and **shrinks below its 8.5in
+  width** (802px in an 850px viewport). Since `.op-canvas` is a fixed-size
+  scaled layer under `overflow: hidden`, that doesn't squash the design — it
+  **clips ~14px off the right edge**. Easy to miss; the first render looked fine
+  until the pixel dimensions came out at 1203 instead of 1224.
+- The floating "Download PDF" button is `position: fixed` over the sheet's
+  bottom-right corner and would land in an element screenshot.
+
+The existing `@media print` block already fixes both, and using it means the
+preview is rendered under exactly the rules the PDF is.
+
+Rendered at **1.5×** (1224×1584) rather than the PDF path's 2×: sharp enough
+full screen at roughly half the bytes, which matters because the dot-grid bands
+are expensive to PNG-encode.
+
+**Generalized, not special-cased:** the thumbnail is an optional
+`thumbnailHref` on the `GeneratedTemplate` registry entry, so the next generated
+template (parent flyer, Instagram square) gets a portal preview by adding one
+line, not by touching the portal. Uploaded thumbnails still win when present.
+
+**The lightbox degrades:** each trigger is a real `<a>` to the image with the JS
+calling `preventDefault()` only once it knows it can handle the click — so with
+no JS the same full-size image still opens in a new tab.
+
+---
+
+## 2026-08-14 (follow-up) — Resource library: one catalog, three asset kinds
+
+**Context:** Stage 0's portal showed a school only *their own* material (their
+pages, their one-pager, their logo/colors). The thing that makes a partner
+portal actually worth opening — a library of templates we've made — didn't
+exist. Requirement was to host both design files (Photoshop, Illustrator) and
+external templates (Canva, Figma), and to keep it scalable.
+
+**Decision:** One Sanity document type, `resourceTemplate`, with an `assetType`
+discriminator covering all three kinds — `staticFile`, `externalLink`,
+`generated`. To a school browsing the portal these are all just "things I can
+use"; the only difference is what the button does (download / open in Canva /
+build in my brand). Modelling them as one catalog keeps the portal UI and the
+Studio editing experience single, instead of three parallel systems.
+
+**The important property — who can add what:**
+- `staticFile` and `externalLink` are **pure content**. Upload or paste a link
+  in the Studio and it's in every school's portal. No developer, no deploy.
+- `generated` is the only kind that costs engineering time, because each one is
+  a real code template (an Astro page + render route, like the one-pager).
+
+This is the scalability answer: the library grows without engineering, and the
+expensive kind stays deliberately small. Generated templates live in a registry
+(`src/lib/generatedTemplates.ts`) keyed by id; a `templateId` with no registry
+entry is **skipped** rather than rendered as a dead button, so deleting a code
+template can't break a school's portal.
+
+**Why layout stays in code, not the CMS:** it's tempting to make generated
+templates editable from Sanity fields. Not doing that — pixel layout belongs
+with the rendering pipeline, and CMS-driven layout would fight it for no gain at
+this scale. Sanity holds the *catalog metadata*; the design is code.
+
+**Gotchas:**
+- Resources are **global**, not per-school. There's no per-school library, and
+  publishing one item publishes it everywhere. Per-school curation, if ever
+  wanted, is a new feature, not a config.
+- The one-pager keeps its own dedicated portal section (it's guaranteed for
+  every school, zero setup). It *can* also be added to the library as a
+  `generated` item, which would show it twice — the Studio field says so.
+- The library fetch is non-fatal in the portal route: if it fails, the section
+  is simply absent rather than taking down the school's own pages and brand files.
+
+**Verification limit worth knowing:** the in-app browser blocks Sanity's realtime
+WebSocket (`wss://...api.sanity.io`), and the Studio's document *editor* depends
+on it — document forms render blank there while list views work fine. So Studio
+form changes have to be eyeballed in a normal browser; this is an environment
+constraint, not a schema bug (an untouched `school` doc behaves identically).
+
+---
+
+## 2026-08-14 — Marketing Portal Stage 0: the URL is the credential (no accounts yet)
+
+**Context:** First slice of the partner Marketing Portal (see the plan doc on
+the Client Drive, `Marketing Portal/xtrapoint-marketing-hub-realistic-plan.md`).
+Schools need one standing place to find their live pages, their co-branded
+one-pager, and their brand files, instead of emailing us for links. The full
+vision has accounts, orgs, and roles — but building auth first would put weeks
+of infrastructure in front of the one thing actually worth testing: whether
+schools use a resource hub at all.
+
+**Decision:** Ship it with **no authentication**. Each school gets a private
+URL, `/portal/<token>`, where the token is 128 bits of randomness stored on the
+school document (`portalToken`) and minted by a Generate button in the Studio
+(`studio/components/PortalLinkInput.tsx`). The token *is* both the address and
+the key — there is nothing to log into.
+
+**Why not build auth now:** Clerk Organizations (the likely Stage 1 choice)
+brings invites, roles, and org-scoped sessions, but also a real integration and
+an ongoing dependency. None of that changes the answer to "do schools open the
+link and use it?" Deferring it keeps Stage 0 to a few files with no new
+services and no new env vars.
+
+**Access control, such as it is:**
+- `portalEnabled` (boolean, per school) is the on/off switch — the manual
+  deactivation story, deliberately not a plan/subscription/trial state. Off →
+  a "this portal isn't active" notice rather than a 404, so a school whose
+  access was switched off learns that, instead of thinking their bookmark rotted.
+- **Regenerate** rotates the link (old one dies on publish); **Revoke** clears it.
+- Token shape is validated (`src/lib/portalToken.ts`) before any Sanity query, so
+  junk never reaches the dataset.
+- The lookup goes token → school, and `portalToken` is never projected into the
+  `School` object, so it can't leak into rendered HTML.
+- `noindex` header + `Disallow: /portal/` in production robots.txt + sitemap
+  filter. Also `Referrer-Policy: no-referrer` on the route — otherwise the full
+  URL (token included) rides along in the `Referer` of every outbound click,
+  including asset downloads to the Sanity CDN.
+
+**Gotchas:**
+- The route **must** stay `prerender = false`. A static build would bake the
+  pages out and lose the gate entirely.
+- The lookup reads published docs (same `VALID` filter as everything else), so
+  generating a token does nothing until the school is **published** — the
+  Studio field says so.
+- Consequently a school that's unpublished, or hidden from production on a
+  production deploy, has no portal there either. That's intended: the portal
+  links to their live pages, so a portal outliving them would just serve 404s.
+
+**Known limits (fine for Stage 0, revisit at Stage 1):** no per-user identity,
+so we can't tell *who* opened a portal or attribute actions; a forwarded link
+grants access to whoever receives it; and revocation is all-or-nothing per
+school. All three are what accounts fix, and none of them block validating the
+idea.
+
+---
+
 ## 2026-08-01 — Incident: "Promote to production" looked broken; `main` was just stale code
 
 **Context:** Client reported unpublishing a school (Example State) in Sanity

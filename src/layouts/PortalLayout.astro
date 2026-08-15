@@ -1,0 +1,118 @@
+---
+// =============================================================================
+// MARKETING PORTAL layout — the dashboard chrome shared by every portal page.
+//
+// Pages supply their body; this owns the sidebar, breadcrumbs, page heading and
+// the per-school theming. A page therefore never has to know the token exists
+// beyond passing `base` through, and can't ship without the nav.
+// =============================================================================
+import Layout from "@/layouts/Layout.astro";
+import PortalShell from "@/components/portal/PortalShell";
+import PortalInteractions from "@/components/portal/PortalInteractions.astro";
+import { schoolThemeVars, type School } from "@/data/schools";
+import { PORTAL_NAV, navHref, navItem } from "@/lib/portalNav";
+import { brand } from "@/config/brand";
+
+interface Props {
+  school: School;
+  /** `/portal/<token>` — every in-portal link hangs off this. */
+  base: string;
+  /** Which nav entry is open ("" is the dashboard root). */
+  active: string;
+  /** Appended after the section crumb — e.g. a single resource's title. */
+  crumb?: string;
+  /** Overrides the section's own title/blurb (used by resource detail pages). */
+  heading?: string;
+  blurb?: string;
+}
+
+const { school, base, active, crumb, heading, blurb } = Astro.props;
+const t = school.theme;
+const section = navItem(active);
+
+const nav = PORTAL_NAV.map((item) => ({
+  title: item.title,
+  href: navHref(base, item.segment),
+  icon: item.icon,
+}));
+
+const crumbs = [
+  { label: school.short, href: base },
+  ...(active ? [{ label: section.title, href: navHref(base, active) }] : []),
+  ...(crumb ? [{ label: crumb }] : []),
+];
+
+// The school's logo art is drawn for a dark bar; a colored logo (either flag)
+// needs a white badge behind it to stay legible on the ink sidebar.
+const badgeLogo = Boolean(school.logoBadge || school.whiteHeader);
+
+// Re-skin shadcn's sidebar to the school. Its defaults are a light neutral gray;
+// the portal reads as *theirs* when the rail is their dark brand color, and this
+// is the whole surface where that lands. schoolThemeVars supplies --color-ink /
+// --color-lime, so these follow whatever the school document says.
+const sidebarVars = [
+  "--sidebar:var(--color-ink)",
+  "--sidebar-foreground:rgba(255,255,255,0.72)",
+  "--sidebar-accent:rgba(255,255,255,0.10)",
+  "--sidebar-accent-foreground:#ffffff",
+  "--sidebar-border:rgba(255,255,255,0.12)",
+  "--sidebar-primary:var(--color-lime)",
+  "--sidebar-primary-foreground:var(--color-on-accent)",
+  "--sidebar-ring:var(--color-lime)",
+].join(";");
+
+const pageTitle = heading ?? section.title;
+const pageBlurb = blurb ?? section.blurb;
+---
+
+<Layout
+  title={`${crumb ?? section.title} — ${school.short} ${brand.name} Portal`}
+  description={`Private marketing resources for ${school.name}.`}
+  noindex
+>
+  <div style={schoolThemeVars(t) + sidebarVars} class="font-sans">
+    <PortalShell
+      client:load
+      nav={nav}
+      activeHref={navHref(base, active)}
+      crumbs={crumbs}
+      school={{
+        short: school.short,
+        name: school.name,
+        logo: school.logo,
+        badgeLogo,
+      }}
+      brandLogo={brand.logo.white}
+      brandMark={brand.logo.mark}
+      brandName={brand.nameSpaced}
+      supportHref={`mailto:${brand.salesEmail}?subject=${encodeURIComponent(
+        `Marketing request — ${school.short}`,
+      )}`}
+    >
+      <main class="mx-auto w-full max-w-5xl px-5 pb-16 pt-8 sm:px-8">
+        <header>
+          <h1 class="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">
+            {pageTitle}
+          </h1>
+          <p class="mt-2 max-w-2xl text-sm leading-relaxed text-gray-600">{pageBlurb}</p>
+        </header>
+
+        <slot />
+
+        <footer class="mt-14 border-t border-gray-200 pt-6">
+          <p class="text-xs leading-relaxed text-gray-500">
+            This is a private link for {school.name}. Anyone with the URL can open
+            it, so please share it only inside your team — don't post it publicly.
+            Need it sent to someone else, or think it's been shared too widely?
+            Email <a
+              href={`mailto:${brand.salesEmail}`}
+              class="font-semibold text-gray-700 hover:underline">{brand.salesEmail}</a
+            > and we'll issue a new one.
+          </p>
+        </footer>
+      </main>
+    </PortalShell>
+  </div>
+
+  <PortalInteractions />
+</Layout>

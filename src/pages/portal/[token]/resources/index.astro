@@ -1,0 +1,138 @@
+---
+// MARKETING PORTAL → Resource library. The shared catalog of XtraPoint-made
+// pieces, grouped by category. Each card is a piece, not a file: it leads to the
+// resource's own page, where the formats live.
+export const prerender = false;
+
+import PortalLayout from "@/layouts/PortalLayout.astro";
+import { gatePortal } from "@/lib/portalRoute";
+import { getResources, groupByCategory, type Resource } from "@/data/resourcesSource";
+import { getGeneratedTemplate } from "@/lib/generatedTemplates";
+import { brand } from "@/config/brand";
+
+const gate = await gatePortal(Astro);
+if (!gate.ok) return gate.response;
+const { school, base } = gate;
+
+let resources: Resource[] = [];
+let failed = false;
+try {
+  resources = await getResources();
+} catch (err) {
+  console.error("resource library fetch failed:", err);
+  failed = true;
+}
+const groups = groupByCategory(resources);
+
+// Sanity's CDN resizes on request, so the card gets a light crop while the
+// full-screen view gets something worth zooming into.
+const img = (url: string, w: number) =>
+  url.includes("cdn.sanity.io") ? `${url}?w=${w}&fit=max&auto=format` : url;
+
+// An uploaded preview wins. Failing that, a resource that ships a generated
+// format can show that template rendered in THIS school's brand — nothing to
+// upload, and it can't go stale.
+const previewFor = (r: Resource): string | undefined =>
+  r.thumbnail ??
+  r.formats
+    .filter((f) => f.source === "generated")
+    .map((f) => getGeneratedTemplate(f.templateId)?.thumbnailHref?.(school))
+    .find(Boolean);
+---
+
+<PortalLayout school={school} base={base} active="resources">
+  {
+    groups.length === 0 && (
+      <div class="mt-8 rounded-card border border-dashed border-gray-300 bg-white px-6 py-12 text-center">
+        <h2 class="text-base font-bold text-gray-900">
+          {failed ? "The library didn't load" : "Nothing here yet"}
+        </h2>
+        <p class="mx-auto mt-2 max-w-md text-sm leading-relaxed text-gray-600">
+          {failed
+            ? "Give it a moment and refresh. If it keeps happening, let us know and we'll take a look."
+            : `The ${brand.name} team is building this out. In the meantime, tell us what you need and we'll make it.`}
+        </p>
+        <a
+          href={`mailto:${brand.salesEmail}?subject=${encodeURIComponent(`Marketing request — ${school.short}`)}`}
+          class="mt-5 inline-flex items-center rounded-full bg-lime px-5 py-2.5 text-sm font-semibold text-on-accent transition-colors hover:bg-lime-deep"
+        >
+          Request a template
+        </a>
+      </div>
+    )
+  }
+
+  {
+    groups.map((group) => (
+      <section class="mt-10">
+        <h2 class="font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-lime-dark">
+          {group.label}
+        </h2>
+        <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {group.items.map((item) => {
+            const href = `${base}/resources/${item.slug}`;
+            const preview = previewFor(item);
+            return (
+              <article class="flex flex-col overflow-hidden rounded-card border border-gray-200 bg-white">
+                {preview && (
+                  /* The image opens full size; the rest of the card opens the
+                     resource's page. Two different jobs, so they're two
+                     different targets rather than one guess. */
+                  <a
+                    href={img(preview, 2000)}
+                    target="_blank"
+                    rel="noopener"
+                    data-lightbox={img(preview, 2000)}
+                    data-lightbox-title={item.title}
+                    class="group relative block aspect-[4/3] overflow-hidden bg-gray-50"
+                  >
+                    <img
+                      src={img(preview, 800)}
+                      alt={`Preview of ${item.title}`}
+                      loading="lazy"
+                      class="h-full w-full object-cover object-top transition-transform duration-300 group-hover:scale-[1.03]"
+                    />
+                    <span class="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition duration-200 group-hover:bg-black/35 group-hover:opacity-100 group-focus-visible:bg-black/35 group-focus-visible:opacity-100">
+                      <span class="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-gray-900 shadow-sm">
+                        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5M11 8v6M8 11h6"/></svg>
+                        View full size
+                      </span>
+                    </span>
+                  </a>
+                )}
+
+                <div class="flex flex-1 flex-col p-5">
+                  <h3 class="text-base font-bold leading-snug text-gray-900">
+                    <a href={href} class="hover:underline">
+                      {item.title}
+                    </a>
+                  </h3>
+                  {item.description && (
+                    <p class="mt-1.5 text-sm leading-relaxed text-gray-600">{item.description}</p>
+                  )}
+
+                  {/* What it's available in — the reason to click through. */}
+                  <ul class="mt-3 flex flex-1 flex-wrap content-start gap-1.5">
+                    {item.formats.map((f) => (
+                      <li class="rounded-full bg-gray-100 px-2.5 py-1 font-mono text-[0.625rem] uppercase tracking-wider text-gray-600">
+                        {f.label}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <a
+                    href={href}
+                    class="group mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-gray-900"
+                  >
+                    View details
+                    <svg class="h-4 w-4 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6"/></svg>
+                  </a>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    ))
+  }
+</PortalLayout>
