@@ -15,7 +15,7 @@ import { brand } from "@/config/brand";
 
 interface Props {
   school: School;
-  /** `/portal/<token>` — every in-portal link hangs off this. */
+  /** `/portal/<token-or-slug>` — every in-portal link hangs off this. */
   base: string;
   /** Which nav entry is open ("" is the dashboard root). */
   active: string;
@@ -24,9 +24,16 @@ interface Props {
   /** Overrides the section's own title/blurb (used by resource detail pages). */
   heading?: string;
   blurb?: string;
+  /**
+   * How the visitor got in. Account controls only make sense for "session" —
+   * a legacy token link has no account to show or sign out of.
+   */
+  via?: "token" | "session";
+  /** XtraPoint staff viewing a school that isn't their own — say so on screen. */
+  staff?: boolean;
 }
 
-const { school, base, active, crumb, heading, blurb } = Astro.props;
+const { school, base, active, crumb, heading, blurb, via = "token", staff = false } = Astro.props;
 const t = school.theme;
 const section = navItem(active);
 
@@ -88,7 +95,28 @@ const pageBlurb = blurb ?? section.blurb;
       supportHref={`mailto:${brand.salesEmail}?subject=${encodeURIComponent(
         `Marketing request — ${school.short}`,
       )}`}
+      showAccount={via === "session"}
     >
+      {
+        /* Staff are looking at someone else's portal. Say whose, unmissably —
+           this is the one thing that stops a support conversation going wrong,
+           and it makes a screenshot unambiguous. */
+        staff && (
+          <div class="border-b border-amber-200 bg-amber-50 px-5 py-2.5 sm:px-8">
+            <p class="mx-auto flex max-w-5xl flex-wrap items-center gap-x-2 gap-y-1 text-xs text-amber-900">
+              <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4m0 4h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+              <span>
+                Staff view — you're seeing <strong class="font-bold">{school.name}</strong>'s
+                portal, not your own.
+              </span>
+              <a href="/portal" class="font-semibold underline underline-offset-2">
+                All schools
+              </a>
+            </p>
+          </div>
+        )
+      }
+
       <main class="mx-auto w-full max-w-5xl px-5 pb-16 pt-8 sm:px-8">
         <header>
           <h1 class="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">

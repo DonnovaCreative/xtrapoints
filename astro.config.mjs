@@ -5,6 +5,7 @@ import react from '@astrojs/react';
 import vercel from '@astrojs/vercel';
 import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
+import clerk from '@clerk/astro';
 
 // Single source of truth for the brand/domain (see src/config/brand.ts).
 import { brand } from './src/config/brand.ts';
@@ -34,6 +35,10 @@ export default defineConfig({
   // Keep the co-branded sales one-pagers (print/PDF collateral) out of the
   // sitemap — they're noindex sell sheets, not landing pages.
   integrations: [
+    // Auth for the partner portal only. The marketing site stays static and
+    // anonymous — src/middleware.ts scopes Clerk to /portal and the auth pages
+    // so no prerendered page pays for it.
+    clerk(),
     react(),
     sitemap({
       // Exclude noindex collateral: the print/PDF one-pagers, the secret-gated

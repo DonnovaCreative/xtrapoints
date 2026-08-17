@@ -12,7 +12,7 @@ import { brand } from "@/config/brand";
 
 const gate = await gatePortal(Astro);
 if (!gate.ok) return gate.response;
-const { school, base } = gate;
+const { school, base, via, staff } = gate;
 
 let resources: Resource[] = [];
 let failed = false;
@@ -40,7 +40,7 @@ const previewFor = (r: Resource): string | undefined =>
     .find(Boolean);
 ---
 
-<PortalLayout school={school} base={base} active="resources">
+<PortalLayout school={school} base={base} active="resources" via={via} staff={staff}>
   {
     groups.length === 0 && (
       <div class="mt-8 rounded-card border border-dashed border-gray-300 bg-white px-6 py-12 text-center">

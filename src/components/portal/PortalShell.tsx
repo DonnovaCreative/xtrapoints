@@ -19,6 +19,7 @@ import {
   LayoutTemplate,
   LifeBuoy,
   Palette,
+  UserRound,
   type LucideIcon,
 } from "lucide-react";
 
@@ -78,6 +79,11 @@ interface Props {
   brandMark: string;
   brandName: string;
   supportHref: string;
+  /**
+   * Show the account menu. False for legacy token links — there's no account
+   * behind them, so a "sign out" would be meaningless.
+   */
+  showAccount?: boolean;
   children?: React.ReactNode;
 }
 
@@ -90,6 +96,7 @@ export function PortalShell({
   brandMark,
   brandName,
   supportHref,
+  showAccount = false,
   children,
 }: Props) {
   return (
@@ -169,6 +176,16 @@ export function PortalShell({
                 </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
+            {showAccount && (
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Your account">
+                  <a href="/portal/account">
+                    <UserRound />
+                    <span>Your account</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )}
           </SidebarMenu>
         </SidebarFooter>
         <SidebarRail />

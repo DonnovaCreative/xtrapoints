@@ -15,7 +15,7 @@ import { brand } from "@/config/brand";
 
 const gate = await gatePortal(Astro);
 if (!gate.ok) return gate.response;
-const { school, base } = gate;
+const { school, base, via, staff } = gate;
 
 const slug = Astro.params.slug;
 const resource = slug ? await getResource(slug) : undefined;
@@ -79,6 +79,8 @@ const preview =
   school={school}
   base={base}
   active="resources"
+  via={via}
+  staff={staff}
   crumb={resource.title}
   heading={resource.title}
   blurb={resource.description ?? resource.categoryLabel}

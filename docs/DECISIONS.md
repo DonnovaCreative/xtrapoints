@@ -4,6 +4,134 @@ Short log of non-obvious engineering decisions. Newest first.
 
 ---
 
+## 2026-08-17 (follow-up) — Production gets its own content: per-school promotion
+
+**Context:** "Promote to production" never promoted content. It POSTs a Vercel
+deploy hook, and production rebuilds from **whatever is published in Sanity at
+that moment**. `hiddenFromProduction` gave per-school *inclusion* but not
+per-school *versioning*, so any promote shipped every school's current content.
+
+Survivable while only our team published — discipline contained it. It stops
+being survivable the moment schools can edit their own pages (the next thing
+we're building): a school's edit has to be published to appear on staging, and
+then the next promote for *any* school carries it live. And the case that
+couldn't work at all: **a school that is already live edits their page.**
+Production must keep serving the approved version until someone reviews the new
+one, and there was nowhere to hold that.
+
+**Decision:** production serves a per-school **approved snapshot**.
+
+- `hiddenFromProduction` (boolean) → `productionStatus`: `draft` | `review` | `live`
+- Approving writes `approvedVersion` — the school's **resolved projection** as
+  JSON (asset URLs already dereferenced) — plus `approvedAt`
+- Production builds query `productionStatus == "live" && defined(approvedVersion)`
+  and render the snapshot; staging renders live content, as before
+- "Approve for production" moves onto the school document
+  (`studio/components/ProductionStatusInput.tsx`); the sidebar tool becomes
+  "Deploy production", for things not tied to one school
+
+**Why a snapshot rather than a second dataset.** Two datasets with a per-document
+copy is the textbook answer and gives true isolation — but Sanity assets are
+dataset-scoped, so promoting a school means copying its images too. That's real
+work and a subtle source of breakage (a missed asset shows as a broken logo on
+production only). Storing the resolved projection keeps one dataset, so image
+URLs keep resolving, and it's a small change to `getSchools()`. At tens of
+schools that trade is clearly right; revisit if the shape of the content changes.
+
+**Consequences worth knowing:**
+- **The snapshot is post-projection**, so a schema/projection change doesn't reach
+  production until each school is approved again. That's the point — but it does
+  mean a new field appears on staging first, and a bulk re-approve is how you roll
+  one out. `toSchool` is null-tolerant, so old snapshots don't break.
+- **A malformed snapshot drops that one school** from the production build rather
+  than failing the whole build.
+- **Order before projecting.** `*[…] | order(name asc) {…}` — on production the
+  projection is just the snapshot blob, so `name` has to be read off the source
+  document. Ordering after the projection silently stopped working.
+- **The portal deliberately ignores production status.** It queries `PUBLISHED`,
+  not `VALID`, and always shows live content: a school that isn't live yet is
+  exactly the one that needs its portal most, since that's where they're getting
+  their page right. Their "your pages" links point at **staging** and are labelled
+  *Preview* until they're approved. This reverses the Stage 0 note that a school
+  hidden from production had no portal there.
+
+**Verified end to end:** edited a live school's published content, then built
+both ways — staging rendered the edit, production rendered the approved version.
+That single test is the whole feature.
+
+---
+
+## 2026-08-17 — Stage 1: accounts, and onboarding that doesn't need a developer
+
+**Context:** Stage 0's known limits were exactly the ones accounts fix — no
+per-user identity, a forwarded link grants access to whoever gets it, and
+revocation is all-or-nothing per school. Clerk Organizations, as predicted.
+
+**One Clerk Organization = one school**, linked by the org's
+`publicMetadata.schoolSlug`. Not the org's own slug, which is editable by org
+admins — a school renaming theirs would silently lose access. publicMetadata is
+backend-writable only, which is what you want from an authorization link. Sanity
+stays the source of truth for content; Clerk only answers "who is this, and which
+school are they with".
+
+**Two doors, one gate.** `/portal/<32-hex-token>` (Stage 0) and
+`/portal/<school-slug>` (signed in) hit the same page files, because a page needs
+a `School`, not knowledge of how the visitor proved they could see it.
+`gatePortal` owns that distinction, plus the noindex/no-referrer headers, so a
+new page can't ship without them.
+
+**Middleware is scoped, not global.** With `output: 'static'`, Astro middleware
+also runs at BUILD time for every prerendered page — an unguarded
+`clerkMiddleware` would put an auth dependency in front of the whole marketing
+site. `src/middleware.ts` short-circuits anything outside `/portal`, `/sign-in`,
+`/sign-up` before Clerk is involved.
+
+**Staff bypass** is a flag on the *organization* (`publicMetadata.staff`), not on
+users: staff access is a job, and it ends when someone leaves that org. Staff can
+open any school and see an amber "Staff view" bar naming whose portal it is —
+five schools in five tabs, and support screenshots, both demand that.
+
+### Onboarding: the Studio is the console
+
+The first cut had org creation as a terminal command. That doesn't scale — it
+needs a developer and the secret key for something the marketing team should do
+themselves, and it has to be run again per environment.
+
+**Decision:** one panel on the school's Marketing portal tab
+(`studio/components/PortalAccessInput.tsx` → `src/pages/api/portal-access.ts`).
+Type an email, click, done: the endpoint **creates the organization on the first
+invite** and sends a Clerk organization invitation. Same Studio-action → gated
+site-endpoint pattern as "Promote to production" and "Auto-fill from ESPN", and
+for the same reason — the Studio bundle is public JS and can't hold
+`CLERK_SECRET_KEY`.
+
+The invite direction matters: emailing a school the `/sign-up` link does **not**
+work. They'd create an account belonging to no organization and dead-end. An
+organization invitation is what ties the new user to the right school.
+
+The terminal script survives for the staff flag only — deliberately the one thing
+that isn't a click away in the CMS, since it's the widest access in the system.
+
+**`portalEnabled` gates both doors.** The first pass had signed-in users bypass
+it, which quietly broke the original requirement ("we're just going to deactivate
+their account if necessary") — a school with accounts couldn't be switched off at
+all. It now applies to accounts and legacy links alike, with staff the one
+exception, since they need to see a deactivated portal in order to fix it.
+
+**Gotcha worth knowing: Clerk's dev and production instances share nothing.**
+Sanity has one dataset behind both staging and production, so content is common —
+but users and organizations are per-instance. Schools must be invited from the
+production Studio; staging invites are for testing only. This is documented in
+ADDING-A-SCHOOL.md because it will otherwise be discovered the hard way.
+
+**`SignOutButton` needs `asChild`** when you pass your own `<button>`. Without
+it, Clerk renders its own button *around* yours — and nested buttons are invalid
+HTML, so the parser splits them into siblings, leaving Clerk's click handler on an
+empty element and yours inert. It renders and looks correct either way, which is
+what makes it a good half-hour to lose.
+
+---
+
 ## 2026-08-14 (follow-up 3) — Portal becomes a dashboard; resources become pieces
 
 **Context:** The portal was one long scrolling page, and a resource was one file.

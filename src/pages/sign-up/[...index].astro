@@ -1,0 +1,22 @@
+---
+// Sign-up for the partner portal.
+//
+// Reachable, but not really self-serve: portal access comes from being invited
+// into your school's organization, so someone who signs up cold lands at /portal
+// with no organization and is told to contact us. That's deliberate — we control
+// which schools have portals.
+export const prerender = false;
+
+import { SignUp } from "@clerk/astro/components";
+import AuthLayout from "@/layouts/AuthLayout.astro";
+
+if (Astro.locals.auth().userId) return Astro.redirect("/portal");
+---
+
+<AuthLayout
+  title="Create your account"
+  heading="Create your account"
+  blurb="Use the email address your invitation was sent to, so we can match you to your school."
+>
+  <SignUp signInUrl="/sign-in" forceRedirectUrl="/portal" />
+</AuthLayout>

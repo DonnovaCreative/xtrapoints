@@ -1,0 +1,27 @@
+---
+// Sign-in for the partner portal.
+//
+// A catch-all path because Clerk's component owns sub-routes of its own (factor
+// two, SSO callbacks, password reset), and they all have to land back on this
+// component rather than 404.
+export const prerender = false;
+
+import { SignIn } from "@clerk/astro/components";
+import AuthLayout from "@/layouts/AuthLayout.astro";
+
+// Where to land after signing in. gatePortal sends people here with the page
+// they wanted; anything else goes to /portal, which routes them to their school.
+const requested = Astro.url.searchParams.get("redirect_url");
+// Only same-site paths — an absolute URL here would be an open redirect.
+const redirectTo = requested?.startsWith("/") && !requested.startsWith("//") ? requested : "/portal";
+
+if (Astro.locals.auth().userId) return Astro.redirect(redirectTo);
+---
+
+<AuthLayout
+  title="Sign in"
+  heading="Sign in to your portal"
+  blurb="Use the email your XtraPoint contact invited, or continue with Google."
+>
+  <SignIn signUpUrl="/sign-up" forceRedirectUrl={redirectTo} />
+</AuthLayout>

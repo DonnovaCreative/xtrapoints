@@ -15,7 +15,7 @@ import { brand } from "@/config/brand";
 
 const gate = await gatePortal(Astro, { allowDisabled: true });
 if (!gate.ok) return gate.response;
-const { school, base, enabled } = gate;
+const { school, base, enabled, via, staff } = gate;
 
 // Only used for the "N templates" count on the library card — a library outage
 // shouldn't take the dashboard down with it.
@@ -55,6 +55,8 @@ const ICON_PATHS: Record<string, string> = {
       school={school}
       base={base}
       active=""
+      via={via}
+      staff={staff}
       heading={`Welcome, ${school.short}.`}
       blurb={`Everything ${brand.name} has built for ${school.fund} — your live pages, your co-branded sell sheet, the template library, and your brand files. Bookmark this page; it stays up to date on its own as we add to your program.`}
     >

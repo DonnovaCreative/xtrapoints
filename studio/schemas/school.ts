@@ -3,6 +3,8 @@ import { ColorInput } from "../components/ColorInput";
 import { FundInput } from "../components/FundInput";
 import { LogoHeightInput } from "../components/LogoHeightInput";
 import { PortalLinkInput } from "../components/PortalLinkInput";
+import { PortalAccessInput } from "../components/PortalAccessInput";
+import { ProductionStatusInput } from "../components/ProductionStatusInput";
 import {
   DEFAULT_AMBASSADOR_TIERS,
   DEFAULT_AMBASSADOR_PROGRAMS,
@@ -118,39 +120,71 @@ export default defineType({
         "Not currently shown on the pages and not required — metadata only (2-letter code, e.g. “TX”).",
     }),
 
-    // ── Publishing (per-environment visibility) ────────────────────────────
+    // ── Publishing (per-school promotion to production) ─────────────────────
+    // Publishing puts a school on STAGING. Production is separate and per-school:
+    // it serves the `approvedVersion` snapshot taken when someone approved it, so
+    // later edits appear on staging for review without touching the live site.
     defineField({
-      name: "hiddenFromProduction",
-      title: "Hide from production",
-      type: "boolean",
+      name: "productionStatus",
+      title: "Production status",
+      type: "string",
       group: "publishing",
-      initialValue: false,
+      components: { input: ProductionStatusInput },
+      initialValue: "draft",
+      options: {
+        list: [
+          { title: "Draft — staging only", value: "draft" },
+          { title: "In review — school has submitted it", value: "review" },
+          { title: "Live — approved and on xtrapoint.com", value: "live" },
+        ],
+        layout: "radio",
+      },
       description:
-        'ON: this school stays published and visible on staging, but is left OUT of production (xtrapoint.com) the next time someone clicks "Promote to production" in the Studio sidebar. Use this to pull a school off production (e.g. a test/placeholder school) without touching its staging content or unpublishing it. Turn back OFF + promote again to bring it back. To take a school off BOTH staging and production, use the normal Unpublish action instead (then promote once more to clear it from production too).',
+        "Where this school is up to. Only Live schools appear on xtrapoint.com, and they appear exactly as they were when approved — so editing a live school is safe: the changes show on staging until someone approves them.",
+      validation: (r) => r.required(),
+    }),
+    defineField({
+      name: "approvedVersion",
+      title: "Approved snapshot",
+      type: "text",
+      group: "publishing",
+      readOnly: true,
+      hidden: true,
+      description:
+        "Set by Approve — the exact content production serves for this school. Not hand-edited.",
+    }),
+    defineField({
+      name: "approvedAt",
+      title: "Approved at",
+      type: "datetime",
+      group: "publishing",
+      readOnly: true,
+      hidden: true,
     }),
 
-    // ── Marketing portal (private per-school resource page) ─────────────────
-    // The school's standing marketing hub at /portal/<portalToken> — brand
-    // assets, their live pages, and the co-branded one-pager, all in one place.
-    // There are no accounts yet: the unguessable token in the URL IS the
-    // credential, and `portalEnabled` is the on/off switch for that school.
+    // ── Marketing portal (the school's private dashboard) ───────────────────
+    // Their standing hub — brand assets, live pages, one-pager, resource
+    // library. Two ways in, and `portalEnabled` gates both:
+    //   • Invited accounts (the normal way) — see PortalAccessInput below.
+    //   • A legacy /portal/<portalToken> link, from before accounts existed.
     defineField({
       name: "portalEnabled",
       title: "Portal access",
       type: "boolean",
       group: "portal",
       initialValue: false,
+      components: { input: PortalAccessInput },
       description:
-        "ON: this school's private Marketing Portal link works. OFF (default): the link shows a “this portal has been deactivated” notice instead — use this to switch a school off without destroying their link, so turning it back on restores the same URL. To kill the link outright, use Revoke on the field below.",
+        "ON: this school's portal works, for everyone invited below and for their legacy link if they have one. OFF (default): everyone gets a “this portal isn't active” notice instead — this is how you deactivate a school without removing anyone or destroying their link.",
     }),
     defineField({
       name: "portalToken",
-      title: "Private portal link",
+      title: "Private portal link (legacy)",
       type: "string",
       group: "portal",
       components: { input: PortalLinkInput },
       description:
-        "The school's private portal URL. Anyone with this link can open the portal, so send it to the school's contact directly — don't post it publicly. Generate mints a new link (and retires the old one); Revoke clears it entirely.",
+        "From before the portal had accounts: a secret URL that works for anyone who has it. Invite people above instead — it's per-person, revocable, and there's no link to leak. Keep this only for schools already using it, and Revoke once they've signed in.",
       // Only ever set by the Generate button — 32 hex chars (128 bits). Rejecting
       // anything else stops a hand-typed, guessable “token” from becoming the gate.
       validation: (r) =>

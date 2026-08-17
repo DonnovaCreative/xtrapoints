@@ -1,0 +1,38 @@
+---
+// Shell for the sign-in / sign-up pages. Deliberately plain: no site header or
+// nav, so the only thing on screen is the task. Clerk's own component supplies
+// the form; this supplies the frame around it.
+import Layout from "@/layouts/Layout.astro";
+import { brand } from "@/config/brand";
+
+interface Props {
+  title: string;
+  heading: string;
+  blurb: string;
+}
+const { title, heading, blurb } = Astro.props;
+---
+
+<Layout title={`${title} — ${brand.name}`} description="Sign in to the XtraPoint partner portal." noindex>
+  <main class="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-6 py-12 font-sans">
+    <a href="/" class="shrink-0">
+      <img src={brand.logo.navy} alt={brand.nameSpaced} class="h-8 w-auto" />
+    </a>
+
+    <div class="mt-8 text-center">
+      <h1 class="text-2xl font-extrabold tracking-tight text-gray-900">{heading}</h1>
+      <p class="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-gray-600">{blurb}</p>
+    </div>
+
+    <div class="mt-8 flex w-full justify-center">
+      <slot />
+    </div>
+
+    <p class="mt-10 max-w-sm text-center text-xs leading-relaxed text-gray-500">
+      Trouble getting in? Email <a
+        href={`mailto:${brand.salesEmail}`}
+        class="font-semibold text-gray-700 hover:underline">{brand.salesEmail}</a
+      > and we'll sort it out.
+    </p>
+  </main>
+</Layout>

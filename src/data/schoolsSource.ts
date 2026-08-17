@@ -60,13 +60,19 @@ interface SchoolDoc {
 // (`drafts.school.*`, created whenever an editor opens a doc in the Studio)
 // would otherwise be returned alongside the published version and render twice.
 //
-// On a PRODUCTION build only, also exclude schools with `hiddenFromProduction`
-// set — this lets a school stay published (visible on staging) while being
-// deliberately left out of production, independent of its publish state. See
-// docs/DECISIONS.md ("Hide from production" toggle). Staging/preview/local
-// builds ignore the flag entirely.
-const VALID = `_type == "school" && !(_id in path("drafts.**")) && defined(slug.current)${
-  isProduction ? " && hiddenFromProduction != true" : ""
+// PUBLISHING MODEL — publishing puts a school on STAGING; production is a
+// separate, per-school decision.
+//
+// On a PRODUCTION build only, a school must be `productionStatus == "live"` AND
+// carry an `approvedVersion` — the snapshot of its content taken when someone
+// approved it. Production renders THAT, not the current content, which is what
+// makes editing a live school safe: their changes show on staging for review
+// while xtrapoint.com keeps serving the approved version until it's approved
+// again. Staging/preview/local builds ignore all of this and render live content.
+// See docs/DECISIONS.md.
+const PUBLISHED = `_type == "school" && !(_id in path("drafts.**")) && defined(slug.current)`;
+const VALID = `${PUBLISHED}${
+  isProduction ? ` && productionStatus == "live" && defined(approvedVersion)` : ""
 }`;
 
 // The field list is kept separate from its braces so the portal lookup at the
@@ -104,6 +110,26 @@ const PROJECTION_FIELDS = `
   }
 `;
 const PROJECTION = `{${PROJECTION_FIELDS}}`;
+
+// On production the content IS the snapshot, so fetch that instead of the live
+// fields. It stores the already-resolved projection (asset URLs and all), which
+// is why it can be handed straight to toSchool.
+const PUBLIC_PROJECTION = isProduction ? `{ "approved": approvedVersion }` : PROJECTION;
+
+/**
+ * Live doc on staging; parsed snapshot on production. A snapshot that won't
+ * parse drops that one school rather than failing the build — better to ship the
+ * rest of the site than to have one bad record take everything down.
+ */
+const publicDoc = (doc: SchoolDoc & { approved?: string }): SchoolDoc | undefined => {
+  if (!isProduction) return doc;
+  try {
+    return JSON.parse(doc.approved ?? "") as SchoolDoc;
+  } catch (err) {
+    console.error("unreadable approvedVersion snapshot, skipping school:", err);
+    return undefined;
+  }
+};
 
 // Header logo height presets → px (see SchoolHeader, which sets the height
 // inline so the "custom" slider can use any value). Editors also get a custom
@@ -235,19 +261,25 @@ const toSchool = (doc: SchoolDoc): School => ({
 
 /** All schools, ordered by name. */
 export async function getSchools(): Promise<School[]> {
-  const docs = await sanityClient.fetch<SchoolDoc[]>(
-    `*[${VALID}]${PROJECTION} | order(name asc)`,
+  const docs = await sanityClient.fetch<(SchoolDoc & { approved?: string })[]>(
+    // Order BEFORE projecting: on production the projection is just the snapshot
+    // blob, so `name` has to be read off the source document.
+    `*[${VALID}] | order(name asc) ${PUBLIC_PROJECTION}`,
   );
-  return docs.map(toSchool);
+  return docs
+    .map(publicDoc)
+    .filter((d): d is SchoolDoc => Boolean(d))
+    .map(toSchool);
 }
 
 /** One school by slug, or undefined if there's no match. */
 export async function getSchool(slug: string): Promise<School | undefined> {
-  const doc = await sanityClient.fetch<SchoolDoc | null>(
-    `*[${VALID} && slug.current == $slug]${PROJECTION}[0]`,
+  const doc = await sanityClient.fetch<(SchoolDoc & { approved?: string }) | null>(
+    `*[${VALID} && slug.current == $slug]${PUBLIC_PROJECTION}[0]`,
     { slug },
   );
-  return doc ? toSchool(doc) : undefined;
+  const resolved = doc ? publicDoc(doc) : undefined;
+  return resolved ? toSchool(resolved) : undefined;
 }
 
 // -----------------------------------------------------------------------------
@@ -271,38 +303,81 @@ export async function getSchoolDraft(
 }
 
 // -----------------------------------------------------------------------------
-// MARKETING PORTAL — the private per-school resource page at /portal/<token>.
+// MARKETING PORTAL — the school's private dashboard.
 //
-// The token in the URL is the only credential (there are no accounts yet), so
-// the lookup runs the OTHER way round from every query above: we resolve a token
-// to a school rather than a slug to a school. `portalToken` is never projected
-// into the returned `School`, so a token can't leak into rendered HTML.
+// These lookups use `PUBLISHED`, NOT `VALID`: the portal deliberately ignores
+// production status. A school that isn't live yet is exactly the one that needs
+// its portal most — that's where they're building their page — so the portal
+// exists from the moment the school is published, on every environment, and
+// always shows their CURRENT content rather than the approved snapshot. (The
+// portal's links to their pages point at staging until they're live; see
+// portalRoute.ts.)
 //
-// The same `VALID` filter applies, which means a school that is unpublished — or
-// hidden from production, on a production deploy — has no portal on that
-// environment either. That's deliberate: the portal links to the school's live
-// pages, so a portal that outlived them would just serve 404s.
+// A token lookup runs the other way round from every query above — token to
+// school rather than slug to school. `portalToken` is never projected into the
+// returned `School`, so it can't leak into rendered HTML.
 // -----------------------------------------------------------------------------
-const PORTAL_PROJECTION = `{${PROJECTION_FIELDS}, portalEnabled}`;
+const PORTAL_PROJECTION = `{${PROJECTION_FIELDS}, portalEnabled, productionStatus}`;
 
 export interface SchoolPortal {
   school: School;
   /** False → the link is valid but XtraPoint has switched this school off. */
   enabled: boolean;
+  /** True once approved for production — decides where "your pages" links point. */
+  live: boolean;
 }
+
+type PortalDoc = SchoolDoc & {
+  portalEnabled: boolean | null;
+  productionStatus: string | null;
+};
+
+const toPortal = (doc: PortalDoc): SchoolPortal => ({
+  school: toSchool(doc),
+  enabled: doc.portalEnabled === true,
+  live: doc.productionStatus === "live",
+});
 
 /** Resolve a portal token to its school. undefined when no school matches. */
 export async function getSchoolByPortalToken(
   token: string,
 ): Promise<SchoolPortal | undefined> {
-  const doc = await sanityClient.fetch<
-    (SchoolDoc & { portalEnabled: boolean | null }) | null
-  >(
-    `*[${VALID} && defined(portalToken) && portalToken == $token]${PORTAL_PROJECTION}[0]`,
+  const doc = await sanityClient.fetch<PortalDoc | null>(
+    `*[${PUBLISHED} && defined(portalToken) && portalToken == $token]${PORTAL_PROJECTION}[0]`,
     { token },
   );
-  if (!doc) return undefined;
-  return { school: toSchool(doc), enabled: doc.portalEnabled === true };
+  return doc ? toPortal(doc) : undefined;
+}
+
+/**
+ * The school's CURRENT published content, resolved through the same projection
+ * production reads — i.e. exactly what approving it would freeze. Ignores
+ * production status by design: you approve a school that isn't live yet.
+ *
+ * Powers /api/school-snapshot, which is how the Studio's Approve button gets the
+ * value it writes to `approvedVersion`.
+ */
+export async function getSchoolSnapshot(slug: string): Promise<SchoolDoc | undefined> {
+  const doc = await sanityClient.fetch<SchoolDoc | null>(
+    `*[${PUBLISHED} && slug.current == $slug]${PROJECTION}[0]`,
+    { slug },
+  );
+  return doc ?? undefined;
+}
+
+/**
+ * Same shape by slug, for signed-in members. Separate from getSchool() because
+ * `portalEnabled` is portal-only state — keeping it off the shared `School` type
+ * means the public page templates can't accidentally depend on it.
+ */
+export async function getSchoolPortalBySlug(
+  slug: string,
+): Promise<SchoolPortal | undefined> {
+  const doc = await sanityClient.fetch<PortalDoc | null>(
+    `*[${PUBLISHED} && slug.current == $slug]${PORTAL_PROJECTION}[0]`,
+    { slug },
+  );
+  return doc ? toPortal(doc) : undefined;
 }
 
 /** Site-wide settings singleton (shared across all school pages). */

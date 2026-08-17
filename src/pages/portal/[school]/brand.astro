@@ -9,7 +9,7 @@ import { gatePortal } from "@/lib/portalRoute";
 
 const gate = await gatePortal(Astro);
 if (!gate.ok) return gate.response;
-const { school, base } = gate;
+const { school, base, via, staff } = gate;
 const t = school.theme;
 
 // Sanity's asset CDN takes ?dl=<filename> to force a download (and name the
@@ -48,7 +48,7 @@ const swatches = [
 ];
 ---
 
-<PortalLayout school={school} base={base} active="brand">
+<PortalLayout school={school} base={base} active="brand" via={via} staff={staff}>
   {
     logos.length > 0 && (
       <section class="mt-8">

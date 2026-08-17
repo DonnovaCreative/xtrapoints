@@ -1,0 +1,155 @@
+---
+// /portal — the front door for signed-in users.
+//
+// Nobody lingers here in the happy path: if the active organization is mapped to
+// a school, you're redirected straight into that school's dashboard. This page
+// is really the *unhappy* paths, spelled out rather than 404'd:
+//
+//   • not signed in                    → sign in
+//   • signed in, no ACTIVE org         → pick one (the common case: Clerk won't
+//                                        choose for you when you belong to more
+//                                        than one, so orgId is simply null)
+//   • active org isn't mapped to a school, or the school isn't published
+//                                      → say so, and offer the other orgs
+//   • no memberships at all            → we haven't set you up yet
+//
+// Every branch offers a sign-out. Without it this page is a trap: /sign-in
+// redirects signed-in users straight back here, so "use a different account"
+// has to actually end the session rather than link to the sign-in page.
+export const prerender = false;
+
+import AuthLayout from "@/layouts/AuthLayout.astro";
+import { OrganizationList, SignOutButton } from "@clerk/astro/components";
+import { getPortalIdentity } from "@/lib/portalAuth";
+import { getSchool, getSchools } from "@/data/schoolsSource";
+import { brand } from "@/config/brand";
+
+Astro.response.headers.set("X-Robots-Tag", "noindex, nofollow");
+Astro.response.headers.set("Referrer-Policy", "no-referrer");
+
+const identity = await getPortalIdentity(Astro);
+if (!identity) return Astro.redirect("/sign-in");
+
+// ?switch=1 holds the page open on the picker. Without it there's no way back
+// here once an organization is active — the redirect below always fires — so
+// anyone in more than one team would be stuck in whichever they picked first.
+const switching = Astro.url.searchParams.has("switch");
+
+// Mapped and published → straight through to the dashboard.
+if (identity.schoolSlug && !switching) {
+  const school = await getSchool(identity.schoolSlug);
+  if (school) return Astro.redirect(`/portal/${school.slug}`);
+}
+
+// Staff don't have a portal of their own — they get the directory, and open
+// whichever school they're helping. No redirect: this list IS their home.
+let staffSchools: Awaited<ReturnType<typeof getSchools>> = [];
+if (identity.isStaff) {
+  try {
+    staffSchools = await getSchools();
+  } catch (err) {
+    console.error("school list fetch failed:", err);
+  }
+}
+
+// Otherwise work out WHY, so the page can say something true. This costs one
+// extra Clerk call, but only on the path that's already stuck.
+let memberships = 0;
+try {
+  const { clerkClient } = await import("@clerk/astro/server");
+  const list = await clerkClient(Astro).users.getOrganizationMembershipList({
+    userId: identity.userId,
+  });
+  memberships = list.totalCount ?? list.data.length;
+} catch (err) {
+  console.error("Clerk membership lookup failed:", err);
+}
+
+const isStaffConsole = identity.isStaff && !switching;
+const needsToPick = !isStaffConsole && memberships > 0;
+
+const heading = isStaffConsole
+  ? "School portals"
+  : needsToPick
+    ? "Choose your school"
+    : "Almost there";
+const blurb = isStaffConsole
+  ? "Open any school's portal to see exactly what they see, or to help them with it."
+  : needsToPick
+    ? "Pick the team whose portal you want to open."
+    : identity.schoolSlug
+      ? "Your account is linked to a school that isn't live yet. That's on our side, not yours — send us a note and we'll finish setting you up."
+      : "Your account isn't attached to a school yet. That's on our side, not yours — send us a note and we'll finish setting you up.";
+---
+
+<AuthLayout title="Portal" heading={heading} blurb={blurb}>
+  <div class="flex w-full flex-col items-center gap-5">
+    {
+      isStaffConsole ? (
+        <div class="w-full max-w-md">
+          {staffSchools.length === 0 ? (
+            <p class="text-center text-sm text-gray-500">
+              No published schools yet.
+            </p>
+          ) : (
+            <ul class="divide-y divide-gray-100 overflow-hidden rounded-card border border-gray-200 bg-white">
+              {staffSchools.map((s) => (
+                <li>
+                  <a
+                    href={`/portal/${s.slug}`}
+                    class="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-gray-50"
+                  >
+                    <span
+                      class="h-8 w-8 shrink-0 rounded-md border border-black/10"
+                      style={`background:${s.theme.primary}`}
+                      aria-hidden="true"
+                    />
+                    <span class="min-w-0 flex-1">
+                      <span class="block truncate text-sm font-semibold text-gray-900">
+                        {s.short}
+                      </span>
+                      <span class="block truncate font-mono text-[0.625rem] uppercase tracking-wider text-gray-400">
+                        {s.slug}
+                      </span>
+                    </span>
+                    <svg class="h-4 w-4 shrink-0 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p class="mt-3 text-center text-xs text-gray-400">
+            You're signed in as {brand.name} staff.
+          </p>
+        </div>
+      ) : needsToPick ? (
+        <OrganizationList
+          hidePersonal
+          skipInvitationScreen
+          afterSelectOrganizationUrl="/portal"
+          afterCreateOrganizationUrl="/portal"
+        />
+      ) : (
+        <a
+          href={`mailto:${brand.salesEmail}?subject=${encodeURIComponent("Portal access")}`}
+          class="inline-flex items-center rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+        >
+          Contact {brand.name}
+        </a>
+      )
+    }
+
+    {/* `asChild` is required when passing your own <button>: without it Clerk
+        renders its own button around this one, and nested buttons are invalid
+        HTML — the parser splits them into siblings, leaving Clerk's click
+        handler on an empty element and this one inert. */}
+    <SignOutButton asChild redirectUrl="/sign-in">
+      <button
+        type="button"
+        class="text-sm font-semibold text-gray-500 transition-colors hover:text-gray-900"
+      >
+        Sign out
+      </button>
+    </SignOutButton>
+  </div>
+</AuthLayout>

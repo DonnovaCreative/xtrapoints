@@ -10,7 +10,7 @@ import { brand } from "@/config/brand";
 
 const gate = await gatePortal(Astro);
 if (!gate.ok) return gate.response;
-const { school, base } = gate;
+const { school, base, via, staff } = gate;
 
 const viewUrl = `/schools/${school.slug}/one-pager`;
 const pdfUrl = `/schools/${school.slug}/one-pager.pdf`;
@@ -20,7 +20,7 @@ const imgUrl = `/schools/${school.slug}/one-pager.png`;
 const title = `${school.short} × ${brand.name} one-pager`;
 ---
 
-<PortalLayout school={school} base={base} active="one-pager">
+<PortalLayout school={school} base={base} active="one-pager" via={via} staff={staff}>
   <div
     class="mt-8 flex flex-col gap-6 rounded-card border border-gray-200 bg-white p-5 sm:flex-row sm:p-6"
   >

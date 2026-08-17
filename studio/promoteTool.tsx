@@ -2,12 +2,16 @@ import { useCallback, useState } from "react";
 import { Box, Button, Card, Code, Heading, Stack, Text } from "@sanity/ui";
 import { RocketIcon } from "@sanity/icons";
 
-// "Promote to production" Studio tool — staging auto-rebuilds on every publish
-// (the "Rebuild staging" Sanity webhook), but production does NOT: that webhook
-// was removed so a publish can't blast straight to xtrapoint.com. This tool is
-// the deliberate, one-click replacement — it POSTs directly to the production
-// Vercel Deploy Hook (bypassing Sanity entirely) once an editor has reviewed on
-// staging and wants to go live. See docs/DECISIONS.md.
+// "Deploy production" Studio tool — the plumbing, not the decision.
+//
+// WHAT GOES LIVE is per-school and set on the school itself ("Approve for
+// production", see components/ProductionStatusInput.tsx): production serves each
+// live school's approved snapshot. This button only asks Vercel to rebuild, so
+// it's needed when something OUTSIDE a school changed — site settings, legal
+// pages, the resource library — since those have no per-document approve step.
+//
+// Approving a school already fires this hook, so in the normal flow nobody has
+// to come here at all. See docs/DECISIONS.md.
 //
 // Config (Studio env, prefixed SANITY_STUDIO_ so Vite exposes them):
 //   SANITY_STUDIO_PRODUCTION_DEPLOY_HOOK_URL — the Vercel Deploy Hook for the
@@ -40,32 +44,32 @@ function PromoteTool() {
   return (
     <Box padding={4} style={{ maxWidth: 640 }}>
       <Stack space={4}>
-        <Heading size={2}>Promote to production</Heading>
+        <Heading size={2}>Deploy production</Heading>
         <Card padding={4} radius={3} shadow={1}>
           <Stack space={4}>
             <Text size={2}>
               <Code>staging.xtrapoint.com</Code> rebuilds automatically every
-              time you publish. <Code>xtrapoint.com</Code> (production) does
-              not — it only updates when you click the button below.
+              time you publish. <Code>xtrapoint.com</Code> (production) only
+              updates when someone asks it to.
+            </Text>
+            <Card padding={3} radius={2} tone="primary">
+              <Text size={1}>
+                <strong>Schools don't need this button.</strong> Open the school
+                and use <strong>Approve for production</strong> on its Publishing
+                tab — that's what decides whether a school is live and freezes the
+                content production serves. It rebuilds for you.
+              </Text>
+            </Card>
+            <Text size={1} muted>
+              Use this for changes that aren't tied to one school — site settings,
+              legal pages, the resource library — which have no approve step of
+              their own. It rebuilds production from the current published content
+              for those, and from each live school's approved snapshot for schools.
             </Text>
             <Text size={1} muted>
-              Review your changes on staging first. When you're ready to make
-              them live, click promote — it triggers a production rebuild
-              (usually live within a couple of minutes).
-            </Text>
-            <Text size={1} muted>
-              This also removes anything from production that's been{" "}
-              <strong>unpublished</strong> or toggled{" "}
-              <strong>"Hide from production"</strong> since the last promote —
-              promoting rebuilds production from whatever is currently
-              published (and not hidden), so it's how removals go live too,
-              not just additions.
-            </Text>
-            <Text size={1} muted>
-              This only updates <strong>content</strong> — school info, copy,
-              photos, etc. If something the dev team just built isn't showing
-              up here after promoting, that's a separate code deploy they need
-              to do first, not something this button controls.
+              This only updates <strong>content</strong>. If something the dev team
+              just built isn't showing up after deploying, that's a separate code
+              deploy, not something this button controls.
             </Text>
 
             {!HOOK_URL && (
@@ -82,7 +86,7 @@ function PromoteTool() {
 
             <Box>
               <Button
-                text={status === "loading" ? "Promoting…" : "Promote to production"}
+                text={status === "loading" ? "Deploying…" : "Deploy production now"}
                 tone="positive"
                 icon={RocketIcon}
                 disabled={!HOOK_URL || status === "loading"}
@@ -111,7 +115,7 @@ function PromoteTool() {
 
 export const promoteTool = {
   name: "promote-production",
-  title: "Promote to production",
+  title: "Deploy production",
   icon: RocketIcon,
   component: PromoteTool,
 };

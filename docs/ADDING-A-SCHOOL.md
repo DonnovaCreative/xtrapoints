@@ -40,18 +40,36 @@ For one-off additions by anyone, technical or not:
 4. **Preview before you publish:** use the **"Open preview"** action (the ⋯ menu
    on the document) to see the draft rendered on the real donor page in a new tab.
 5. **Publish.** Within seconds the webhook rebuilds **staging** — the two pages
-   + share image go live there first. **Production doesn't auto-update** — when
-   you're happy with it on staging, use the **"Promote to production"** button
-   (top-level tool in the Studio's left sidebar) to make it live on
-   `xtrapoint.com`.
-   - **Removing a school works the same way.** Clicking **Unpublish** takes it
-     off staging right away, but production won't drop it until you click
-     **Promote to production** again — that's expected, not a bug (promoting
-     also carries removals live, not just additions).
-   - **Want it live on staging but not production** (e.g. a placeholder/test
-     school)? Toggle **"Hide from production"** on the school (under the
-     Publishing tab) instead of unpublishing, then promote. Flip it back off
-     + promote again to bring it back.
+   + share image go live there first. Publishing never touches `xtrapoint.com`.
+6. **Approve for production**, per school, on its **Publishing** tab. That's what
+   puts it on `xtrapoint.com` — and it **freezes the content**: production serves
+   the snapshot taken at approval.
+
+### Publishing vs approving — the thing to understand
+
+| | Where it goes | Who decides |
+|---|---|---|
+| **Publish** | staging | anyone editing |
+| **Approve for production** | `xtrapoint.com` | per school, deliberately |
+
+Because approving freezes a snapshot, **editing a live school is safe**. Their
+changes appear on staging for review while `xtrapoint.com` carries on serving the
+approved version, until someone approves again. The Publishing tab flags this:
+a live school that's been edited since approval shows **"Live — changes not
+approved"**.
+
+This is also why there's no longer a "Hide from production" toggle or a global
+promote. A school is on production only if its status is **Live**, and approving
+one school never carries another school's half-finished edits live with it.
+
+- **Taking a school off production:** *Take off production* on its Publishing
+  tab. It stays on staging, and its snapshot is kept, so putting it back doesn't
+  need re-approving content nobody changed.
+- **Removing it everywhere:** **Unpublish** as usual, then use **Deploy
+  production** so the removal reaches the live site.
+- **Deploy production** (sidebar) is now just the plumbing — for changes not tied
+  to one school (site settings, legal pages, the resource library). Approving a
+  school already triggers a rebuild, so you rarely need it.
 
 > The **Auto-fill from ESPN** button is the browser version of path 3 (the
 > terminal `seed:college`). It calls the site's `/api/seed-college` endpoint. To
@@ -222,21 +240,65 @@ and a page per section:
 Everything except the resource library is generated from the same Sanity school
 document, so there's nothing extra to maintain per school.
 
-Set it up in the school's **Marketing portal** tab in the Studio:
+Access is by **invitation**: you invite a school's contact by email from the
+Studio, and they get an account. (A school onboarded before accounts existed may
+still be using a secret link — see the legacy note below.)
 
-1. Click **Generate** on "Private portal link" to mint the URL.
-2. Turn **Portal access** on.
-3. **Publish** the school — the link does nothing until you do.
-4. **Copy link** and email it to the school's contact.
+### Turning a school on — the whole checklist
 
-There are no logins yet: the link itself is the credential (an unguessable
-token), so it should go to the school directly, not anywhere public. To switch a
-school off, turn **Portal access** off — they get a "not active" notice and the
-same URL works again if you turn it back on. **Regenerate** replaces the link
-(the old one stops working on publish); **Revoke** kills it outright.
+Everything happens in the Studio. No terminal, no Clerk dashboard.
 
-Note that an unpublished school — or one hidden from production, on production —
-has no portal there either, since the portal links to pages that wouldn't exist.
+1. **Create and publish the school** (paths above). You can invite them before
+   it's approved for production — in fact that's the point: the portal is where
+   they get their page right before it goes live.
+2. Open the school's **Marketing portal** tab.
+3. Turn **Portal access** on.
+4. Under **Who can open this portal**, type their contact's email and hit
+   **Send invite**. Repeat for as many people as you like.
+
+That's it. They get an email that creates their account and drops them straight
+into their portal — there's no link for you to copy and nothing for them to set
+up. Their organization is created automatically by the first invite.
+
+The panel shows who's **Active** (signed in) and who's still **Invited**, and
+lets you cancel an invitation or remove someone.
+
+### Switching a school off
+
+Turn **Portal access** off. Everyone — accounts and legacy links alike — gets a
+"this portal isn't active" notice, and turning it back on restores everything
+exactly as it was. That's the deactivation switch; it doesn't delete anything.
+
+To remove one *person* rather than the whole school, use **Remove** next to their
+name.
+
+### Two things that trip people up
+
+- **Publish first.** Invitations are refused for an unpublished school — there'd
+  be no pages to show them. The panel says so if you try. The school does *not*
+  need to be approved for production: before it's live, the portal links them to
+  the staging previews and labels them **Preview**, so they can see their pages
+  while they're still being built.
+- **Staging and production have separate accounts.** Sanity content is shared
+  between them, but the account system is not: an invite sent from the staging
+  Studio creates an account that only exists on staging. Schools should be
+  invited from the **production** Studio; use staging invites for testing only.
+
+### The legacy "Private portal link"
+
+Before accounts existed, each school got a secret URL (`/portal/<token>`) that
+worked for anyone holding it. Those still work, and **Portal access** still
+switches them off — but don't hand out new ones. Invitations are better in every
+way that matters: per-person, revocable individually, and nothing to leak. Once a
+school's people have signed in, hit **Revoke** on their old link.
+
+### XtraPoint staff
+
+Staff belong to one organization flagged as staff, which has no school of its own
+and can open **every** school's portal — with an amber "Staff view" bar so it's
+obvious whose portal you're looking at. That flag is set from the terminal
+(`node scripts/clerk-orgs.mjs <org> --staff`) precisely because it's the widest
+access in the system and shouldn't be a click away in the CMS.
 
 ## The resource library (Marketing Resources)
 
