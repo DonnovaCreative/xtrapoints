@@ -98,7 +98,7 @@ export const GET: APIRoute = async ({ url }) => {
   }
 };
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, url }) => {
   let body: {
     secret?: string;
     school?: string;
@@ -162,9 +162,12 @@ export const POST: APIRoute = async ({ request }) => {
       organizationId: org.id,
       emailAddress: email,
       role: "org:member",
-      // Land them straight in their portal after they accept.
-      redirectUrl: new URL(`/portal/${schoolSlug}`, import.meta.env.SITE ?? "https://xtrapoint.com")
-        .href,
+      // Land them straight in their portal after they accept — on the
+      // deployment that SENT the invite, which is what `url.origin` gives us.
+      // Not Astro's configured `site`: that's always the production domain, so
+      // an invite sent from staging would tell the recipient to go to
+      // xtrapoint.com, where the portal may not exist yet.
+      redirectUrl: new URL(`/portal/${schoolSlug}`, url.origin).href,
     });
 
     return json(await accessState(schoolSlug));
