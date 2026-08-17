@@ -34,7 +34,6 @@ interface SchoolDoc {
   videoUrl: string | null;
   videoHeading: string | null;
   videoCaption: string | null;
-  mark: string | null;
   avatar: string | null;
   photos: Partial<
     Record<"team" | "fans" | "celebrate" | "mascot" | "action", string | null>
@@ -83,7 +82,6 @@ const PROJECTION_FIELDS = `
   fundShort, beneficiary, whyGiveHeading, whyGiveBody, videoUrl, videoHeading, videoCaption,
   logoBadge, whiteHeader, logoLockup, logoSize, logoHeight, headerHug, headerPadding,
   "logo": logo.asset->url,
-  "mark": mark.asset->url,
   "avatar": avatar.asset->url,
   "photos": {
     "team": photos.team.asset->url,
@@ -239,7 +237,6 @@ const toSchool = (doc: SchoolDoc): School => ({
   ...(doc.videoUrl ? { videoUrl: doc.videoUrl } : {}),
   ...(doc.videoHeading ? { videoHeading: doc.videoHeading } : {}),
   ...(doc.videoCaption ? { videoCaption: doc.videoCaption } : {}),
-  ...(doc.mark ? { mark: doc.mark } : {}),
   ...(doc.avatar ? { avatar: doc.avatar } : {}),
   ...(mapPhotos(doc.photos, doc.photoCredits)
     ? { photos: mapPhotos(doc.photos, doc.photoCredits) }

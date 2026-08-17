@@ -6,34 +6,16 @@
 export interface Props {
   fund: string;
   mascot: string;
-  /** Optional single-color mark (e.g. paw); tinted with the accent via CSS mask. */
-  mark?: string;
-  /** Optional full-color logo for the app avatar (takes priority over `mark`). */
+  /** Optional full-color logo for the app avatar. */
   avatar?: string;
 }
-const { fund, mascot, mark, avatar } = Astro.props;
+const { fund, mascot, avatar } = Astro.props;
 const quickAmounts = [
   { v: "$5", on: false },
   { v: "$25", on: true },
   { v: "$50", on: false },
   { v: "$100", on: false },
 ];
-// The mark is tinted to the accent via a CSS mask. Browsers won't apply a
-// CROSS-ORIGIN mask image (the mark now lives on the Sanity CDN), so fetch the
-// SVG at build and inline it as a same-origin data URI.
-let maskStyle = "";
-if (mark) {
-  let maskSrc = mark;
-  if (/^https?:\/\//.test(mark)) {
-    try {
-      const svg = await fetch(mark).then((r) => r.text());
-      maskSrc = `data:image/svg+xml,${encodeURIComponent(svg)}`;
-    } catch {
-      maskSrc = mark; // fall back to the URL rather than nothing
-    }
-  }
-  maskStyle = `mask:url("${maskSrc}") center/contain no-repeat;-webkit-mask:url("${maskSrc}") center/contain no-repeat;background:var(--color-lime);`;
-}
 ---
 
 <div class="relative mx-auto flex h-[560px] w-full max-w-[440px] items-center justify-center sm:h-[600px]">
@@ -102,10 +84,6 @@ if (mark) {
           {avatar ? (
             <span class="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-gray-200">
               <img src={avatar} alt="" class="h-6 w-6 object-contain" />
-            </span>
-          ) : mark ? (
-            <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-lime-soft">
-              <span class="h-4 w-4" style={maskStyle}></span>
             </span>
           ) : (
             <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-lime text-sm font-bold text-on-accent">{fund.charAt(0)}</span>

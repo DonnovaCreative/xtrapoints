@@ -4,6 +4,67 @@ Short log of non-obvious engineering decisions. Newest first.
 
 ---
 
+## 2026-08-17 (follow-up 3) — Trimming `mark`; page status made explicit
+
+**Removed the `mark` field.** It predated `avatar` and had been superseded:
+`SchoolPhone` already preferred avatar over mark, so the one school that had both
+was rendering the avatar anyway. Both render sites already fell back cleanly, so
+removal is a no-op visually except on the one-pager, which switches from a masked
+mark to the avatar image — consistent with the landing page. Data unset from the
+three schools that still carried one.
+
+**"Your pages" now shows production and preview as separate rows.** It previously
+showed ONE url, switching on live status, which made "is my page live?"
+unanswerable and risked a school sending a staging link to donors. Now: a
+live/not-live badge, the xtrapoint.com row (with Copy link only when it's real),
+and a preview row that's always available. Copy link is deliberately absent
+pre-launch — the preview URL is not for sharing.
+
+**Photo credits are editable by schools**, which forced a fix in the upload path:
+setting the whole image object would have wiped the credit alongside it. Uploads
+now `setIfMissing` the object and set only `.asset`.
+
+---
+
+## 2026-08-17 (follow-up 2) — Schools edit their own brand
+
+**Decision:** school edits land on the Sanity **draft** of their own school
+document. That makes the Studio's existing draft/publish UI the review queue, the
+existing draft-preview route render exactly what they'll get, and Publish →
+Approve the path to live. A parallel "submission" document type would have
+duplicated all three.
+
+**The allowlist is the security boundary** (`src/lib/portalEdit.ts`). It's an
+allowlist, never a blocklist, so a sensitive field added to the schema later
+can't silently become school-editable. Excluded and worth stating: production
+status and the approved snapshot (a school could otherwise publish itself to
+xtrapoint.com), portal access and token, slug (their public URL *and* what their
+Clerk org is matched on), and all page copy. `primaryDarkOverride` is excluded
+too — it exists to fix contrast, so a wrong value makes text unreadable rather
+than merely off-brand.
+
+Keys are tested with `Object.prototype.hasOwnProperty.call`, which is what makes
+`__proto__` and `constructor` non-editable; a naive `in` check would accept both.
+
+**Submission is a separate axis from production status.** First cut reused
+`productionStatus: "review"` for "school has submitted" — wrong, because a school
+that is already **live** submitting an edit would have moved off `live` and
+dropped straight off production. `submittedForReview` + `submittedAt` are their
+own fields, and `productionStatus` went back to `draft | live`.
+
+**A separate write client** (`src/config/sanityWrite.ts`, `SANITY_WRITE_TOKEN`)
+rather than adding write scope to the read token — this one can change content,
+so its blast radius should be obvious and its imports few.
+
+**SVG uploads are allowed**, which needs justifying since SVG can carry script.
+Every school asset is rendered as `<img src>` from cdn.sanity.io, where script in
+an SVG does not execute, and the one place that reads the file itself
+(OnePagerView inlining `mark` as a CSS mask) can't execute it either. School
+logos are usually SVG, so excluding it would have been a real regression. **This
+rests on nothing ever injecting a school asset with `set:html`.**
+
+---
+
 ## 2026-08-17 (follow-up) — Production gets its own content: per-school promotion
 
 **Context:** "Promote to production" never promoted content. It POSTs a Vercel

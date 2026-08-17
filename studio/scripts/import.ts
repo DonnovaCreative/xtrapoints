@@ -4,7 +4,7 @@
 //   IMPORT_FILE=../import/schools.json npm run import          # creates DRAFTS
 //   IMPORT_FILE=../import/schools.json PUBLISH=1 npm run import # creates LIVE docs
 //
-// Manifest = a JSON array of entries. Image fields (logo/mark/avatar/photos.*)
+// Manifest = a JSON array of entries. Image fields (logo/avatar/photos.*)
 // may be LOCAL paths (resolved from where you run the command) OR remote URLs.
 // `slug`, `short`, and `fund` are optional (derived if omitted).
 import { readFile } from "node:fs/promises";
@@ -35,7 +35,6 @@ interface Row {
   logoLockup?: boolean;
   /** Header logo size preset. */
   logoSize?: "sm" | "md" | "lg" | "xl";
-  mark?: string;
   avatar?: string;
   photos?: Partial<
     Record<"team" | "fans" | "celebrate" | "mascot" | "action", string>
@@ -56,9 +55,8 @@ async function run() {
 
   for (const r of rows) {
     const slug = r.slug ?? slugify(r.short ?? r.name);
-    const [logo, mark, avatar] = await Promise.all([
+    const [logo, avatar] = await Promise.all([
       r.logo ? uploadImage(client, r.logo) : undefined,
-      r.mark ? uploadImage(client, r.mark) : undefined,
       r.avatar ? uploadImage(client, r.avatar) : undefined,
     ]);
     const photos: Record<string, unknown> = {};
@@ -79,7 +77,6 @@ async function run() {
       ...(r.whiteHeader ? { whiteHeader: true } : {}),
       ...(r.logoLockup ? { logoLockup: true } : {}),
       ...(r.logoSize ? { logoSize: r.logoSize } : {}),
-      ...(mark ? { mark } : {}),
       ...(avatar ? { avatar } : {}),
       ...(Object.keys(photos).length ? { photos } : {}),
       theme: {

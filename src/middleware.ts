@@ -15,8 +15,11 @@ import { defineMiddleware } from "astro:middleware";
 
 const clerk = clerkMiddleware();
 
-/** The only paths that need to know about auth. */
-const SCOPE = /^\/(portal|sign-in|sign-up)(\/|$)/;
+// The only paths that need to know about auth. /api/portal-brand is here because
+// it authorizes by Clerk session — without middleware, locals.auth() wouldn't
+// exist and every edit would 401. /api/portal-access is deliberately NOT here:
+// it's called by the Studio and gated by the shared secret instead.
+const SCOPE = /^\/(portal|sign-in|sign-up)(\/|$)|^\/api\/portal-brand\/?$/;
 
 export const onRequest = defineMiddleware((context, next) => {
   if (!SCOPE.test(context.url.pathname)) return next();

@@ -29,7 +29,9 @@ export const PORTAL_NAV: PortalNavItem[] = [
     segment: "pages",
     title: "Your pages",
     icon: "pages",
-    blurb: "Live now. Share these links anywhere you're driving supporters.",
+    // Neutral on purpose: the page itself says whether they're live, and a
+    // blanket "Live now" would be wrong for every school before launch.
+    blurb: "Your donor and ambassador pages — preview them here, and share them once they're live.",
   },
   {
     segment: "one-pager",

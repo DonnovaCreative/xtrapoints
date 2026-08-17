@@ -89,7 +89,7 @@ IMPORT_FILE=import/schools.json PUBLISH=1 npm run import
 ```
 
 The manifest is a JSON array; see [`studio/import/example.json`](../studio/import/example.json).
-Image fields (`logo`, `mark`, `avatar`, `photos.*`) may be **local file paths**
+Image fields (`logo`, `avatar`, `photos.*`) may be **local file paths**
 (resolved from where you run the command — absolute paths are safest) **or remote
 URLs**. `slug`, `short`, and `fund` are optional — derived from `name`/`mascot` if
 omitted. Requires only your `sanity login` (no separate token).
@@ -149,8 +149,7 @@ officially-approved file**, and Publish.
 | `logoSize` | preset / Custom | Header logo height: Small 24 / Medium 28 / Large 40 / X-Large 56 / 2X-Large 80 px, or **Custom** → a slider (24–120px). |
 | `headerHug` | toggle | OFF (default) = fixed 68px header bar. ON = header has no fixed height and grows to fit the logo — for tall crest/wordmark lockups. |
 | `headerPadding` | toggle | Only when `headerHug` is ON. ON (default) adds standard space above/below the logo; turn OFF when the logo file already has margin baked in (header sits tight to it). |
-| `mark` | image | Optional single-color icon (e.g. a paw) for the app avatar; tinted to the accent. |
-| `avatar` | image | Optional full-color square logo for the app avatar (beats `mark`). |
+| `avatar` | image | Optional full-color square logo for the app avatar / app mockup. |
 | `photos.*` | images | `team` / `celebrate` / `fans` / `action` / `mascot` — each optional; pages degrade gracefully. Each photo has an optional **Photo credit** field (photographer/source, e.g. "Jane Doe") shown as a small caption on the photo — leave empty to show none. |
 | `whyGiveHeading` / `whyGiveBody` | text | **Optional** (Page copy & media). A fund's own "why give" pitch — when the body is set it replaces the default value-prop cards in the "Why round up" section. One paragraph per blank line. Empty → the standard donor-focused default. |
 | `videoUrl` | URL | **Optional** per-school explainer video (YouTube / Vimeo / MP4) shown under the sign-up steps — e.g. a testimonial. **Overrides** the site-wide default (set in **Site settings → Default explainer video**). Empty → the site default. |
@@ -291,6 +290,29 @@ worked for anyone holding it. Those still work, and **Portal access** still
 switches them off — but don't hand out new ones. Invitations are better in every
 way that matters: per-person, revocable individually, and nothing to leak. Once a
 school's people have signed in, hit **Revoke** on their old link.
+
+### What a school can change themselves
+
+On their **Brand kit** page, an invited school can replace their logo and app
+avatar, set their brand colors, and upload the five page photos — each with an
+optional **photo credit**, the same as in the Studio.
+
+**Their edits go to the Sanity draft, never straight to a live page.** So the
+review flow is the one you already use:
+
+1. School edits in the portal → it becomes an **unpublished change** on their
+   school document
+2. They hit **Submit for review** → the Publishing tab shows *"School has
+   submitted changes"*
+3. You review the draft (**Open preview** renders it), then **Publish** → staging
+4. **Approve for production** when you're happy → `xtrapoint.com`
+
+Deliberately **not** editable by schools: page copy, their slug, ambassador
+tiers, portal access, and anything to do with production status — a school can't
+publish itself live. Those stay in the Studio. `primaryDarkOverride` is also
+ours, since getting it wrong makes text unreadable rather than merely off-brand.
+
+Requires `SANITY_WRITE_TOKEN` (see `.env.example`).
 
 ### XtraPoint staff
 

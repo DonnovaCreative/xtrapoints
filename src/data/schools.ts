@@ -78,9 +78,7 @@ export interface School {
   headerPadPx?: number;
   /** The header height (= --header-h) for this school: 68 fixed, or logo-based. */
   headerHeightPx?: number;
-  /** Small square mark (e.g. paw) tinted with the accent; used in the app mockup. */
-  mark?: string;
-  /** Full-color square logo for the app mockup avatar (takes priority over `mark`). */
+  /** Full-color square logo for the app mockup avatar. */
   avatar?: string;
   /** Real game-day photography — adds school spirit across the pages. */
   photos?: {

@@ -53,22 +53,6 @@ const dotGrid = (w: number, h: number): string => {
 const heroDots = dotGrid(612, 260);
 const footerDots = dotGrid(612, 130);
 
-// The phone-header mark is tinted WHITE via a CSS mask. Browsers won't apply a
-// cross-origin mask image (marks live on the Sanity CDN), so fetch the SVG at
-// build and inline it as a same-origin data URI (same trick as SchoolPhone).
-let maskStyle = "";
-if (school.mark) {
-  let maskSrc = school.mark;
-  if (/^https?:\/\//.test(school.mark)) {
-    try {
-      const svg = await fetch(school.mark).then((r) => r.text());
-      maskSrc = `data:image/svg+xml,${encodeURIComponent(svg)}`;
-    } catch {
-      maskSrc = school.mark;
-    }
-  }
-  maskStyle = `mask:url("${maskSrc}") center/contain no-repeat;-webkit-mask:url("${maskSrc}") center/contain no-repeat;background:#fff;`;
-}
 ---
 
 <Layout
@@ -130,9 +114,7 @@ if (school.mark) {
                   <div class="op-phone-island"></div>
                   <div class="op-phone-status"><span class="op-time">9:41</span><span class="op-staticons"></span></div>
                   <div class="op-phone-head">
-                    {maskStyle ? (
-                      <span class="op-phone-mark" style={maskStyle}></span>
-                    ) : school.avatar ? (
+                    {school.avatar ? (
                       <span class="op-phone-avatar"><img src={school.avatar} alt="" /></span>
                     ) : (
                       <span class="op-phone-letter">{school.fund.charAt(0)}</span>

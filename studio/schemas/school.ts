@@ -134,7 +134,6 @@ export default defineType({
       options: {
         list: [
           { title: "Draft — staging only", value: "draft" },
-          { title: "In review — school has submitted it", value: "review" },
           { title: "Live — approved and on xtrapoint.com", value: "live" },
         ],
         layout: "radio",
@@ -160,6 +159,29 @@ export default defineType({
       group: "publishing",
       readOnly: true,
       hidden: true,
+    }),
+
+    // Set by the school from their portal ("Submit for review"). Deliberately a
+    // SEPARATE axis from productionStatus: a school that's already live can
+    // submit changes, and that must not take them off production. Lives on the
+    // draft, so it arrives with the edits it refers to.
+    defineField({
+      name: "submittedForReview",
+      title: "School has submitted changes",
+      type: "boolean",
+      group: "publishing",
+      readOnly: true,
+      initialValue: false,
+      description:
+        "Set by the school from their portal when they've finished editing and want you to look. Cleared when you approve.",
+    }),
+    defineField({
+      name: "submittedAt",
+      title: "Submitted at",
+      type: "datetime",
+      group: "publishing",
+      readOnly: true,
+      hidden: ({ parent }) => !(parent as { submittedForReview?: boolean })?.submittedForReview,
     }),
 
     // ── Marketing portal (the school's private dashboard) ───────────────────
@@ -406,14 +428,6 @@ export default defineType({
         "Only when “Header hugs the logo” is on. ON (default): adds standard space above/below the logo. Turn OFF when the logo file already has its own margin baked in, so the header sits tight to it.",
       initialValue: true,
       hidden: ({ document }) => !document?.headerHug,
-    }),
-    defineField({
-      name: "mark",
-      title: "App mark (single-color)",
-      type: "image",
-      group: "branding",
-      description:
-        "Optional small single-color icon (e.g. a paw) for the app-mockup avatar; it's tinted to the accent, so the file's own color doesn't matter.",
     }),
     defineField({
       name: "avatar",
