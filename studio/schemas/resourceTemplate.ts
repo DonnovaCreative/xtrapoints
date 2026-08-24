@@ -52,7 +52,10 @@ const PLATFORMS = [
 // Keep in sync with GENERATED_TEMPLATES in src/lib/generatedTemplates.ts — the
 // Studio can't import from the site, and an id with no matching registry entry
 // is skipped when the portal renders.
-const GENERATED_TEMPLATE_IDS = [{ title: "Sales one-pager (PDF)", value: "one-pager" }];
+const GENERATED_TEMPLATE_IDS = [
+  { title: "Sales one-pager (PDF)", value: "one-pager" },
+  { title: "Ambassador recruitment flyer (PDF)", value: "ambassador-flyer" },
+];
 
 /** Reads the enclosing formats[] item, whichever nesting Sanity hands us. */
 const src = (parent: unknown): string | undefined =>

@@ -1,0 +1,20 @@
+---
+// Student-facing AMBASSADOR FLYER (published). The HTML source of truth for
+// /schools/<slug>/ambassador-flyer.pdf. The rendered sheet lives in
+// AmbassadorFlyerView.astro; this file just supplies published data + points the
+// download button at the published PDF route. Same split as one-pager.astro.
+import AmbassadorFlyerView from "@/components/school/AmbassadorFlyerView.astro";
+import { getSchools } from "@/data/schoolsSource";
+
+export async function getStaticPaths() {
+  const schools = await getSchools();
+  return schools.map((school) => ({ params: { school: school.slug }, props: { school } }));
+}
+
+const { school } = Astro.props;
+---
+
+<AmbassadorFlyerView
+  school={school}
+  pdfHref={`/schools/${school.slug}/ambassador-flyer.pdf`}
+/>

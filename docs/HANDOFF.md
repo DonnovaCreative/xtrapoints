@@ -180,6 +180,51 @@ the repo.
   - Layout is tuned to fit exactly one page (CTA footer flush at the bottom) —
     re-check the fit if you change copy.
 
+- **Ambassador flyer (PDF)** — the student-facing recruitment sheet, and the
+  second **generated** portal resource. Same machinery as the one-pager:
+  `src/pages/schools/[school]/ambassador-flyer.astro` is the HTML source of truth,
+  `.pdf.ts` / `.png.ts` print it. Ported from a **Claude Design** artboard
+  (`Ambassador Flyer.dc.html`), which is authored directly in **inches** at 8.5×11
+  — so unlike the one-pager there's no scaled coordinate canvas; the values in
+  `AmbassadorFlyerView.astro` are the design's own.
+  - **Type:** self-hosted **Archivo** variable (`/public/fonts/Archivo*.woff2`,
+    converted from Google's TTFs). The display setting is `'wdth' 62` condensed
+    italic — a static fallback reflows the headline, so the variable axes matter.
+  - **Nothing is authored per school.** Colors resolve through
+    `src/lib/flyerTheme.ts` and copy through `src/lib/flyerContent.ts`, both
+    derived from the existing school record — a new school gets a flyer with no
+    one writing one. The reward chips do pick up `ambassadorTiers[].perks` when a
+    school has customised them.
+  - **⚠ The color resolver is not decoration — read its header before touching
+    it.** The design assumes a dark primary + light secondary (UAlbany purple +
+    gold). Most schools aren't that shape, so `base`/`accent`/`mark` are chosen by
+    measured WCAG contrast, including a **7:1 preference on `base`** (a mid-tone
+    primary passes 4.5:1 but leaves no room for a light accent above it) and a
+    separate **`mark`** role for the accent-colored bits that sit on the bare
+    white sheet (bullets, CTA button) rather than on `base`. Both rules exist
+    because their absence produced real broken sheets — a grayscale flyer for an
+    orange school, and an invisible white-on-white pillars band for a red one.
+  - **⚠ The hero photo and its scrim MUST stay separate elements, and the photo
+    MUST be cropped server-side** (`croppedImage` in `src/lib/sanityImage.ts`).
+    Chromium flattens any image under a semi-transparent overlay into a bitmap at
+    the **source** dimensions — an uncropped hero put the PDF at **6MB**; cropping
+    to the band's own 3.26:1 at ~1200px brings it to ~1.4MB with no visible
+    difference under a 78–94% scrim.
+  - Unlike the one-pager, the flyer's glyphs export as **Type3** fonts (a
+    variable-font quirk of Chromium's PDF writer). They're vector and cost almost
+    nothing — a photo-less flyer is 344KB — but the text isn't selectable. Checked
+    against macOS Quartz per the soft-mask warning above; the scrim survives.
+  - Cutouts (`photos.cutout` / `cutoutSecondary`) are **pre-masked transparent
+    PNGs**, deliberately a separate field from `photos.mascot` — a mascot on a
+    white box prints as a white box. Absent → the headline widens into the space.
+
+- **Adding another generated template** — register it in
+  `src/lib/generatedTemplates.ts` AND in `GENERATED_TEMPLATE_IDS` in
+  `studio/schemas/resourceTemplate.ts` (the Studio can't import from the site), then
+  create the Marketing Resource document with a `generated` format pointing at the
+  id. `src/lib/printSheet.ts` (was `onePagerPdf.ts`) does the Chromium rendering for
+  all of them — pass the sheet's selector and, if it isn't US-Letter, its size.
+
 - **Hero rays** — the donor + ambassador heroes layer React Bits **SideRays**
   (`src/components/islands/SideRays.tsx`, WebGL via **`ogl`**, `client:only`)
   *under* the DotField dots — soft animated light rays from the top-right corner.
@@ -329,7 +374,7 @@ publishing (Option A — no visual-editing overlays yet).
   - `preview/schools/[slug]/one-pager` → `OnePagerView.astro` (draft sell sheet;
     its Download button → the draft PDF below)
   - `preview/schools/[slug]/one-pager.pdf` → prints the secret-gated draft HTML
-    preview via headless Chromium (shared `src/lib/onePagerPdf.ts`, used by the
+    preview via headless Chromium (shared `src/lib/printSheet.ts`, used by the
     published PDF too). So sales can download a sell sheet **before** publishing.
     Not CDN-cached (drafts change). ⚠ Deployment Protection would break it (the fn
     fetches its own preview URL — see DECISIONS).
@@ -382,6 +427,17 @@ Staging/preview de-indexed, production indexable (keyed on `VERCEL_ENV`).
 
 - **A. `SANITY_WRITE_TOKEN` is not on Vercel.** Brand editing returns a clean 503
   on staging until it's added (Preview + Production). It IS set locally.
+- **A2. The ambassador flyer has no Marketing Resource document yet.** The
+  template, routes and registry entries are all in (`ambassador-flyer`), and every
+  school renders — but until someone creates the resource document in the Studio
+  it isn't in any school's library. Create it under **Marketing Resources** with a
+  format of source *generated* → *Ambassador recruitment flyer (PDF)*; the title,
+  description, category and "How to use it" copy are the only decisions.
+  Meanwhile it's reachable directly at `/schools/<slug>/ambassador-flyer`.
+- **A3. No school has a mascot cutout uploaded.** Every flyer currently renders
+  the no-cutout variant (headline widened, no mascot bleeding off the hero). The
+  fields exist in the Studio and in the portal's brand editor; they need
+  pre-masked transparent PNGs. UAlbany's are in the Claude Design export.
 - **B. Production cutover, not started.** Needs, in order: merge `staging` →
   `main`; create the **Clerk production instance** (DNS CNAMEs on the domain +
   your OWN Google OAuth credentials — the dev instance uses Clerk's shared app,

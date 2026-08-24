@@ -484,6 +484,23 @@ export default defineType({
           options: { hotspot: true },
           fields: [CREDIT_FIELD],
         }),
+        defineField({
+          name: "cutout",
+          title: "Mascot cutout — ambassador flyer",
+          type: "image",
+          description:
+            "A CUT-OUT mascot on a transparent background (PNG), not a photo — it bleeds off the corner of the ambassador flyer's hero with no box around it. A mascot saved on a white background will print as a white rectangle. Roughly 900×970px works best. Leave empty and the flyer widens its headline into the space instead.",
+          options: { hotspot: false },
+        }),
+        defineField({
+          name: "cutoutSecondary",
+          title: "Second mascot cutout — ambassador flyer",
+          type: "image",
+          description:
+            "Optional second cut-out (a mascot pair, or an alternate pose), tucked behind and to the left of the first. Same rules: transparent PNG, no background. Around 640×650px. Only shown when the first cutout is set.",
+          options: { hotspot: false },
+          hidden: ({ parent }) => !(parent as { cutout?: unknown } | undefined)?.cutout,
+        }),
       ],
     }),
 

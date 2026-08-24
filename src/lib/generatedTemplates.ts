@@ -39,6 +39,12 @@ export const GENERATED_TEMPLATES: Record<string, GeneratedTemplate> = {
     thumbnailHref: (s) => `/schools/${s.slug}/one-pager.png`,
     downloadLabel: "Download PDF",
   },
+  "ambassador-flyer": {
+    downloadHref: (s) => `/schools/${s.slug}/ambassador-flyer.pdf`,
+    previewHref: (s) => `/schools/${s.slug}/ambassador-flyer`,
+    thumbnailHref: (s) => `/schools/${s.slug}/ambassador-flyer.png`,
+    downloadLabel: "Download PDF",
+  },
 };
 
 export const getGeneratedTemplate = (id: string | undefined): GeneratedTemplate | undefined =>

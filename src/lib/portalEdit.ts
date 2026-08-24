@@ -20,6 +20,16 @@ export const EDITABLE_IMAGES = {
   "photos.fans": { path: "photos.fans", label: "Fans", note: "Ambassador page callout" },
   "photos.action": { path: "photos.action", label: "Action", note: "Ambassador page hero background" },
   "photos.mascot": { path: "photos.mascot", label: "Mascot", note: "Ambassador page spirit band" },
+  "photos.cutout": {
+    path: "photos.cutout",
+    label: "Mascot cutout",
+    note: "Transparent PNG, no background — ambassador flyer",
+  },
+  "photos.cutoutSecondary": {
+    path: "photos.cutoutSecondary",
+    label: "Second mascot cutout",
+    note: "Optional transparent PNG — ambassador flyer",
+  },
 } as const;
 
 export type EditableImage = keyof typeof EDITABLE_IMAGES;

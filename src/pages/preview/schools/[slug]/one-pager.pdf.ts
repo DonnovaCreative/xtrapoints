@@ -9,7 +9,7 @@
 import type { APIRoute } from "astro";
 import { getSchoolDraft } from "@/data/schoolsSource";
 import { previewUnauthorized } from "@/lib/previewGuard";
-import { renderOnePagerPdf } from "@/lib/onePagerPdf";
+import { renderSheetPdf } from "@/lib/printSheet";
 
 export const prerender = false;
 
@@ -29,7 +29,7 @@ export const GET: APIRoute = async ({ params, url }) => {
   ).href;
 
   try {
-    const pdf = await renderOnePagerPdf(pageUrl);
+    const pdf = await renderSheetPdf(pageUrl);
     const filename = `${school.short.replace(/[^\w-]+/g, "-")}-XtraPoint-One-Pager-DRAFT.pdf`;
     return new Response(pdf, {
       headers: {

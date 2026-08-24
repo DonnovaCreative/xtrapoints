@@ -36,7 +36,10 @@ interface SchoolDoc {
   videoCaption: string | null;
   avatar: string | null;
   photos: Partial<
-    Record<"team" | "fans" | "celebrate" | "mascot" | "action", string | null>
+    Record<
+      "team" | "fans" | "celebrate" | "mascot" | "action" | "cutout" | "cutoutSecondary",
+      string | null
+    >
   > | null;
   photoCredits: Partial<
     Record<"team" | "fans" | "celebrate" | "mascot" | "action", string | null>
@@ -88,7 +91,9 @@ const PROJECTION_FIELDS = `
     "fans": photos.fans.asset->url,
     "celebrate": photos.celebrate.asset->url,
     "mascot": photos.mascot.asset->url,
-    "action": photos.action.asset->url
+    "action": photos.action.asset->url,
+    "cutout": photos.cutout.asset->url,
+    "cutoutSecondary": photos.cutoutSecondary.asset->url
   },
   "photoCredits": {
     "team": photos.team.credit,

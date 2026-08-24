@@ -9,6 +9,7 @@ import { gatePortal } from "@/lib/portalRoute";
 import { getResources, groupByCategory, type Resource } from "@/data/resourcesSource";
 import { getGeneratedTemplate } from "@/lib/generatedTemplates";
 import { brand } from "@/config/brand";
+import { sizedImage } from "@/lib/sanityImage";
 
 const gate = await gatePortal(Astro);
 if (!gate.ok) return gate.response;
@@ -26,8 +27,7 @@ const groups = groupByCategory(resources);
 
 // Sanity's CDN resizes on request, so the card gets a light crop while the
 // full-screen view gets something worth zooming into.
-const img = (url: string, w: number) =>
-  url.includes("cdn.sanity.io") ? `${url}?w=${w}&fit=max&auto=format` : url;
+const img = sizedImage;
 
 // An uploaded preview wins. Failing that, a resource that ships a generated
 // format can show that template rendered in THIS school's brand — nothing to

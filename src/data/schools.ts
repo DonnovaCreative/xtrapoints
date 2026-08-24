@@ -89,6 +89,16 @@ export interface School {
     action?: string; // extra action / celebration shot
     /** Photographer/source credit per photo, keyed the same as above. */
     credits?: Partial<Record<"team" | "fans" | "celebrate" | "mascot" | "action", string>>;
+    /**
+     * Mascot CUTOUT — a pre-masked transparent PNG, not a photo. Used by the
+     * ambassador flyer, where it bleeds off the hero's bottom-right corner. A
+     * mascot on a white box renders as a white box, so this is a separate field
+     * from `mascot` rather than a reuse of it. Absent → the flyer widens its
+     * headline into the space instead.
+     */
+    cutout?: string;
+    /** Optional second cutout, tucked behind and left of the primary. */
+    cutoutSecondary?: string;
   };
   /** Optional custom Ambassador page reward tiers. Empty → the standard
    *  Bronze/Silver/Gold defaults (see SchoolAmbassadors.astro). */

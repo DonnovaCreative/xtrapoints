@@ -1,0 +1,556 @@
+---
+// =============================================================================
+// AMBASSADOR FLYER — the student-facing recruitment sheet, re-skinned per school.
+//
+// The HTML source of truth for /schools/<slug>/ambassador-flyer.pdf (rendered on
+// demand by ambassador-flyer.pdf.ts via headless Chromium), and for the .png the
+// Marketing Portal shows on the resource card.
+//
+// Ported from the Claude Design artboard "Ambassador Flyer" (the UAlbany / Danes
+// of Greatness original). The design is authored directly in INCHES at 8.5×11 —
+// unlike the one-pager, which is drawn in Figma's 612×792 point space and scaled —
+// so the values below are the design's own, transcribed as-is. Two things are
+// resolved rather than copied:
+//
+//   • colors  → src/lib/flyerTheme.ts, which measures contrast instead of assuming
+//               a dark primary and a light secondary (see that file's header)
+//   • copy    → src/lib/flyerContent.ts, derived from the school record so a new
+//               school gets a flyer without anyone writing one
+//
+// Every per-school image is optional and degrades: no mascot cutout widens the
+// hero copy, no photo leaves the brand-colored field, no color logo falls back
+// through the avatar to a plain wordmark.
+// =============================================================================
+import QRCode from "qrcode";
+import Layout from "@/layouts/Layout.astro";
+import { brand } from "@/config/brand";
+import type { School } from "@/data/schools";
+import { flyerTheme } from "@/lib/flyerTheme";
+import { flyerContent } from "@/lib/flyerContent";
+import { croppedImage, sizedImage } from "@/lib/sanityImage";
+
+interface Props {
+  school: School;
+  /** Where "Download PDF" points — the published route or the draft preview. */
+  pdfHref: string;
+}
+const { school, pdfHref } = Astro.props;
+
+const t = flyerTheme(school.theme);
+const c = flyerContent(school);
+const photos = school.photos ?? {};
+
+// Hero background: the first game-day photo the school has. The scrim sits over
+// it either way, so the band reads the same when there's no photo at all.
+//
+// Every image here is capped to what it's actually rendered at. Chromium embeds
+// whatever the page loads, so an uncapped original goes straight into the PDF —
+// this hero alone was the difference between a 350KB file and a 6MB one.
+//
+// The band is 816×250, i.e. 3.26:1, and the scrim over it runs 78–94% opaque, so
+// the photo reads as atmosphere rather than detail. Cropping to the band's own
+// proportions at ~1200px (≈140dpi across 8.5in) is indistinguishable in print and
+// a fraction of the bytes. fp-y matches the `center 62%` framing the design used.
+const rawHero = photos.fans || photos.team || photos.celebrate || photos.action;
+const heroPhoto = rawHero
+  ? croppedImage(rawHero, 1200, 368, { focusY: 0.62, quality: 80 })
+  : undefined;
+
+// Masthead mark. The site's `logo` is the WHITE/mono cut for dark headers, which
+// would vanish on this design's white chip — so a colored logo (logoBadge) or the
+// full-color avatar takes the chip, and a mono logo instead sits directly on the
+// masthead with no chip behind it.
+const rawChip = school.logoBadge ? school.logo : school.avatar;
+const chipMark = rawChip ? sizedImage(rawChip, 320) : undefined;
+const monoMark = !chipMark && school.logo ? sizedImage(school.logo, 400) : undefined;
+
+// Cutouts keep their alpha through the CDN (it re-encodes to WebP, which has it).
+const cutout = photos.cutout ? sizedImage(photos.cutout, 900) : undefined;
+const cutoutSecondary = photos.cutoutSecondary
+  ? sizedImage(photos.cutoutSecondary, 650)
+  : undefined;
+// Without a cutout the right side of the hero is empty, so let the copy use it.
+const heroCopyWidth = cutout ? "5.35in" : "6.6in";
+
+// QR is generated at render, not stored — it can never point at a stale URL.
+const qrSvg = await QRCode.toString(c.applyUrl, {
+  type: "svg",
+  margin: 0,
+  errorCorrectionLevel: "M",
+  color: { dark: t.base, light: "#ffffff" },
+});
+
+const canvasStyle = [
+  `--af-base:${t.base}`,
+  `--af-base-deep:${t.baseDeep}`,
+  `--af-accent:${t.accent}`,
+  `--af-accent-ink:${t.accentInk}`,
+  `--af-mark:${t.mark}`,
+  `--af-on-mark:${t.onMark}`,
+  `--af-scrim-top:${t.scrimTop}`,
+  `--af-scrim-bottom:${t.scrimBottom}`,
+  `--af-h1:${c.h1Size}`,
+  `--af-hero-copy:${heroCopyWidth}`,
+].join(";");
+
+---
+
+<Layout
+  title={`${school.short} × ${brand.name} — Ambassador Flyer`}
+  description={`Student ambassador recruitment flyer for ${school.name}.`}
+  noindex
+>
+  <div class="af-stage">
+    <!-- Download button — screen only; hidden in the print/PDF render. -->
+    <a href={pdfHref} class="af-download noprint">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>
+      Download PDF
+    </a>
+
+    <section class="af-sheet" style={canvasStyle}>
+      <!-- ===================== MASTHEAD ===================== -->
+      <div class="af-masthead">
+        {chipMark ? (
+          <span class="af-chip"><img src={chipMark} alt={school.name} /></span>
+        ) : monoMark ? (
+          <img src={monoMark} alt={school.name} class="af-mono" />
+        ) : (
+          <span class="af-wordmark">{school.short}</span>
+        )}
+
+        <div class="af-lockup">
+          <span class="af-chev af-chev--lockup" aria-hidden="true"></span>
+          <span>{c.lockup}</span>
+        </div>
+
+        <img src="/assets/xtrapoint-logo-solid-white.svg" alt={brand.name} class="af-xplogo" />
+      </div>
+
+      <!-- ======================= HERO ======================= -->
+      <div class="af-hero">
+        {/* The photo and the scrim are SEPARATE layers on purpose — see the
+            .af-hero-photo rule. */}
+        {heroPhoto && (
+          <div class="af-hero-photo" style={`background-image:url('${heroPhoto}')`} aria-hidden="true"></div>
+        )}
+        <div class="af-hero-scrim" aria-hidden="true"></div>
+
+        {cutout && <div class="af-cutout af-cutout--primary" style={`background-image:url('${cutout}')`} aria-hidden="true"></div>}
+        {cutout && cutoutSecondary && (
+          <div class="af-cutout af-cutout--secondary" style={`background-image:url('${cutoutSecondary}')`} aria-hidden="true"></div>
+        )}
+
+        <div class="af-hero-copy">
+          <h1 class="af-h1">{c.headlineLine1}<br /><span>{c.headlineLine2}</span></h1>
+          <p class="af-lede">{c.heroSubhead}</p>
+          <div class="af-badge">{c.heroBadge}</div>
+        </div>
+      </div>
+
+      <!-- ==================== PILLARS BAND ==================== -->
+      <div class="af-pillars">
+        <div class="af-pillars-intro">
+          <h2 class="af-h2">{c.pillarsTitleLine1}<br />{c.pillarsTitleLine2}</h2>
+          <p class="af-pillars-blurb">{c.pillarsBlurb}</p>
+        </div>
+        <div class="af-tiles">
+          {c.pillars.map((p) => (
+            <div class={`af-tile${p.invert ? " af-tile--invert" : ""}`}>
+              <div class="af-tile-kicker">{p.kicker}</div>
+              <div class="af-tile-label">{p.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- ================ BENEFITS + REWARDS ================ -->
+      <div class="af-cols">
+        <div>
+          <h3 class="af-h3">{c.benefitsTitleLine1}<br />{c.benefitsTitleLine2}</h3>
+          <ul class="af-benefits">
+            {c.benefits.map((b) => (
+              <li><span class="af-chev" aria-hidden="true"></span><span>{b}</span></li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h3 class="af-h3">{c.rewardsTitle}</h3>
+          <p class="af-rewards-label">{c.rewardsLabel}</p>
+          <div class="af-rewards">
+            {c.rewards.map((r) => <span class="af-reward">{r}</span>)}
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== CAREER STRIP ==================== -->
+      <div class="af-career">
+        <div class="af-career-title">{c.careerTitle}</div>
+        <div class="af-career-body">{c.careerBody}</div>
+      </div>
+
+      <!-- ======================= CTA + QR ======================= -->
+      <div class="af-cta">
+        <div class="af-cta-left">
+          <h3 class="af-h2">{c.ctaTitle}</h3>
+          <div class="af-cta-btn">
+            <span>{c.ctaButton}</span>
+            <span class="af-chev af-chev--btn" aria-hidden="true"></span>
+          </div>
+          <ol class="af-steps">
+            {c.ctaSteps.map((s) => <li>{s}</li>)}
+          </ol>
+        </div>
+        <div class="af-qr-wrap">
+          <div class="af-qr" set:html={qrSvg}></div>
+          <div class="af-qr-url">{c.applyUrlDisplay}</div>
+        </div>
+      </div>
+
+      <!-- ======================== FOOTER ======================== -->
+      <div class="af-footer">
+        <div class="af-contact">{c.contactPrompt}&nbsp;{c.contactUrl}</div>
+        <div class="af-disclaimer">{c.disclaimer}</div>
+      </div>
+    </section>
+  </div>
+</Layout>
+
+<style>
+  /* Archivo variable — the design's face. Both axes matter: the display type is
+     set at 'wdth' 62 (condensed), so a static fallback would reflow the headline.
+     font-display:block deliberately blocks paint rather than painting fallback
+     metrics, which is what makes the Chromium capture deterministic. */
+  @font-face {
+    font-family: "Archivo Flyer";
+    src: url("/fonts/Archivo.woff2") format("woff2-variations");
+    font-weight: 100 900;
+    font-stretch: 62% 125%;
+    font-style: normal;
+    font-display: block;
+  }
+  @font-face {
+    font-family: "Archivo Flyer";
+    src: url("/fonts/Archivo-Italic.woff2") format("woff2-variations");
+    font-weight: 100 900;
+    font-stretch: 62% 125%;
+    font-style: italic;
+    font-display: block;
+  }
+
+  @page { size: Letter; margin: 0; }
+
+  .af-stage {
+    display: flex;
+    justify-content: center;
+    padding: 24px;
+    background: #e5e7eb;
+    min-height: 100vh;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .af-sheet {
+    position: relative;
+    width: 8.5in;
+    height: 11in;
+    box-sizing: border-box;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    color: #444;
+    font-family: "Archivo Flyer", Helvetica, Arial, sans-serif;
+    box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.4);
+  }
+
+  @media print {
+    .af-stage { padding: 0; background: #fff; display: block; min-height: 0; }
+    .af-sheet { box-shadow: none; }
+    .noprint { display: none !important; }
+  }
+
+  /* Every display heading shares the condensed italic setting. */
+  .af-h1, .af-h2, .af-h3, .af-career-title {
+    font-weight: 800;
+    font-style: italic;
+    font-variation-settings: "wdth" 62, "wght" 800;
+    word-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+
+  /* The arrow-chevron mark, used at three sizes. The bare one sits on the white
+     sheet (the benefit bullets) so it takes `mark`; the lockup variant sits on
+     the masthead, where the accent is the color that reads. */
+  .af-chev {
+    display: block;
+    flex: 0 0 auto;
+    background: var(--af-mark);
+    clip-path: polygon(0 0, 55% 0, 100% 50%, 55% 100%, 0 100%, 45% 50%);
+    width: 8px;
+    height: 12px;
+    margin-top: 2px;
+  }
+  .af-chev--lockup { width: 9px; height: 14px; margin-top: 0; background: var(--af-accent); }
+  .af-chev--btn { width: 10px; height: 15px; margin-top: 0; background: var(--af-on-mark); }
+
+  /* ===================== MASTHEAD ===================== */
+  .af-masthead {
+    flex: 0 0 auto;
+    background: var(--af-base);
+    padding: 0.2in 0.42in;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.3in;
+  }
+  .af-chip {
+    display: inline-flex;
+    background: #fff;
+    padding: 0.06in 0.09in;
+    border-radius: 4px;
+  }
+  .af-chip img { height: 0.35in; width: auto; display: block; }
+  .af-mono { height: 0.4in; width: auto; display: block; }
+  .af-wordmark {
+    font-weight: 800;
+    font-style: italic;
+    font-variation-settings: "wdth" 62, "wght" 800;
+    font-size: 17pt;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+  }
+  .af-lockup {
+    display: flex;
+    align-items: center;
+    gap: 0.1in;
+    font-size: 8.5pt;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    color: var(--af-accent);
+    white-space: nowrap;
+  }
+  .af-xplogo { height: 0.28in; width: auto; display: block; }
+
+  /* ======================= HERO ======================= */
+  .af-hero {
+    flex: 0 0 auto;
+    position: relative;
+    overflow: hidden;
+    padding: 0.17in 0.42in 0.19in;
+    background-color: var(--af-base);
+  }
+  /* The photograph and the scrim over it are separate elements rather than two
+     background layers on .af-hero, and that is load-bearing for the PDF: given a
+     gradient stacked on an image in ONE `background-image`, Chromium flattens the
+     whole band into a raw bitmap, which took this file from ~350KB to ~6MB. Drawn
+     as two layers, the JPEG survives as a JPEG and the gradient stays vector. */
+  .af-hero-photo {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-position: center 62%;
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+  .af-hero-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(to bottom, var(--af-scrim-top), var(--af-scrim-bottom));
+  }
+  .af-cutout {
+    position: absolute;
+    z-index: 2;
+    background-position: right bottom;
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+  .af-cutout--primary { right: -0.3in; bottom: -0.5in; width: 296px; height: 319px; }
+  .af-cutout--secondary { right: 1.28in; bottom: -0.52in; width: 213px; height: 216px; }
+
+  .af-hero-copy { position: relative; z-index: 3; max-width: var(--af-hero-copy); }
+  .af-h1 {
+    font-size: var(--af-h1);
+    line-height: 0.94;
+    letter-spacing: -0.015em;
+    color: #fff;
+  }
+  .af-h1 span { color: var(--af-accent); }
+  .af-lede {
+    margin: 0.12in 0 0;
+    font-size: 11pt;
+    line-height: 1.42;
+    font-weight: 400;
+    color: #fff;
+    max-width: 4.5in;
+    text-wrap: pretty;
+  }
+  .af-badge {
+    margin-top: 0.14in;
+    display: inline-flex;
+    align-items: center;
+    background: var(--af-accent);
+    color: var(--af-base);
+    font-size: 9pt;
+    font-weight: 900;
+    letter-spacing: 0.07em;
+    padding: 0.09in 0.18in;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  /* ==================== PILLARS BAND ==================== */
+  .af-pillars {
+    flex: 0 0 auto;
+    background: var(--af-accent);
+    padding: 0.17in 0.42in 0.18in;
+    display: flex;
+    align-items: center;
+    gap: 0.26in;
+  }
+  .af-pillars-intro { flex: 1 1 auto; }
+  .af-h2 { font-size: 23pt; line-height: 1; letter-spacing: -0.005em; color: var(--af-base); }
+  .af-pillars-blurb {
+    margin: 0.1in 0 0;
+    font-size: 10pt;
+    line-height: 1.4;
+    color: var(--af-accent-ink);
+    max-width: 2.55in;
+    text-wrap: pretty;
+  }
+  .af-tiles {
+    flex: 0 0 4.5in;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.1in 0.14in;
+  }
+  .af-tile { background: var(--af-base); padding: 0.1in 0.12in; border-radius: 7px; }
+  .af-tile--invert { background: #fff; }
+  .af-tile-kicker { font-size: 7pt; font-weight: 800; letter-spacing: 0.14em; color: var(--af-accent); }
+  .af-tile--invert .af-tile-kicker { color: var(--af-base); }
+  .af-tile-label { font-size: 9.5pt; font-weight: 800; margin-top: 1px; color: #fff; }
+  .af-tile--invert .af-tile-label { color: #000; }
+
+  /* ================ BENEFITS + REWARDS ================ */
+  .af-cols {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: 1.06fr 0.94fr;
+    gap: 0.34in;
+    padding: 0.15in 0.42in 0.1in;
+    align-content: start;
+  }
+  .af-h3 { font-size: 17.5pt; line-height: 1.03; letter-spacing: -0.01em; color: var(--af-base); }
+  .af-benefits {
+    margin: 0.11in 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.045in;
+  }
+  .af-benefits li { display: flex; gap: 0.1in; align-items: flex-start; font-size: 10pt; line-height: 1.32; }
+  .af-rewards-label { margin: 0.1in 0 0.11in; font-size: 9pt; font-weight: 700; color: #444; }
+  .af-rewards { display: flex; flex-wrap: wrap; gap: 0.075in; }
+  .af-reward {
+    background: #eee;
+    border-left: 3px solid var(--af-base);
+    padding: 0.06in 0.1in;
+    font-size: 9pt;
+    font-weight: 700;
+    color: var(--af-base);
+  }
+
+  /* ==================== CAREER STRIP ==================== */
+  .af-career {
+    flex: 0 0 auto;
+    background: var(--af-base-deep);
+    padding: 0.12in 0.42in;
+    display: flex;
+    align-items: center;
+    gap: 0.28in;
+  }
+  .af-career-title {
+    flex: 0 0 auto;
+    font-size: 19pt;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--af-accent);
+    max-width: 2.1in;
+  }
+  .af-career-body { flex: 1 1 auto; font-size: 9.5pt; line-height: 1.38; color: #fff; text-wrap: pretty; }
+
+  /* ======================= CTA + QR ======================= */
+  .af-cta {
+    flex: 0 0 auto;
+    padding: 0.13in 0.42in 0.1in;
+    display: flex;
+    align-items: center;
+    gap: 0.34in;
+  }
+  .af-cta-left { flex: 1 1 auto; }
+  .af-cta .af-h2 { letter-spacing: -0.015em; }
+  /* Sits on the bare sheet, so it takes `mark` rather than the band's accent. */
+  .af-cta-btn {
+    margin-top: 0.13in;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.1in;
+    background: var(--af-mark);
+    color: var(--af-on-mark);
+    font-size: 11pt;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    padding: 0.11in 0.2in;
+    text-transform: uppercase;
+  }
+  .af-steps {
+    margin: 0.11in 0 0;
+    padding: 0 0 0 0.17in;
+    font-size: 9.5pt;
+    line-height: 1.4;
+    color: #444;
+    font-weight: 600;
+  }
+  .af-qr-wrap { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; }
+  .af-qr {
+    width: 1.4in;
+    height: 1.4in;
+    background: #fff;
+    padding: 0.05in;
+    box-sizing: border-box;
+    border-radius: 10px;
+    border: 1px solid #d7d7d7;
+  }
+  .af-qr :global(svg) { width: 100%; height: 100%; display: block; }
+  .af-qr-url { margin-top: 0.09in; font-size: 10pt; font-weight: 800; color: var(--af-base); letter-spacing: 0.02em; }
+
+  /* ======================== FOOTER ======================== */
+  .af-footer {
+    flex: 0 0 auto;
+    margin-top: auto;
+    background: #444;
+    color: #eee;
+    padding: 0.1in 0.42in;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.3in;
+  }
+  .af-contact { font-size: 9.5pt; font-weight: 700; color: #fff; }
+  .af-disclaimer { font-size: 6.8pt; line-height: 1.35; max-width: 4.2in; text-align: right; }
+
+  /* Screen-only download affordance, mirroring the one-pager's. */
+  .af-download {
+    position: fixed; right: 20px; bottom: 20px; z-index: 100;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 20px; border-radius: 999px;
+    background: #111827; color: #fff; font-weight: 700; font-size: 14px;
+    font-family: "Inter Display", sans-serif;
+    box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.5);
+    text-decoration: none;
+  }
+  .af-download svg { width: 18px; height: 18px; }
+</style>
