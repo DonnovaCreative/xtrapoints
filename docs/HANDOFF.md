@@ -224,6 +224,12 @@ the repo.
   create the Marketing Resource document with a `generated` format pointing at the
   id. `src/lib/printSheet.ts` (was `onePagerPdf.ts`) does the Chromium rendering for
   all of them — pass the sheet's selector and, if it isn't US-Letter, its size.
+  - These are designed in **Claude Design** and ported in. **Read
+    `docs/CLAUDE-DESIGN-BRIEF.md` BEFORE starting a new one** — it's the spec to
+    paste into the design session, written from what the flyer's export failed to
+    carry (color roles and what they sit on, copy defaults, per-asset absent
+    states, the print/PDF gotchas). Those omissions, not the layout, were the
+    expensive part of the first port.
 
 - **Hero rays** — the donor + ambassador heroes layer React Bits **SideRays**
   (`src/components/islands/SideRays.tsx`, WebGL via **`ogl`**, `client:only`)
