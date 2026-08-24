@@ -1,7 +1,8 @@
 # Session handoff — XtraPoint marketing site
 
 Pick-up notes for continuing in a fresh chat. Start a new chat **in this project**
-and say: _"Read docs/HANDOFF.md and README.md, then let's continue."_
+and say: _"Read docs/HANDOFF.md and docs/DECISIONS.md, then confirm the git state
+(`git log main..staging --oneline`) before we start."_
 
 > Reference docs: [README.md](../README.md) (run/build, brand toggle, contact form),
 > [ADDING-A-SCHOOL.md](ADDING-A-SCHOOL.md) (the co-branded school pages + the 3
@@ -9,13 +10,16 @@ and say: _"Read docs/HANDOFF.md and README.md, then let's continue."_
 > [deploys-and-indexing.md](deploys-and-indexing.md) (envs + SEO),
 > [DECISIONS.md](DECISIONS.md) (why). This file is **current state**.
 
-_Last updated: 2026-08-01._
+_Last updated: 2026-08-17._
 
 ---
 
 ## Where things stand (git / deploy)
 
-- **`main` and `staging` are in sync** (as of 2026-08-01) and both **live**:
+- **⚠ `staging` is 4 commits AHEAD of `main`** (as of 2026-08-17) — the whole
+  Marketing Portal (accounts, brand editing, per-school promotion) is on staging
+  and **not yet on production**. That's deliberate; see "Marketing Portal" below
+  for what the production cutover needs.
   - **Production** = `xtrapoint.com` (apex → `www`), builds from **`main`**.
   - **Staging** = `staging.xtrapoint.com`, builds from the **`staging`** branch.
 - **Promotion flow**: `git checkout main && git merge --ff-only staging && git push origin main`
@@ -204,39 +208,63 @@ the repo.
    `studio/scripts/seed-college.ts`. All run via `sanity exec --with-user-token`
    (operator's login — no separate write token).
 
-### Publish → rebuild (staging auto, production manual)
+### Publish → staging; Approve → production (PER SCHOOL)
 
-Publishing no longer goes live everywhere at once. A Sanity **publish webhook**
-→ **Vercel Deploy Hook** rebuilds **staging only**, filtered to `school`/
-`legalPage` docs (drafts excluded) — instant, no review step. **Production does
-NOT auto-rebuild** — the old "Rebuild production" webhook was deleted (see
-DECISIONS.md 2026-07-31). To go live on `xtrapoint.com`, an editor reviews the
-content on staging, then clicks **"Promote to production"** — a top-level
-Studio tool (`studio/promoteTool.tsx`) that POSTs straight to the production
-Vercel Deploy Hook (same hook the deleted webhook used to call).
+**This changed on 2026-08-17. Anything you read elsewhere about a global
+"Promote to production" button or a "Hide from production" toggle is stale.**
 
-- Config: `SANITY_STUDIO_PRODUCTION_DEPLOY_HOOK_URL` (`studio/.env`, baked in at
-  `sanity deploy`) — the Vercel Deploy Hook URL for the `main`/production
-  deploy. Obscurity-level secret, same posture as `SANITY_STUDIO_PREVIEW_SECRET`.
-- To restore auto-publish-to-production (not recommended — this was the
-  behavior the client asked to remove): recreate a Sanity webhook pointed at
-  that same Deploy Hook URL with the filter
-  `_type in ["school","legalPage"] && !(_id in path("drafts.**"))`.
-- **⚠ Unpublish is global, not per-environment.** Clicking the Studio's native
-  **Unpublish** on a school converts it to a draft — it disappears from
-  staging right away (auto webhook), but production keeps serving its last
-  build until someone clicks **Promote to production** again. Promoting
-  rebuilds production from whatever is *currently* published (and not
-  hidden), so it's also how removals go live, not just additions — the
-  promote tool's own UI says this. If you unpublish something and production
-  still shows it, that's expected until the next promote, not a bug.
-- **Want a school live on staging but excluded from production specifically?**
-  Toggle **"Hide from production"** on the school doc (group "Publishing")
-  and promote — `schoolsSource.ts`'s `VALID` filter excludes
-  `hiddenFromProduction` docs only when `VERCEL_ENV === "production"`
-  (`isProduction`, `site-env.ts`); staging/preview builds ignore it. Good for
-  taking a placeholder/test school off production without touching its
-  staging content. See DECISIONS.md.
+- **Publishing** a school triggers the Sanity webhook → Vercel Deploy Hook and
+  rebuilds **staging only**. It never touches `xtrapoint.com`.
+- **Production is per-school.** Each school has `productionStatus` (`draft` |
+  `live`) on its Publishing tab. Only `live` schools appear on production, and
+  they render their **`approvedVersion`** — a JSON snapshot of the resolved GROQ
+  projection taken when someone clicked **Approve for production**
+  (`studio/components/ProductionStatusInput.tsx` → `/api/school-snapshot`).
+- **This is why editing a live school is safe.** Their changes go to staging for
+  review while production keeps serving the approved snapshot. The Publishing tab
+  shows *"Live — changes not approved"* when the two have diverged.
+- The sidebar tool is now **"Deploy production"** — plumbing only, for changes not
+  tied to one school (site settings, legal pages, resource library). Approving a
+  school already fires the deploy hook.
+- **Removals:** Unpublish as usual, then **Deploy production** to carry it live.
+- **Consequence worth knowing:** the snapshot is taken *after* the projection, so
+  a new schema field does not reach production until each school is approved
+  again. `toSchool` is null-tolerant so old snapshots don't break, but a schema
+  rollout needs a re-approve pass.
+
+## 🔐 Marketing Portal — the partner dashboard (NEWEST WORK, staging only)
+
+A private per-school dashboard at `/portal/…`: their live pages, co-branded
+one-pager, the shared resource library, and a **brand editor** they can use
+themselves. Built on shadcn's `sidebar-07`, re-skinned to each school's colors.
+
+**Two ways in, one gate** (`src/lib/portalRoute.ts` — read this first):
+- `/portal/<32-hex-token>` — Stage 0 links, still working, no account
+- `/portal/<school-slug>` — a signed-in Clerk user whose org maps to that school
+
+The same page files serve both. `gatePortal` also owns the noindex /
+no-referrer headers, so a new portal page can't ship without them.
+
+**Accounts (Clerk).** One Organization = one school, linked by the org's
+`publicMetadata.schoolSlug` (backend-writable only, so it can't be self-granted).
+Onboarding is entirely in the Studio: the school's **Marketing portal** tab
+invites people by email (`/api/portal-access`), and **creates the org on the
+first invite**. `scripts/clerk-orgs.mjs` survives only for the staff flag
+(`--staff`), an org that can open every school's portal.
+
+**Middleware is scoped** (`src/middleware.ts`) to `/portal`, the auth pages and
+`/api/portal-brand`. With `output: 'static'`, Astro middleware also runs at BUILD
+time — an unguarded `clerkMiddleware` would put auth in front of the whole
+marketing site.
+
+**Brand editing.** Schools change their logo, avatar, colors and the five photos
+(with credits). Everything writes to the Sanity **draft**, so the existing Studio
+review flow is the approval gate. The security boundary is an **allowlist**
+(`src/lib/portalEdit.ts`) — never a blocklist, so a sensitive field added later
+can't silently become editable. Schools cannot reach `productionStatus`,
+`approvedVersion`, `portalEnabled`, `portalToken`, their slug, or any page copy.
+
+**What Stage 2 still needs — see "Open items" for the full list.**
 
 ## 📄 Legal & Compliance (legal docs + support + school legal copy)
 
@@ -343,8 +371,42 @@ Staging/preview de-indexed, production indexable (keyed on `VERCEL_ENV`).
 | `PREVIEW_SECRET` | Vercel Prod+Preview **and** local `.env` | Gates the draft-preview route; must match Studio's `SANITY_STUDIO_PREVIEW_SECRET` |
 | `DATAGOV_API_KEY` | local `.env`; **add to Vercel** to enable it in the Studio "Auto-fill from ESPN" flow (optional) | Auto-seed city/state + official name via College Scorecard |
 | `PUBLIC_WEB3FORMS_KEY` | `.env` + Vercel | Contact/waitlist form delivery |
+| `PUBLIC_CLERK_PUBLISHABLE_KEY` | `.env` + Vercel **Preview+Prod** | Portal auth. `PUBLIC_` ⇒ inlined at BUILD time, so adding it needs a redeploy |
+| `CLERK_SECRET_KEY` | `.env` + Vercel **Preview+Prod** | Portal auth, server-side |
+| `SANITY_WRITE_TOKEN` | `.env` + Vercel | Brand editor writes (Editor perms on `production` dataset). **Not yet set on Vercel — brand editing 503s on staging until it is.** |
+| `PUBLIC_STAGING_ORIGIN` | optional | Where the portal points schools for page previews. Defaults to `https://staging.xtrapoint.com` |
 
 ## Open items / follow-ups
+
+### Marketing Portal (current work — do these first)
+
+- **A. `SANITY_WRITE_TOKEN` is not on Vercel.** Brand editing returns a clean 503
+  on staging until it's added (Preview + Production). It IS set locally.
+- **B. Production cutover, not started.** Needs, in order: merge `staging` →
+  `main`; create the **Clerk production instance** (DNS CNAMEs on the domain +
+  your OWN Google OAuth credentials — the dev instance uses Clerk's shared app,
+  which production forbids); add `pk_live_`/`sk_live_` to Vercel Production;
+  **recreate the orgs there** (dev and production Clerk instances share NO users
+  or orgs); point `SANITY_STUDIO_PREVIEW_ORIGIN` at production and redeploy the
+  Studio. Every account made in the dev instance is throwaway.
+- **C. Wider school editing (the actual Stage 2 ask).** The client wants schools
+  to also edit page copy, ambassador tiers/incentives, and "key details" — the
+  brand editor was deliberately scoped to brand-only first. Extend
+  `EDITABLE_*` in `src/lib/portalEdit.ts` plus the editor UI; the draft/review
+  plumbing already works and shouldn't need changing.
+- **D. Legacy portal tokens still live.** Both doors work during transition.
+  Lackawanna and Sam Houston currently have tokens. Revoke per school once their
+  people have signed in.
+- **E. Two one-shot migration scripts left in `studio/scripts/`**
+  (`zz-migrate-resources.ts`, `zz-migrate-production-status.ts`). Both have been
+  run against `production`. Delete once you're confident.
+- **F. Studio panels not verified by Claude.** The Sanity Studio's *document
+  forms* don't render in Claude's in-app browser (its realtime WebSocket is
+  blocked — list views work fine). So the invite panel, the Approve button and
+  the status badges were built and their APIs tested directly, but a human needs
+  to eyeball the actual Studio UI.
+
+### Older
 
 1. **Test schools left live** — `oregon`, `boise-state`, `example-state`,
    `kennesaw-state`, `butler` are published with **preview/placeholder data +
