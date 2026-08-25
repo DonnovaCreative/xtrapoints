@@ -172,7 +172,14 @@ be design-agnostic — it constrains how the piece is *specified*, not how it lo
 >
 > A photograph under a scrim must be **its own element** with the scrim as a
 > sibling overlay — never two layers of one `background-image` — and tell me the
-> band's aspect ratio so it can be cropped server-side.
+> band's aspect ratio so it can be cropped server-side. Concretely, stack four
+> absolutely-positioned layers inside the band, lowest to highest:
+>   1. the photo (`background-image`, `inset:0`)
+>   2. the scrim (a plain `linear-gradient`, `inset:0`, its own element)
+>   3. any cutout art
+>   4. the copy (`position:relative` is enough; it just needs to paint last)
+> Assign explicit `z-index` in that order rather than relying on DOM order —
+> it's what keeps this correct if a later edit reorders the markup.
 >
 > ### 5. Type
 > Prefer fonts already in the project: **Inter Display**, **Space Mono**,
