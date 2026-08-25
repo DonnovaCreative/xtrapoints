@@ -31,6 +31,24 @@ be design-agnostic — it constrains how the piece is *specified*, not how it lo
 > Roughly 15 schools today, growing. Design it however it should look, but
 > specify it to the rules below, because they're what make the port mechanical.
 >
+> ### 0. Two audiences, and why that shapes the spec
+> Where this is heading: schools get a **Marketing Portal** that works the way
+> your own tweak panel does — they open a generated piece and change the parts
+> that are theirs. A different logo, their own hero image, reworded copy, a QR
+> pointing somewhere else. So the template has two jobs at once:
+>
+> 1. **Render correctly for a school that has touched nothing.** Day one, every
+>    school gets this piece with zero authoring.
+> 2. **Survive being edited.** Anything you mark editable *will* be changed, so
+>    the layout has to hold across the whole range you allow — not just at your
+>    default. A three-item list must look deliberate if you permit three.
+>
+> Your manifest is what builds that editor. The `maxLength` you measure becomes a
+> live character counter; a list's `min`/`max` becomes its add/remove limits; a
+> variable you mark editable becomes a field in their portal, and one you don't
+> is locked. Specify accordingly — this is the spec for a UI, not just notes for
+> a developer.
+>
 > ### 1. One root, fixed size, print-safe
 > - Wrap the whole piece in a **single root element** with a stable class
 >   (`.xp-sheet`). Nothing that should print may live outside it. It gets
@@ -73,12 +91,30 @@ be design-agnostic — it constrains how the piece is *specified*, not how it lo
 > "the base darkened 35%" or "the base at 94% alpha", say so — it gets computed,
 > not supplied.
 >
-> ### 3. Content: everything varies, everything has a default
+> ### 3. Content: every variable has a default AND an owner
 > - Every string a school could change is a named variable.
-> - **Write a sensible default for every one of them** — generic enough to read
->   correctly for any school, using placeholders like `{programName}`,
->   `{beneficiary}`, `{mascot}` where a name genuinely helps. A new school must
->   render with zero authoring. This is the single most important rule here.
+> - **Write a default for every one of them** that renders correctly with zero
+>   authoring. This is the single most important rule here.
+> - Tag every variable with an **`owner`**, because that decides where its value
+>   comes from and whether it appears in the school's editor:
+>   - **`derived`** — computed from data the school already has. Name the exact
+>     source field from the dictionary below (`"source": "school.beneficiary"`).
+>     Prefer this whenever a real field fits; it's the only kind that's correct
+>     automatically. Lists can derive too — the ambassador flyer's reward chips
+>     come from `ambassadorTiers[].perks`.
+>   - **`school`** — a school should be able to change this in their portal.
+>     This is the biggest bucket and the point of the whole exercise. Give it a
+>     **`control`**: `text`, `textarea`, `color`, `image`, `url`, `list<text>`,
+>     `list<object>`. Add a short `label` and `help` string — those are the field
+>     label and hint a school actually reads.
+>   - **`fixed`** — XtraPoint's copy, not theirs to edit: legal disclaimers,
+>     compliance language, claims about the platform.
+> - **Invented placeholders are fine, but only inside `school`-owned defaults.**
+>   If your piece wants a price, a headcount, or a contact name, that's allowed —
+>   mark it `owner: "school"` with a control, and write a default that reads as an
+>   obvious blank (`"Contact us"`, `"—"`), **never a literal `{token}`**, because
+>   an unedited school prints exactly what the default says. Do NOT invent a
+>   `derived` source; `derived` may only reference the dictionary.
 > - Give each string a `maxLength` **measured against your layout**, not guessed.
 > - Split any heading that needs a line break into `…Line1` / `…Line2`; the `<br>`
 >   lives in the markup. Copy must never contain HTML.
@@ -86,6 +122,40 @@ be design-agnostic — it constrains how the piece is *specified*, not how it lo
 >   and what happens outside that range.
 > - Give me one escape hatch for long copy (e.g. "drop the h1 from 37pt to 33pt
 >   when either line exceeds 26 characters") and note where the layout has slack.
+>   **Wire it in the artboard** — a rule that only exists in the manifest is dead
+>   on arrival, and any size it names must match the value the design actually
+>   uses.
+>
+> ### 3a. The data dictionary — what `derived` may reference
+> This is everything a school record holds today. `derived` variables may use
+> **only** these. Anything else is `school` or `fixed`.
+>
+> **Always present:** `slug`, `name` ("Sam Houston State University"), `short`
+> ("Sam Houston State"), `mascot` (plural — "Bearkats"), `fund`
+> ("Bearkat Athletics Fund"), `city`, `state`, `beneficiary` (who supporters
+> help — "Bearkat Athletes"), `programName` (the ambassador program's name — the
+> collective if set, else `short`), `approver`, `givingDest`, `theme`.
+>
+> **Optional — always give the layout an absent path:** `collective` (a fund's
+> own brand, e.g. "KatFund"), `whyGiveHeading`, `whyGiveBody`, `videoUrl`,
+> `videoHeading`, `videoCaption`, `logo` (**white/mono cut, for dark
+> backgrounds**), `logoBadge` (true = `logo` is full-color), `avatar`
+> (full-color square mark), `photos.{team,fans,celebrate,action,mascot}` (game-day
+> photography, each independent), `photos.{cutout,cutoutSecondary}` (pre-masked
+> transparent mascot PNGs), `ambassadorTiers[]` (`{name, role?, perks?[],
+> highlight?}`), `ambassadorPrograms[]` (`{title, body?}`).
+>
+> **Colors —** `theme.primary`, `theme.secondary`, `theme.hasSecondary` (false
+> means `secondary` is just a tint of primary, not a real brand color),
+> `theme.ink` (their dark color). Everything else is derived at render, so never
+> ask for a shade: request roles per §2 and they get fitted by measured contrast.
+>
+> **Platform constants** (not per-school): the XtraPoint name, domain, logo marks,
+> and support URL.
+>
+> Note what is NOT here: no prices, no headcounts, no per-school contact person,
+> no season label, no social handles. Those are all legitimate — they're just
+> `school`-owned, not `derived`.
 >
 > ### 4. Assets: classify by lifecycle, and declare the absent state
 > Sort every image into exactly one of:
@@ -130,14 +200,38 @@ be design-agnostic — it constrains how the piece is *specified*, not how it lo
 >   "derived": { "--base-deep": "darken(--base, 0.35)",
 >                "--scrim-top": "rgba(--base, 0.94)" },
 >   "copy": [
->     { "key": "headlineLine1", "default": "Don't just be a fan.", "maxLength": 26 }
+>     { "key": "headlineLine1", "default": "Don't just be a fan.", "maxLength": 26,
+>       "owner": "school", "control": "text",
+>       "label": "Headline, first line",
+>       "help": "Keep it short — it's set in condensed caps at 37pt." },
+>
+>     { "key": "programName", "owner": "derived", "source": "school.programName",
+>       "note": "the collective's name if they have one, else the school's short name" },
+>
+>     { "key": "disclaimer", "owner": "fixed",
+>       "default": "Rewards are subject to eligibility and official program terms.",
+>       "maxLength": 200 },
+>
+>     { "key": "contactEmail", "owner": "school", "control": "text",
+>       "default": "Contact us", "maxLength": 40,
+>       "label": "Contact shown in the footer",
+>       "note": "no such field exists yet — an unedited school prints the default verbatim, so the default must read as finished copy, not a placeholder token" }
 >   ],
 >   "lists": [
 >     { "key": "benefits", "min": 3, "max": 5, "itemMaxLength": 62,
->       "default": ["…"], "overflow": "drop items past 5" }
+>       "owner": "school", "control": "list<text>",
+>       "label": "What ambassadors get",
+>       "default": ["…"], "overflow": "drop items past 5",
+>       "underflow": "below 3 the column looks thin; raise item gap to 0.09in" },
+>
+>     { "key": "rewards", "owner": "derived",
+>       "source": "school.ambassadorTiers[].perks",
+>       "fallback": "if fewer than 3 unique perks, use the default list",
+>       "min": 3, "max": 6, "itemMaxLength": 40, "default": ["…"] }
 >   ],
 >   "assets": [
->     { "key": "heroImage", "kind": "school", "box": [816, 250], "aspect": 3.26,
+>     { "key": "heroImage", "kind": "school", "control": "image",
+>       "label": "Hero photograph", "box": [816, 250], "aspect": 3.26,
 >       "focal": [0.5, 0.62], "transparent": false, "ownLayer": true,
 >       "absent": "band falls back to solid --base; scrim still applies" },
 >     { "key": "mascotCutout", "kind": "school", "box": [296, 319],
@@ -154,6 +248,31 @@ be design-agnostic — it constrains how the piece is *specified*, not how it lo
 > Keep the design body free of literal per-school values — no school name, no
 > brand hex, no uploaded photo path outside the vars and the manifest.
 
+## Why `owner` matters more than it looks
+
+Sanity is the tool XtraPoint staff use to stand a school up, and it should stay
+small — the fields needed to launch, not a home for every string on every piece.
+The **portal** is where a school edits their own materials, the way Claude
+Design's tweak panel works: swap the logo, change the hero, reword a section,
+point the QR somewhere else.
+
+So "this variable has no Sanity field" is not a defect. It means the variable is
+**school-owned**, and it needs a default that reads as finished copy plus a
+control in the portal. The only hard rule is that `derived` may not reference a
+field that doesn't exist — a `derived` variable with no source prints its own
+placeholder token onto the sheet.
+
+That makes the manifest do triple duty:
+
+| Manifest field | What it becomes |
+|---|---|
+| `default` | the template's zero-authoring render |
+| `owner: derived` + `source` | a read straight from the school record |
+| `owner: school` + `control`/`label`/`help` | a field in the portal's editor |
+| `maxLength`, list `min`/`max` | live character counters and add/remove limits |
+| the set of `owner: school` keys | the per-template **allowlist** — the same security boundary `src/lib/portalEdit.ts` already enforces for brand editing, extended per template rather than hand-maintained |
+| `escapeHatches`, `slack` | what keeps the layout intact when they overrun |
+
 ## What still needs a developer
 
 Even a perfect export doesn't self-install. Per template, expect:
@@ -162,10 +281,14 @@ Even a perfect export doesn't self-install. Per template, expect:
   ambassador flyer's and swap the body
 - a registry entry in `src/lib/generatedTemplates.ts` **and** in
   `GENERATED_TEMPLATE_IDS` in `studio/schemas/resourceTemplate.ts`
-- Sanity fields for any genuinely new per-school asset, plus the
-  `EDITABLE_IMAGES` allowlist entry in `src/lib/portalEdit.ts` if schools should
-  upload it themselves
+- a content module (like `src/lib/flyerContent.ts`) holding the defaults and the
+  `derived` reads
 - the Marketing Resource document in the Studio
+
+**Not yet built:** the per-school override store and the portal editor the
+`owner: school` variables imply. Until that exists, school-owned variables render
+their defaults — which is exactly why the defaults must be finished copy. The
+manifests accumulated between now and then are the spec for building it.
 
 The brief's job is to delete the *translation* work — the color-role archaeology,
 the invented fallbacks, the copy defaults, the print gotchas. That was the
