@@ -80,16 +80,44 @@ export interface FlyerTheme {
 const first = (candidates: string[], ok: (c: string) => boolean): string | undefined =>
   candidates.find(ok);
 
-export const flyerTheme = (t: SchoolTheme): FlyerTheme => {
+/**
+ * A school's own color picks for this sheet, from the portal's customise screen.
+ *
+ * They're offered to the resolver as the FIRST candidates rather than assigned
+ * directly, so every contrast rule below still applies to them. A school that
+ * picks a pale "dark background" gets the next legible option instead of a flyer
+ * with white text on cream — the editor warns them separately, but the rendered
+ * sheet is never allowed to become unreadable.
+ */
+export interface FlyerThemeOverrides {
+  base?: string;
+  accent?: string;
+}
+
+export const flyerTheme = (
+  t: SchoolTheme,
+  overrides: FlyerThemeOverrides = {},
+): FlyerTheme => {
   // ── base ────────────────────────────────────────────────────────────────
   // Prefer a genuinely deep field; accept merely-legible only if nothing is
   // deeper, and fall back to a darkened primary, which always is.
-  const baseCandidates = [t.primary, t.ink, darken(t.primary, 0.62)];
+  const baseCandidates = [
+    ...(overrides.base ? [overrides.base] : []),
+    t.primary,
+    t.ink,
+    darken(t.primary, 0.62),
+  ];
   const base =
     first(baseCandidates, (c) => contrast(c, WHITE) >= DEEP) ??
     first(baseCandidates, (c) => contrast(c, WHITE) >= AA) ??
     darken(t.primary, 0.72);
-  const swappedBase = base !== t.primary;
+  // Two different questions, and conflating them cost a school their accent:
+  //   • is the primary still FREE to be the accent? — whenever it isn't the base,
+  //     for any reason, including a school picking their own base color
+  //   • did we have to SWAP off it for contrast? — only when nobody asked us to,
+  //     which is what `swappedBase` reports to callers
+  const primaryFree = base !== t.primary;
+  const swappedBase = primaryFree && base !== overrides.base;
 
   // ── accent ──────────────────────────────────────────────────────────────
   // When base swapped OFF the primary, that primary is the best accent there is:
@@ -98,7 +126,8 @@ export const flyerTheme = (t: SchoolTheme): FlyerTheme => {
   // tint of the base is the floor — always on-brand, never pure white (which
   // would erase the band against the sheet).
   const accentCandidates = [
-    ...(swappedBase ? [t.primary] : []),
+    ...(overrides.accent ? [overrides.accent] : []),
+    ...(primaryFree ? [t.primary] : []),
     ...(t.hasSecondary ? [t.secondary] : []),
     lighten(base, 0.88),
     lighten(base, 0.94),

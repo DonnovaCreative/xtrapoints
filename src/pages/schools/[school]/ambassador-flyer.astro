@@ -1,20 +1,34 @@
 ---
 // Student-facing AMBASSADOR FLYER (published). The HTML source of truth for
 // /schools/<slug>/ambassador-flyer.pdf. The rendered sheet lives in
-// AmbassadorFlyerView.astro; this file just supplies published data + points the
-// download button at the published PDF route. Same split as one-pager.astro.
+// AmbassadorFlyerView.astro; this file supplies the school's data plus whatever
+// they've changed about this flyer in the portal.
+//
+// ⚠ SSR, not prerendered — unlike one-pager.astro. A school's tweaks are read
+// here at request time, so a static build would serve them yesterday's flyer and
+// the customise screen's live preview would never update. The page is noindex
+// and sitemap-excluded, and its only real traffic is the PDF/PNG renderers, so
+// nothing is lost by not building it ahead.
+export const prerender = false;
+
 import AmbassadorFlyerView from "@/components/school/AmbassadorFlyerView.astro";
-import { getSchools } from "@/data/schoolsSource";
+import { getSchool } from "@/data/schoolsSource";
+import { getTemplateOverrides } from "@/data/templateOverrides";
 
-export async function getStaticPaths() {
-  const schools = await getSchools();
-  return schools.map((school) => ({ params: { school: school.slug }, props: { school } }));
-}
+const slug = Astro.params.school;
+const school = slug ? await getSchool(slug) : undefined;
+if (!school) return new Response("Not found", { status: 404 });
 
-const { school } = Astro.props;
+const overrides = await getTemplateOverrides(school.slug, "ambassador-flyer");
+
+// The portal frames this page as a live preview and supplies its own Export
+// button, so it asks for the sheet without the floating download affordance.
+const bare = Astro.url.searchParams.get("bare") === "1";
 ---
 
 <AmbassadorFlyerView
   school={school}
   pdfHref={`/schools/${school.slug}/ambassador-flyer.pdf`}
+  overrides={overrides}
+  bare={bare}
 />

@@ -28,16 +28,24 @@ import type { School } from "@/data/schools";
 import { flyerTheme } from "@/lib/flyerTheme";
 import { flyerContent } from "@/lib/flyerContent";
 import { croppedImage, sizedImage } from "@/lib/sanityImage";
+import { EMPTY_OVERRIDES, type TemplateOverrides } from "@/lib/templateFields";
 
 interface Props {
   school: School;
   /** Where "Download PDF" points — the published route or the draft preview. */
   pdfHref: string;
+  /** The school's own tweaks from the portal. Absent → pure derived defaults. */
+  overrides?: TemplateOverrides;
+  /** Hide the floating download button (the portal frames this in an iframe). */
+  bare?: boolean;
 }
-const { school, pdfHref } = Astro.props;
+const { school, pdfHref, overrides = EMPTY_OVERRIDES, bare = false } = Astro.props;
 
-const t = flyerTheme(school.theme);
-const c = flyerContent(school);
+const t = flyerTheme(school.theme, {
+  base: overrides.values.colorBase,
+  accent: overrides.values.colorAccent,
+});
+const c = flyerContent(school, overrides);
 const photos = school.photos ?? {};
 
 // Hero background: the first game-day photo the school has. The scrim sits over
@@ -51,7 +59,8 @@ const photos = school.photos ?? {};
 // the photo reads as atmosphere rather than detail. Cropping to the band's own
 // proportions at ~1200px (≈140dpi across 8.5in) is indistinguishable in print and
 // a fraction of the bytes. fp-y matches the `center 62%` framing the design used.
-const rawHero = photos.fans || photos.team || photos.celebrate || photos.action;
+const rawHero =
+  overrides.images.heroImage || photos.fans || photos.team || photos.celebrate || photos.action;
 const heroPhoto = rawHero
   ? croppedImage(rawHero, 1200, 368, { focusY: 0.62, quality: 80 })
   : undefined;
@@ -60,7 +69,9 @@ const heroPhoto = rawHero
 // would vanish on this design's white chip — so a colored logo (logoBadge) or the
 // full-color avatar takes the chip, and a mono logo instead sits directly on the
 // masthead with no chip behind it.
-const rawChip = school.logoBadge ? school.logo : school.avatar;
+// A school's own pick for this sheet wins, and always takes the white chip —
+// they chose it seeing the chip behind it.
+const rawChip = overrides.images.mark || (school.logoBadge ? school.logo : school.avatar);
 const chipMark = rawChip ? sizedImage(rawChip, 320) : undefined;
 const monoMark = !chipMark && school.logo ? sizedImage(school.logo, 400) : undefined;
 
@@ -101,11 +112,16 @@ const canvasStyle = [
   noindex
 >
   <div class="af-stage">
-    <!-- Download button — screen only; hidden in the print/PDF render. -->
-    <a href={pdfHref} class="af-download noprint">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>
-      Download PDF
-    </a>
+    {/* Download button — screen only, hidden in the print/PDF render, and off
+        entirely when the portal frames this page as a live preview (it has its
+        own Export button, and a second one floating over the sheet reads as
+        part of the design). */}
+    {!bare && (
+      <a href={pdfHref} class="af-download noprint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>
+        Download PDF
+      </a>
+    )}
 
     <section class="af-sheet" style={canvasStyle}>
       <!-- ===================== MASTHEAD ===================== -->

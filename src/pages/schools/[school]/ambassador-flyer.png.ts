@@ -8,6 +8,8 @@
 import type { APIRoute } from "astro";
 import { getSchool } from "@/data/schoolsSource";
 import { renderSheetImage } from "@/lib/printSheet";
+import { getOverrideVersion } from "@/data/templateOverrides";
+import { sheetCacheHeaders } from "@/lib/sheetCache";
 
 export const prerender = false;
 
@@ -17,6 +19,7 @@ export const GET: APIRoute = async ({ params, url }) => {
   if (!school) return new Response("Not found", { status: 404 });
 
   const pageUrl = new URL(`/schools/${slug}/ambassador-flyer`, url.origin).href;
+  const version = await getOverrideVersion(school.slug, "ambassador-flyer");
 
   try {
     const png = await renderSheetImage(pageUrl, { selector: ".af-sheet" });
@@ -26,8 +29,7 @@ export const GET: APIRoute = async ({ params, url }) => {
         // Inline, not a download — this one is for looking at. The PDF route is
         // the one that hands over a file.
         "Content-Disposition": "inline",
-        "Cache-Control": "public, max-age=3600",
-        "CDN-Cache-Control": "public, max-age=86400",
+        ...sheetCacheHeaders(version, url),
       },
     });
   } catch (err) {

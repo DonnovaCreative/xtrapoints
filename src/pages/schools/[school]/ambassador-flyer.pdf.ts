@@ -5,6 +5,8 @@
 import type { APIRoute } from "astro";
 import { getSchool } from "@/data/schoolsSource";
 import { renderSheetPdf } from "@/lib/printSheet";
+import { getOverrideVersion } from "@/data/templateOverrides";
+import { sheetCacheHeaders } from "@/lib/sheetCache";
 
 export const prerender = false;
 
@@ -14,6 +16,7 @@ export const GET: APIRoute = async ({ params, url }) => {
   if (!school) return new Response("Not found", { status: 404 });
 
   const pageUrl = new URL(`/schools/${slug}/ambassador-flyer`, url.origin).href;
+  const version = await getOverrideVersion(school.slug, "ambassador-flyer");
 
   try {
     const pdf = await renderSheetPdf(pageUrl);
@@ -22,10 +25,7 @@ export const GET: APIRoute = async ({ params, url }) => {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="${filename}"`,
-        // A rebrand triggers a fresh deployment (new function), so a long cache
-        // is safe — mirrors the one-pager and OG endpoints.
-        "Cache-Control": "public, max-age=3600",
-        "CDN-Cache-Control": "public, max-age=86400",
+        ...sheetCacheHeaders(version, url),
       },
     });
   } catch (err) {

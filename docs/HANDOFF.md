@@ -217,6 +217,40 @@ the repo.
   - Cutouts (`photos.cutout` / `cutoutSecondary`) are **pre-masked transparent
     PNGs**, deliberately a separate field from `photos.mascot` — a mascot on a
     white box prints as a white box. Absent → the headline widens into the space.
+  - **⚠ SSR, unlike the one-pager.** `ambassador-flyer.astro` is
+    `prerender = false` because it reads a school's customisations at request
+    time; prerendered, the customise screen's preview would never update.
+
+- **Customising a template (portal → "Make it yours")** — the first step toward
+  the portal being the school's own CMS. A school opens
+  `/portal/<…>/customize/<templateId>`, changes wording, lists, the QR
+  destination, the photo, the flyer's logo, or its two carrying colors, watches a
+  live preview of the real sheet, and exports.
+  - **What they may touch is `src/lib/templateFields.ts`** — the code form of a
+    design manifest's `owner: "school"` set. One declaration drives the editor
+    UI, the API's validation and the renderer's merge, and it's the security
+    boundary: same allowlist rule as `portalEdit.ts`, so copy added to a template
+    later can't silently become editable.
+  - **Overrides never replace derivation, they sit on top.** Clearing a field
+    drops it and the computed default returns — which is why every input shows
+    its derived value as a *placeholder* rather than pre-filling it. There's no
+    per-field "reset" to explain.
+  - **⚠ Published immediately, NOT staged on a draft** (the opposite of
+    `portal-brand.ts`). Brand edits change public pages and need our review; this
+    changes a PDF the school prints themselves, and "tweak → look → export"
+    doesn't work if every tweak waits on us. Nothing reachable here touches their
+    pages.
+  - **Color picks go through the resolver as candidates, not assignments**
+    (`FlyerThemeOverrides`), so §"the color resolver" above still holds — a school
+    who picks a pale "dark background" gets the next legible option rather than a
+    flyer nobody can read.
+  - Storage is one `templateOverride` document per school per template, id
+    `tplov-<slug>-<templateId>`, so a write is an upsert. Visible in the Studio
+    for support (clear a value for a school) but not somewhere to author.
+  - `src/lib/sheetCache.ts` — the sheets used to cache for a day because only a
+    deploy could change them. Now the portal links exports with `?v=<updatedAt>`
+    (new URL per edit → long cache is still safe), and a bare URL drops to 60s
+    once a school has customised anything.
 
 - **Adding another generated template** — register it in
   `src/lib/generatedTemplates.ts` AND in `GENERATED_TEMPLATE_IDS` in

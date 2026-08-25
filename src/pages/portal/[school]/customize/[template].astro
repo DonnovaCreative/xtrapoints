@@ -1,0 +1,74 @@
+---
+// MARKETING PORTAL → customise one generated template.
+//
+// A school opens this from the resource library and tweaks their copy of the
+// sheet: wording, the lists, the QR destination, the photo, the two colors that
+// carry the design. Their changes take effect immediately — this is their own
+// collateral, not a public page, so it doesn't go through the Studio review that
+// brand edits do (see src/pages/api/portal-template.ts for why).
+//
+// What they may change lives in src/lib/templateFields.ts, which also renders
+// the form — so this page stays the same as more templates gain editors.
+export const prerender = false;
+
+import PortalLayout from "@/layouts/PortalLayout.astro";
+import TemplateEditor from "@/components/portal/TemplateEditor";
+import { gatePortal } from "@/lib/portalRoute";
+import { getTemplateSpec } from "@/lib/templateFields";
+import { getTemplateDefaults } from "@/lib/templateDefaults";
+import { ALLOWED_IMAGE_TYPES, imageTypeLabel } from "@/lib/portalEdit";
+
+const gate = await gatePortal(Astro);
+if (!gate.ok) return gate.response;
+const { school, base, via, staff } = gate;
+
+const spec = getTemplateSpec(Astro.params.template);
+if (!spec) return Astro.redirect(`${base}/resources`);
+
+const defaults = getTemplateDefaults(spec.id, school);
+
+// Plain data only — this crosses into a React island.
+const fields = spec.fields.map((f) => ({
+  ...f,
+  derived: defaults.values[f.key],
+  derivedItems: defaults.lists[f.key],
+}));
+
+// A token visitor has no account, so there's nobody to attribute changes to, and
+// staff edit on the school's behalf in the Studio. Same rule as the brand kit.
+const canEdit = via === "session" && !staff;
+---
+
+<PortalLayout
+  school={school}
+  base={base}
+  active="resources"
+  via={via}
+  staff={staff}
+  crumb={`Customise ${spec.title.toLowerCase()}`}
+  heading={`Customise your ${spec.title.toLowerCase()}`}
+  blurb="Change any of this and the flyer updates. Leave a box empty and we'll fill it in from your program."
+>
+  {
+    canEdit || staff ? (
+      <TemplateEditor
+        client:load
+        school={school.slug}
+        template={spec.id}
+        title={spec.title}
+        groups={spec.groups}
+        fields={fields}
+        previewHref={spec.previewHref(school.slug)}
+        exportHref={spec.exportHref(school.slug)}
+        accept={ALLOWED_IMAGE_TYPES.join(",")}
+        acceptLabel={imageTypeLabel}
+        readOnly={!canEdit}
+      />
+    ) : (
+      <p class="mt-8 rounded-card border border-gray-200 bg-white px-5 py-4 text-sm leading-relaxed text-gray-600">
+        This is a view-only link. Ask your XtraPoint contact for an account if
+        you'd like to customise your own materials.
+      </p>
+    )
+  }
+</PortalLayout>

@@ -14,8 +14,13 @@
 // slack and the headline/pillar labels are set in a condensed face at large
 // sizes. The caps noted per field were measured against the design. When copy
 // becomes editable (Stage 2 of the portal), those are the maxLength values.
+//
+// A school's own tweaks (made in the portal, see src/lib/templateFields.ts) are
+// merged on top at the end. They override, never replace: clearing a field in
+// the portal drops it from the override set and the derived default returns.
 import { brand } from "@/config/brand";
 import type { School } from "@/data/schools";
+import { EMPTY_OVERRIDES, type TemplateOverrides } from "@/lib/templateFields";
 
 export interface FlyerContent {
   /** ≤ 26 chars each before the headline needs stepping down. */
@@ -82,14 +87,18 @@ const rewardsFrom = (school: School): string[] | undefined => {
   return unique.length >= 3 ? unique.slice(0, 6) : undefined;
 };
 
-export const flyerContent = (school: School): FlyerContent => {
+export const flyerContent = (
+  school: School,
+  overrides: TemplateOverrides = EMPTY_OVERRIDES,
+): FlyerContent => {
   const { programName, beneficiary, collective, short, slug } = school;
-  const applyUrl = `${brand.url}/schools/${slug}/ambassadors`;
+  const o = overrides.values;
+  const applyUrl = o.applyUrl || `${brand.url}/schools/${slug}/ambassadors`;
 
-  const headlineLine1 = "Don't just be a fan.";
-  const headlineLine2 = "Become one of the greats.";
+  const headlineLine1 = o.headlineLine1 || "Don't just be a fan.";
+  const headlineLine2 = o.headlineLine2 || "Become one of the greats.";
 
-  return {
+  const derived: FlyerContent = {
     headlineLine1,
     headlineLine2,
     heroSubhead: `Join the ${programName} ${brand.name} Ambassador Program and turn your school spirit into real-world experience, campus impact and exclusive opportunities.`,
@@ -146,7 +155,23 @@ export const flyerContent = (school: School): FlyerContent => {
     contactUrl: `${brand.domain}/support`,
 
     // Step down when either line runs past the width the 37pt setting holds.
+    // Measured on the FINAL headline, so a school's own long headline steps down
+    // too rather than overflowing the sheet.
     h1Size:
       Math.max(headlineLine1.length, headlineLine2.length) > 26 ? "33pt" : "37pt",
   };
+
+  // Scalar overrides, applied only where the spec declares a matching key. The
+  // two headline fields and applyUrl are already folded in above because other
+  // values derive from them.
+  const merged: FlyerContent = { ...derived };
+  for (const key of ["heroSubhead", "heroBadge", "benefitsTitleLine1",
+                     "benefitsTitleLine2", "rewardsTitle", "ctaTitle",
+                     "contactUrl"] as const) {
+    if (o[key]) merged[key] = o[key];
+  }
+  if (overrides.lists.benefits?.length) merged.benefits = overrides.lists.benefits;
+  if (overrides.lists.rewards?.length) merged.rewards = overrides.lists.rewards;
+
+  return merged;
 };
