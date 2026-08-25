@@ -72,17 +72,28 @@ export function TemplateEditor({
   const [previewKey, setPreviewKey] = React.useState(0);
 
   const load = React.useCallback(async () => {
-    const res = await fetch(
-      `${api}?school=${encodeURIComponent(school)}&template=${encodeURIComponent(template)}`,
-    );
-    if (!res.ok) {
-      setError("Couldn't load your changes. Refresh and try again.");
-      return;
+    try {
+      const res = await fetch(
+        `${api}?school=${encodeURIComponent(school)}&template=${encodeURIComponent(template)}`,
+      );
+      if (!res.ok) {
+        // Report the status. A bare "couldn't load" sent someone hunting through
+        // the wrong layer once already — a 500 here means the endpoint broke, a
+        // 401 means the session did, and those have nothing to do with each other.
+        const detail = await res
+          .json()
+          .then((d) => d.message ?? d.error)
+          .catch(() => null);
+        throw new Error(`Couldn't load your changes (${res.status}${detail ? `: ${detail}` : ""}).`);
+      }
+      const data: Loaded = await res.json();
+      setLoaded(data);
+      setValues(data.values ?? {});
+      setLists(data.lists ?? {});
+      setError(null);
+    } catch (err) {
+      setError((err as Error).message);
     }
-    const data: Loaded = await res.json();
-    setLoaded(data);
-    setValues(data.values ?? {});
-    setLists(data.lists ?? {});
   }, [school, template]);
 
   React.useEffect(() => {
@@ -182,8 +193,22 @@ export function TemplateEditor({
     ? `${exportHref}?v=${encodeURIComponent(loaded.updatedAt)}`
     : exportHref;
 
+  // Nothing to edit yet. The error branch matters: this early return sits above
+  // the form's own error box, so without it a failed load spins forever and the
+  // reason never reaches the person looking at it.
   if (!loaded) {
-    return (
+    return error ? (
+      <div className="mt-8 rounded-card border border-red-200 bg-red-50 px-5 py-4">
+        <p className="text-sm font-semibold text-red-800">{error}</p>
+        <button
+          type="button"
+          onClick={() => void load()}
+          className="mt-2 text-sm font-semibold text-red-700 underline hover:no-underline"
+        >
+          Try again
+        </button>
+      </div>
+    ) : (
       <div className="mt-8 flex items-center gap-2 text-sm text-gray-500">
         <Loader2 className="h-4 w-4 animate-spin" /> Loading your flyer…
       </div>
