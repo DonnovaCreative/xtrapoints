@@ -2,28 +2,35 @@ import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { brand } from "@/config/brand";
+import { hubspotCookie } from "@/lib/hubspotCookie";
 
-// Compact, single-field waitlist capture (email + submit). Posts to Web3Forms,
-// same key/inbox as the contact form. A honeypot is the spam guard — no visible
-// captcha, to keep it a true one-line sign-up.
-const ACCESS_KEY = import.meta.env.PUBLIC_WEB3FORMS_KEY as string | undefined;
+// Waitlist capture for the school ambassador + donor pages: first name, last
+// name, email. Posts to /api/lead, which writes it to that school's tab in the
+// Google Sheets workbook (see src/pages/api/lead.ts).
+//
+// No captcha here on purpose — this is a one-line sign-up on a page we're trying
+// to convert, and a captcha would cost more real applicants than it saves in
+// spam. The honeypot plus a server-side write-only endpoint is the trade.
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type Status = "idle" | "submitting" | "success" | "error";
+type Errors = Partial<Record<"firstName" | "lastName" | "email", string>>;
 
 export default function WaitlistForm({
   school,
+  leadType = "ambassador",
   source = "Waitlist",
   buttonLabel = "Join the waitlist",
-  placeholder = "you@email.com",
 }: {
   school?: string;
-  /** Tag for the submission + subject line, e.g. "Ambassador waitlist". */
+  /** Which sheet tab this lands in. */
+  leadType?: "ambassador" | "donor";
+  /** Tag for the submission, e.g. "Ambassador waitlist". */
   source?: string;
   buttonLabel?: string;
-  placeholder?: string;
 } = {}) {
   const [status, setStatus] = useState<Status>("idle");
+  const [errors, setErrors] = useState<Errors>({});
   const [error, setError] = useState("");
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -34,40 +41,42 @@ export default function WaitlistForm({
     // Honeypot — bots fill hidden fields; humans never see this.
     if ((fd.get("botcheck") as string)?.length) return;
 
+    const firstName = ((fd.get("firstName") as string) ?? "").trim();
+    const lastName = ((fd.get("lastName") as string) ?? "").trim();
     const email = ((fd.get("email") as string) ?? "").trim();
-    if (!EMAIL_RE.test(email)) {
-      setError("Please enter a valid email address.");
-      setStatus("error");
-      return;
-    }
-    if (!ACCESS_KEY) {
-      setError("Form isn’t configured yet — add PUBLIC_WEB3FORMS_KEY to .env.");
-      setStatus("error");
-      return;
-    }
+
+    const next: Errors = {};
+    if (!firstName) next.firstName = "Enter your first name.";
+    if (!lastName) next.lastName = "Enter your last name.";
+    if (!email) next.email = "Enter your email address.";
+    else if (!EMAIL_RE.test(email)) next.email = "Enter a valid email address.";
+    setErrors(next);
+    if (Object.keys(next).length) return;
 
     setStatus("submitting");
     setError("");
     try {
-      const res = await fetch("https://api.web3forms.com/submit", {
+      const res = await fetch("/api/lead", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          access_key: ACCESS_KEY,
-          subject: `New ${brand.name} ${source}${school ? ` — ${school}` : ""} — ${email}`,
-          from_name: `${brand.name} Website`,
+          type: leadType,
+          firstName,
+          lastName,
           email,
-          type: source,
           school: school ?? "",
+          source,
+          page: window.location.href,
+          hutk: hubspotCookie(),
         }),
       });
       const json = await res.json();
-      if (json.success) {
+      if (json.ok) {
         setStatus("success");
         form.reset();
       } else {
         setStatus("error");
-        setError(json.message || "Something went wrong. Please try again.");
+        setError(json.error || "Something went wrong. Please try again.");
       }
     } catch {
       setStatus("error");
@@ -86,6 +95,11 @@ export default function WaitlistForm({
     );
   }
 
+  const fieldError = (field: keyof Errors) =>
+    errors[field] ? (
+      <p className="mt-1 px-4 text-left text-sm text-error-600">{errors[field]}</p>
+    ) : null;
+
   return (
     <form onSubmit={handleSubmit} noValidate className="w-full">
       {/* honeypot */}
@@ -97,24 +111,61 @@ export default function WaitlistForm({
         className="absolute left-[-9999px] h-0 w-0 opacity-0"
         aria-hidden="true"
       />
-      <div className="flex flex-col gap-2.5 sm:flex-row">
-        <Input
-          type="email"
-          name="email"
-          required
-          autoComplete="email"
-          aria-label="Email address"
-          placeholder={placeholder}
-          className="h-12 flex-1 rounded-full px-5"
-        />
-        <Button
-          type="submit"
-          disabled={status === "submitting"}
-          className="h-12 shrink-0 rounded-full bg-lime px-6 font-bold text-on-accent hover:bg-lime-deep disabled:opacity-60"
-        >
-          {status === "submitting" ? "Joining…" : buttonLabel}
-        </Button>
+
+      <div className="flex flex-col gap-2.5">
+        {/* Names share a row on anything wider than a phone; three stacked pills
+            would push the button below the fold on the enrol section. */}
+        <div className="flex flex-col gap-2.5 sm:flex-row">
+          <div className="flex-1">
+            <Input
+              name="firstName"
+              required
+              autoComplete="given-name"
+              aria-label="First name"
+              aria-invalid={!!errors.firstName}
+              placeholder="First name"
+              className="h-12 w-full rounded-full px-5"
+            />
+            {fieldError("firstName")}
+          </div>
+          <div className="flex-1">
+            <Input
+              name="lastName"
+              required
+              autoComplete="family-name"
+              aria-label="Last name"
+              aria-invalid={!!errors.lastName}
+              placeholder="Last name"
+              className="h-12 w-full rounded-full px-5"
+            />
+            {fieldError("lastName")}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2.5 sm:flex-row">
+          <div className="flex-1">
+            <Input
+              type="email"
+              name="email"
+              required
+              autoComplete="email"
+              aria-label="Email address"
+              aria-invalid={!!errors.email}
+              placeholder="you@email.com"
+              className="h-12 w-full rounded-full px-5"
+            />
+            {fieldError("email")}
+          </div>
+          <Button
+            type="submit"
+            disabled={status === "submitting"}
+            className="h-12 shrink-0 rounded-full bg-lime px-6 font-bold text-on-accent hover:bg-lime-deep disabled:opacity-60"
+          >
+            {status === "submitting" ? "Joining…" : buttonLabel}
+          </Button>
+        </div>
       </div>
+
       {status === "error" && (
         <p role="alert" className="mt-2 text-sm text-error-600">
           {error}

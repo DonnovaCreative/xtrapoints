@@ -26,3 +26,4 @@ pnpm-debug.log*
 
 # local reference snapshot of the source Webflow page
 _reference/
+.env*.local

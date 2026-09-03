@@ -12,17 +12,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { brand } from "@/config/brand";
+import { hubspotCookie } from "@/lib/hubspotCookie";
+import {
+  CONSENT_INTRO,
+  CONSENT_COMMS_TEXT,
+  CONSENT_PROCESS_INTRO,
+  CONSENT_PROCESS_TEXT,
+  CONSENT_PRIVACY_PREFIX,
+  CONSENT_PRIVACY_LINK_TEXT,
+  CONSENT_PRIVACY_HREF,
+} from "@/lib/consent";
 
-// Web3Forms access key. Create a key for the brand sales inbox (brand.salesEmail) at
-// https://web3forms.com and add it to .env as PUBLIC_WEB3FORMS_KEY.
-const ACCESS_KEY = import.meta.env.PUBLIC_WEB3FORMS_KEY as string | undefined;
-
-// hCaptcha sitekey — defaults to Web3Forms' free shared key (no hCaptcha account
-// needed; just enable hCaptcha in the Web3Forms dashboard). Override with
-// PUBLIC_HCAPTCHA_SITEKEY only if you move to a Pro custom key.
-const HCAPTCHA_SITEKEY =
-  (import.meta.env.PUBLIC_HCAPTCHA_SITEKEY as string | undefined) ||
-  "50b2fe65-b00b-4b9e-ad62-3ba471098be2";
+// hCaptcha sitekey — OUR key now, paired with HCAPTCHA_SECRET which the server
+// route verifies against (src/lib/hcaptcha.ts).
+//
+// This used to default to Web3Forms' free shared sitekey, which worked only
+// because Web3Forms did the verifying. Once submissions moved to HubSpot that
+// default would have left a widget users still solve and nothing checks, so
+// there is deliberately no fallback value: an unset sitekey hides the widget
+// rather than rendering a decorative one.
+const HCAPTCHA_SITEKEY = import.meta.env.PUBLIC_HCAPTCHA_SITEKEY as string | undefined;
 
 const ORG_TYPES = [
   "Athletic department",
@@ -37,7 +46,17 @@ const ORG_TYPES = [
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type Status = "idle" | "submitting" | "success" | "error";
-type Errors = Partial<Record<"name" | "email" | "organization" | "orgType", string>>;
+type Errors = Partial<
+  Record<
+    | "firstName"
+    | "lastName"
+    | "email"
+    | "organization"
+    | "orgType"
+    | "consent",
+    string
+  >
+>;
 
 export default function ContactForm({
   school,
@@ -56,17 +75,24 @@ export default function ContactForm({
   const isSignup = variant === "signup";
   const isInterest = variant === "interest";
   const isConsumer = isSignup || isInterest;
+  // Captcha guards the B2B inquiry form only. The consumer waitlists post as
+  // "donor" leads, which /api/lead does not captcha-check — so rendering one
+  // there would be theatre. Hidden entirely if no sitekey is configured.
+  const showCaptcha = !isConsumer && Boolean(HCAPTCHA_SITEKEY);
   const [status, setStatus] = useState<Status>("idle");
   const [errors, setErrors] = useState<Errors>({});
   const [orgType, setOrgType] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [consentProcess, setConsentProcess] = useState(false);
+  const [consentComms, setConsentComms] = useState(false);
   const [captchaToken, setCaptchaToken] = useState("");
   const [captchaError, setCaptchaError] = useState("");
   const captchaRef = useRef<HCaptcha>(null);
 
   const validate = (data: Record<string, string>): Errors => {
     const e: Errors = {};
-    if (!data.name?.trim()) e.name = "Please enter your full name.";
+    if (!data.firstName?.trim()) e.firstName = "Please enter your first name.";
+    if (!data.lastName?.trim()) e.lastName = "Please enter your last name.";
     if (!data.email?.trim())
       e.email = isConsumer ? "Please enter your email." : "Please enter your work email.";
     else if (!EMAIL_RE.test(data.email)) e.email = "Enter a valid email address.";
@@ -74,6 +100,11 @@ export default function ContactForm({
       if (!data.organization?.trim())
         e.organization = "Please enter your organization or program name.";
       if (!orgType) e.orgType = "Please select an organization type.";
+      // Both checkboxes are required on the HubSpot form, and HubSpot does not
+      // enforce that for API submissions — so this check (and its twin in
+      // src/lib/leads.ts) is what actually makes the consent real.
+      if (!consentProcess || !consentComms)
+        e.consent = "Please check both boxes to continue.";
     }
     return e;
   };
@@ -87,7 +118,8 @@ export default function ContactForm({
     if ((fd.get("botcheck") as string)?.length) return;
 
     const data = {
-      name: (fd.get("name") as string) ?? "",
+      firstName: (fd.get("firstName") as string) ?? "",
+      lastName: (fd.get("lastName") as string) ?? "",
       email: (fd.get("email") as string) ?? "",
       phone: (fd.get("phone") as string) ?? "",
       organization: (fd.get("organization") as string) ?? "",
@@ -98,60 +130,53 @@ export default function ContactForm({
     setErrors(e);
     if (Object.keys(e).length) return;
 
-    if (!captchaToken) {
+    if (showCaptcha && !captchaToken) {
       setCaptchaError("Please complete the captcha.");
-      return;
-    }
-
-    if (!ACCESS_KEY) {
-      setStatus("error");
-      setErrorMsg(
-        "Form isn’t configured yet — add PUBLIC_WEB3FORMS_KEY to .env. (See README.)",
-      );
       return;
     }
 
     setStatus("submitting");
     setErrorMsg("");
     try {
-      const res = await fetch("https://api.web3forms.com/submit", {
+      // One endpoint for every form on the site; it decides the destination.
+      // "contact" → HubSpot CRM, "donor" → this school's Google Sheets tab.
+      const res = await fetch("/api/lead", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          access_key: ACCESS_KEY,
-          subject: isInterest
-            ? `New ${brand.name} interest${school ? ` — ${school}` : ""} — ${data.name}`
-            : isSignup
-              ? `New ${brand.name} app sign-up${school ? ` — ${school}` : ""} — ${data.name}`
-              : school
-                ? `New ${brand.name} inquiry — ${school} — from ${data.organization}`
-                : `New ${brand.name} inquiry from ${data.organization}`,
-          school: school ?? "",
-          from_name: `${brand.name} Website`,
-          name: data.name,
+          type: isConsumer ? "donor" : "contact",
+          firstName: data.firstName,
+          lastName: data.lastName,
           email: data.email,
-          ...(isInterest
-            ? { phone: data.phone || "(not provided)", type: "Waitlist (pre-launch)" }
+          phone: data.phone,
+          school: school ?? "",
+          organization: isConsumer ? "" : data.organization,
+          orgType: isConsumer ? "" : orgType,
+          message: isConsumer ? "" : data.message,
+          source: isInterest
+            ? "Donor waitlist"
             : isSignup
-              ? { phone: data.phone || "(not provided)", type: "App sign-up" }
-              : {
-                  organization: data.organization,
-                  organization_type: orgType,
-                  message: data.message || "(no message)",
-                }),
-          "h-captcha-response": captchaToken,
+              ? "App sign-up"
+              : "Contact form",
+          page: window.location.href,
+          consentToProcess: isConsumer ? undefined : consentProcess,
+          consentToComms: isConsumer ? undefined : consentComms,
+          hutk: hubspotCookie(),
+          captchaToken,
         }),
       });
       const json = await res.json();
-      if (json.success) {
+      if (json.ok) {
         setStatus("success");
         form.reset();
         setOrgType("");
+        setConsentProcess(false);
+        setConsentComms(false);
         captchaRef.current?.resetCaptcha();
         setCaptchaToken("");
       } else {
         setStatus("error");
-        setErrorMsg(json.message || "Something went wrong. Please try again.");
+        setErrorMsg(json.error || "Something went wrong. Please try again.");
       }
     } catch {
       setStatus("error");
@@ -212,10 +237,20 @@ export default function ContactForm({
         aria-hidden="true"
       />
 
-      <div>
-        <Label htmlFor="name">{isConsumer ? "First name" : "Full name"} <span className="text-error-500">*</span></Label>
-        <Input id="name" name="name" autoComplete={isConsumer ? "given-name" : "name"} placeholder={isConsumer ? "Jordan" : "Jordan Rivera"} aria-invalid={!!errors.name} className="mt-1.5" />
-        {err("name")}
+      {/* First and last are separate fields, not one "full name" split on a
+          space: HubSpot stores firstname/lastname as distinct properties, and a
+          whitespace split mangles compound surnames straight into the CRM. */}
+      <div className="flex flex-col gap-5 sm:flex-row sm:gap-4">
+        <div className="flex-1">
+          <Label htmlFor="firstName">First name <span className="text-error-500">*</span></Label>
+          <Input id="firstName" name="firstName" autoComplete="given-name" placeholder="Jordan" aria-invalid={!!errors.firstName} className="mt-1.5" />
+          {err("firstName")}
+        </div>
+        <div className="flex-1">
+          <Label htmlFor="lastName">Last name <span className="text-error-500">*</span></Label>
+          <Input id="lastName" name="lastName" autoComplete="family-name" placeholder="Rivera" aria-invalid={!!errors.lastName} className="mt-1.5" />
+          {err("lastName")}
+        </div>
       </div>
 
       <div>
@@ -265,10 +300,71 @@ export default function ContactForm({
         </>
       )}
 
+      {/* Consent — required on the HubSpot form, and NOT enforced by its API, so
+          this is the only thing standing between a checked box and a contact
+          record with no legal basis attached. Wording comes from
+          src/lib/consent.ts, the same module the API payload reads, so what
+          HubSpot stores as evidence is exactly what was on screen here. */}
+      {!isConsumer && (
+        <div className="rounded-2xl border border-gray-200 bg-gray-50/70 p-5">
+          <p className="text-sm leading-relaxed text-gray-600">{CONSENT_INTRO}</p>
+
+          <label className="mt-4 flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              name="consentToComms"
+              checked={consentComms}
+              onChange={(ev) => {
+                setConsentComms(ev.target.checked);
+                setErrors((p) => ({ ...p, consent: undefined }));
+              }}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-400 accent-lime"
+            />
+            <span className="text-sm leading-relaxed text-gray-700">
+              {CONSENT_COMMS_TEXT} <span className="text-error-500">*</span>
+            </span>
+          </label>
+
+          <p className="mt-4 text-sm leading-relaxed text-gray-600">
+            {CONSENT_PROCESS_INTRO}
+          </p>
+
+          <label className="mt-3 flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              name="consentToProcess"
+              checked={consentProcess}
+              onChange={(ev) => {
+                setConsentProcess(ev.target.checked);
+                setErrors((p) => ({ ...p, consent: undefined }));
+              }}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-400 accent-lime"
+            />
+            <span className="text-sm leading-relaxed text-gray-700">
+              {CONSENT_PROCESS_TEXT} <span className="text-error-500">*</span>
+            </span>
+          </label>
+
+          {err("consent")}
+
+          <p className="mt-4 text-xs leading-relaxed text-gray-500">
+            {CONSENT_PRIVACY_PREFIX}
+            <a
+              href={CONSENT_PRIVACY_HREF}
+              className="font-semibold text-lime-dark underline-offset-4 hover:underline"
+            >
+              {CONSENT_PRIVACY_LINK_TEXT}
+            </a>
+            .
+          </p>
+        </div>
+      )}
+
+      {showCaptcha && (
       <div>
         <HCaptcha
           ref={captchaRef}
-          sitekey={HCAPTCHA_SITEKEY}
+          sitekey={HCAPTCHA_SITEKEY!}
           reCaptchaCompat={false}
           onVerify={(token) => {
             setCaptchaToken(token);
@@ -281,6 +377,7 @@ export default function ContactForm({
           <p className="mt-1.5 text-sm text-error-600">{captchaError}</p>
         )}
       </div>
+      )}
 
       {status === "error" && (
         <p role="alert" className="rounded-lg border border-error-500/30 bg-error-50 px-4 py-3 text-sm text-error-700">

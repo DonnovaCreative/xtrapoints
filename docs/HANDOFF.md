@@ -439,10 +439,42 @@ publishing (Option A — no visual-editing overlays yet).
   if desired.
 - Preview covers **donor, ambassador, and legal** pages.
 
-## Forms (Web3Forms) — unchanged
+## Forms — CHANGED (was Web3Forms)
 
-All forms post to Web3Forms (`PUBLIC_WEB3FORMS_KEY` in `.env` + Vercel) →
-`sales@xtrapoint.com`. hCaptcha on the full ContactForm; honeypot on WaitlistForm.
+Every form now POSTs the same payload to **one endpoint**, `/api/lead`
+([src/pages/api/lead.ts](../src/pages/api/lead.ts)), which routes it:
+
+| Form | Destination |
+| --- | --- |
+| `/contact` B2B inquiry | **HubSpot CRM** (Forms API, portal `246921674`) |
+| Donor waitlist (school landing) | **Google Sheets** — `<School> — Donors` tab |
+| Ambassador waitlist (school ambassadors) | **Google Sheets** — `<School> — Ambassadors` tab |
+
+- Both waitlist forms now collect **first name, last name, email** (was email only
+  on the ambassador form). Names are separate fields, not one string split on a
+  space — HubSpot stores firstname/lastname separately and a split mangles
+  compound surnames into the CRM permanently.
+- Sheets tabs are **created automatically** on a school's first submission, so
+  launching school #2 needs no spreadsheet setup. One workbook, two tabs per
+  school. Per-school CSV = File → Download → CSV (exports the active tab).
+- ⚠ Tabs separate **data, not access** — Google sharing is per file. If schools
+  need their own leads, serve from `/portal/[school]` (already Clerk-gated), do
+  not split into one workbook per school.
+- **hCaptcha** on the contact form is now verified by us
+  ([src/lib/hcaptcha.ts](../src/lib/hcaptcha.ts)) against our own account. It
+  previously used Web3Forms' shared sitekey, verified by Web3Forms — that would
+  have become a decorative widget the moment Web3Forms was archived. Waitlist
+  forms use the honeypot only, by design.
+- **Web3Forms is archived, not deleted** —
+  [src/lib/web3forms.ts](../src/lib/web3forms.ts) stays wired but runs only if
+  `WEB3FORMS_KEY` is set (deliberately unset in Vercel). Re-enabling is a
+  one-variable change.
+- **HubSpot tracking** loads in `Layout.astro` on the **Vercel Production deploy
+  only**. That is a consent decision: cookie banners are configured in HubSpot
+  for `xtrapoint.com` / `www.xtrapoint.com` but **not staging**, so loading it
+  there would set `hubspotutk` with no way to decline.
+- ⚠ The HubSpot form must keep **captcha disabled** — with bot protection on, the
+  submissions API refuses everything with `FORM_HAS_RECAPTCHA_ENABLED`.
 
 ## Environments & SEO — unchanged (see deploys-and-indexing.md)
 
@@ -514,7 +546,8 @@ Staging/preview de-indexed, production indexable (keyed on `VERCEL_ENV`).
    Kats" (Sam-Houston-specific). Make it per-school or generic.
 4. **Vercel deploy title** — content-publish deploys show the branch HEAD commit
    (inherent to Deploy Hooks; not fixed).
-5. **Ambassador waitlist inbox** — route to a dedicated Web3Forms key (not done).
+5. **Ambassador waitlist inbox** — superseded: waitlists now write to Google
+   Sheets, not an inbox. See the Forms section above.
 6. **Vercel Deployment Protection** on staging/preview (dashboard toggle).
 7. Homepage §06 stock photos (Pexels) still to replace. _(Footer Terms/Privacy
    now point to the internal `/terms` + `/privacy-policy` pages — see below.)_

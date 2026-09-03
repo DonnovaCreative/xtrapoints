@@ -109,52 +109,150 @@ and the site/canonical/sitemap/robots domain (`astro.config.mjs` reads
 when you flip it:
 
 - **Vercel custom domain** must match (xtrapoint.com vs xtrapoints.com).
-- **Web3Forms key** must be created for the matching `sales@…` inbox (the key
-  determines the delivery address — see below).
+- **HubSpot form** notification recipients should match the `sales@…` inbox for
+  the domain you flipped to (set in HubSpot, not here).
 
-## Contact form (Web3Forms)
+## Forms
 
-The form posts client-side to [Web3Forms](https://web3forms.com) and emails
-submissions to **sales@xtrapoints.com**.
+Three forms, three destinations — but **one endpoint**. Every form POSTs the same
+payload shape to `/api/lead` ([src/pages/api/lead.ts](src/pages/api/lead.ts)),
+which decides where it goes:
 
-**➡ You must add your access key:**
+| Form | Where it lives | Destination |
+| --- | --- | --- |
+| B2B sales inquiry | `/contact` | HubSpot CRM |
+| Donor waitlist | school landing page | Google Sheets |
+| Ambassador waitlist | school ambassadors page | Google Sheets |
 
-1. Go to https://web3forms.com and create a free Access Key using the inbox
-   **sales@xtrapoints.com** (Web3Forms delivers to the email the key is created
-   for — this is how submissions reach sales@xtrapoints.com).
-2. Copy `.env.example` → `.env` and paste the key:
-   ```
-   PUBLIC_WEB3FORMS_KEY=your-key-here
-   ```
-3. Restart `npm run dev`. In Vercel, add the same var under
-   **Project → Settings → Environment Variables** (name `PUBLIC_WEB3FORMS_KEY`).
+The React components are deliberately dumb: they collect fields and post. Which
+vendor receives a submission is a one-file change, not an edit across three
+components.
 
-Until a key is set, the form validates but shows a "not configured yet" message
-on submit. Features: required-field + email validation with inline errors,
-inline success/error states (no reload), submit disabled while sending, a hidden
-subject line (`New XtraPoint inquiry from {organization}`), a honeypot field, and
-an **hCaptcha** challenge.
+**Why a server route** (the forms used to post straight to Web3Forms from the
+browser): the Apps Script URL and the hCaptcha secret must not ship to the
+browser, the captcha token has to be verified somewhere a bot can't skip, and
+there needs to be one place to fan out to CRM + sheet + notification.
+
+### HubSpot (the contact form)
+
+Submissions go to the **Forms API** (`api.hsforms.com/submissions/v3/...`), which
+needs no auth token — the portal id and form GUID are public by design. It runs
+the form's HubSpot-side automation (notifications, workflows, lifecycle stage),
+so sales can change routing without a deploy.
+
+```
+PUBLIC_HUBSPOT_PORTAL_ID=246921674
+HUBSPOT_FORM_GUID=<the form's data-form-id>
+```
+
+**Two things that will break it:**
+
+1. **Captcha must stay OFF for that form in HubSpot.** With bot protection on,
+   the API refuses every submission with `FORM_HAS_RECAPTCHA_ENABLED` — it's a
+   refusal, not a warning. Spam prevention is hCaptcha on our side instead.
+2. **Never send a field the HubSpot form doesn't define** — HubSpot rejects the
+   *entire* submission. The field list is `FIELD_MAP` in
+   [src/lib/hubspot.ts](src/lib/hubspot.ts); it must mirror the form. Note
+   `organization_type` is a **Company** property (`0-2/`), not a Contact one.
+
+If HubSpot rejects a submission anyway, the route falls back to writing the lead
+to the Google Sheet rather than dropping it. A sales lead is too expensive to
+lose to a form-config mistake.
+
+#### Consent (data privacy)
+
+The HubSpot form has "Data privacy options" enabled with two **required**
+checkboxes — communications opt-in and data-processing consent. The site form
+renders both and blocks submission until they're checked.
+
+⚠ **HubSpot does not enforce this for API submissions.** A payload with no
+`legalConsentOptions` at all returns `200` and creates the contact with no
+consent recorded — silently. The validation in
+[src/lib/leads.ts](src/lib/leads.ts) is the only thing that makes those required
+checkboxes real, so don't "simplify" it away.
+
+Consent wording lives in [src/lib/consent.ts](src/lib/consent.ts) and is imported
+by **both** the form UI and the API payload. HubSpot stores the `text` as the
+record of what the person was shown, so if those two drifted apart your CRM would
+hold evidence of consent to wording nobody ever saw. If you edit the wording in
+HubSpot, edit it there.
+
+```
+HUBSPOT_SUBSCRIPTION_TYPE_ID=<Settings → Marketing → Email → Subscription Types>
+```
+
+If that's unset the form still works and still records processing consent; only
+the subscription opt-in is omitted — erring toward recording *less* consent than
+was given.
+
+### Google Sheets (the two waitlists)
+
+Rows are appended by a **Google Apps Script Web App** bound to the workbook.
+Setup is documented at the top of
+[scripts/apps-script/Code.gs](scripts/apps-script/Code.gs) — about five minutes,
+no GCP project, no service account, no new dependency.
+
+```
+SHEETS_WEBHOOK_URL=<the Apps Script /exec URL>
+SHEETS_SECRET=<must match SECRET inside the script>
+```
+
+**Per-school separation:** one workbook, two tabs per school
+(`University at Albany — Donors`, `University at Albany — Ambassadors`), created
+automatically on that school's first submission. Launching school #2 needs no
+spreadsheet setup at all.
+
+Per-school CSV is already built in: in the sheet, **File → Download → CSV**
+exports the active tab only.
+
+⚠ **Tabs separate data, not access.** Google sharing is per *file*. If schools
+ever need to see their own leads, don't split this into one workbook per school —
+serve it from `/portal/[school]`, which is already Clerk-gated per school org.
 
 ### hCaptcha
 
-The form shows an hCaptcha "I'm human" challenge and sends its token
-(`h-captcha-response`) with the submission. It uses Web3Forms' **free built-in
-hCaptcha** (shared sitekey `50b2fe65-…`), so no hCaptcha account or key is needed.
+The contact form only. Uses **our own** hCaptcha account, verified server-side in
+[src/lib/hcaptcha.ts](src/lib/hcaptcha.ts):
 
-**➡ One required step:** in the Web3Forms dashboard, **enable hCaptcha** for your
-access key — otherwise the token isn't actually verified and the challenge is
-cosmetic. Notes:
+```
+PUBLIC_HCAPTCHA_SITEKEY=<renders the widget>
+HCAPTCHA_SECRET=<server only>
+```
 
-- On `localhost` the widget shows a "localhost detected" warning (the shared
-  sitekey is domain-locked); it works normally on the live domain.
-- The submit button stays blocked with "Please complete the captcha." until it's
-  solved. The honeypot remains as a second, silent layer.
-- Only set `PUBLIC_HCAPTCHA_SITEKEY` if you upgrade to a Web3Forms Pro custom key.
+This previously used Web3Forms' shared sitekey, which worked only because
+*Web3Forms* did the verifying. There is now deliberately **no fallback sitekey**:
+if it's unset the widget is hidden rather than rendered as decoration. The two
+waitlist forms have no captcha by design — they're one-line sign-ups where a
+captcha costs more real applicants than the spam is worth; they use the honeypot.
 
-> **Later (not built now):** this can be swapped to an Astro server endpoint +
-> [Resend](https://resend.com) to send from our own domain instead of a
-> third-party service. That would require switching `output` to `server`/hybrid
-> for the `/api/contact` route.
+### HubSpot tracking + cookie consent
+
+The tracking script loads in [Layout.astro](src/layouts/Layout.astro) **only on
+the Vercel Production deploy** (`isProduction`, see
+[src/config/site-env.ts](src/config/site-env.ts)).
+
+That is a consent decision, not tidiness: the script sets `hubspotutk`, a
+non-essential analytics cookie, so it may only run where a cookie banner can gate
+it. Banners are configured in HubSpot for `xtrapoint.com` and `www.xtrapoint.com`
+— **not** staging. Keeping it off preview/local also stops QA traffic polluting
+HubSpot analytics.
+
+The `hubspotutk` cookie is forwarded with contact submissions as `hutk`, which is
+what attributes a lead to that visitor's browsing history. It's absent whenever
+someone declines cookies — that's normal, and the payload omits it rather than
+sending an empty value.
+
+### Web3Forms (archived)
+
+The previous destination for every form. Kept **wired but dormant** in
+[src/lib/web3forms.ts](src/lib/web3forms.ts) in case the team moves off HubSpot —
+code that stays wired to live field names doesn't rot against a form shape that's
+moved on.
+
+It runs only when `WEB3FORMS_KEY` is set, and that var is deliberately unset in
+Vercel. Setting it re-enables email notification alongside the real destination;
+that is the entire re-activation procedure. (It lost its `PUBLIC_` prefix when it
+moved server-side.)
 
 ## SEO
 

@@ -1,7 +1,7 @@
 ---
 import "@/styles/globals.css";
 import { brand } from "@/config/brand";
-import { shouldNoindex } from "@/config/site-env";
+import { isProduction, shouldNoindex } from "@/config/site-env";
 
 export interface Props {
   title: string;
@@ -18,6 +18,16 @@ const {
   ogImage = "/assets/og-image-xp.jpg",
   noindex = false,
 } = Astro.props;
+
+// HubSpot tracking — PRODUCTION ONLY, and that is a consent decision, not a
+// tidiness one. The script sets `hubspotutk`, a non-essential analytics cookie,
+// so it may only run where a cookie banner can gate it. Banners are configured
+// in HubSpot for xtrapoint.com and www.xtrapoint.com — NOT for staging — so
+// loading it on staging would set a tracking cookie with no way to decline.
+// Keeping it off preview/local also stops our own QA traffic polluting HubSpot
+// analytics. See src/config/site-env.ts for how production is identified.
+const hubspotPortalId = import.meta.env.PUBLIC_HUBSPOT_PORTAL_ID;
+const loadHubSpot = isProduction && Boolean(hubspotPortalId);
 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImageUrl = new URL(ogImage, Astro.site).href;
@@ -68,6 +78,18 @@ const ogImageUrl = new URL(ogImage, Astro.site).href;
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Anton&family=Permanent+Marker&family=Space+Mono:wght@400;700&display=swap"
     />
+
+    {/* HubSpot tracking + cookie banner. Loads the banner too, so consent is
+        handled by HubSpot rather than a second banner of our own. */}
+    {loadHubSpot && (
+      <script
+        type="text/javascript"
+        id="hs-script-loader"
+        async
+        defer
+        src={`https://js-na2.hs-scripts.com/${hubspotPortalId}.js`}
+      />
+    )}
   </head>
   <body>
     <slot />
