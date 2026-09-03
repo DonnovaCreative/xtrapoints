@@ -75,7 +75,21 @@ export interface HubSpotResult {
 /** True when both env vars are present — lets the route skip HubSpot cleanly. */
 export const hubspotConfigured = () => Boolean(PORTAL_ID && FORM_GUID);
 
-export async function submitToHubSpot(lead: Lead): Promise<HubSpotResult> {
+export async function submitToHubSpot(
+  lead: Lead,
+  /**
+   * The visitor's IP, taken from the REQUEST — never from the posted payload.
+   *
+   * We submit server-to-server, so without this HubSpot sees Vercel's
+   * datacenter IP and (correctly) records none at all, leaving geolocation and
+   * form analytics blank. Passing it restores country/region/city on the
+   * contact.
+   *
+   * It must come from context.clientAddress rather than the request body: a
+   * client-supplied IP would let anyone spoof their location in your CRM.
+   */
+  ipAddress?: string,
+): Promise<HubSpotResult> {
   if (!hubspotConfigured()) {
     return { ok: false, error: "PUBLIC_HUBSPOT_PORTAL_ID / HUBSPOT_FORM_GUID not set" };
   }
@@ -126,6 +140,7 @@ export async function submitToHubSpot(lead: Lead): Promise<HubSpotResult> {
       // label, and HubSpot groups page analytics by pageName, so putting a form
       // label here mislabels the reporting as well as the timeline entry.
       pageName: lead.pageTitle || lead.source || "XtraPoint contact form",
+      ...(ipAddress ? { ipAddress } : {}),
     },
   };
 

@@ -66,7 +66,8 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   const full = lead as Lead;
 
   if (full.type === "contact") {
-    const result = await submitToHubSpot(full);
+    // clientAddress, not anything from the payload — see submitToHubSpot.
+    const result = await submitToHubSpot(full, clientAddress);
 
     if (result.ok) {
       void notifyWeb3Forms(full); // dormant unless WEB3FORMS_KEY is set
