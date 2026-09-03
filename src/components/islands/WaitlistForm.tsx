@@ -67,6 +67,7 @@ export default function WaitlistForm({
           school: school ?? "",
           source,
           page: window.location.href,
+          pageTitle: document.title,
           hutk: hubspotCookie(),
         }),
       });

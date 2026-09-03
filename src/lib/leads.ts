@@ -52,6 +52,16 @@ export interface Lead {
   /** URL the form was submitted from — attribution in both Sheets and HubSpot. */
   page?: string;
   /**
+   * The page's actual <title>, sent as HubSpot's `pageName`.
+   *
+   * Distinct from `source` on purpose: `source` is our own label for the
+   * submission ("Contact form", "Ambassador waitlist") and names the Sheets tab,
+   * whereas HubSpot means pageName to be the page title — it groups
+   * form-submission analytics by it, and renders it on the contact timeline as
+   * "submitted X on <pageName>".
+   */
+  pageTitle?: string;
+  /**
    * HubSpot's `hubspotutk` cookie, read client-side and forwarded. This is what
    * ties a submission to that browser's page-view history in HubSpot. It only
    * exists AFTER the visitor accepts cookies, so treat it as optional forever —
@@ -117,6 +127,7 @@ export function normalizeLead(raw: Record<string, unknown>): Partial<Lead> {
     consentToComms: raw.consentToComms === true,
     source: str(raw.source),
     page: str(raw.page),
+    pageTitle: str(raw.pageTitle),
     hutk: str(raw.hutk),
   };
 }

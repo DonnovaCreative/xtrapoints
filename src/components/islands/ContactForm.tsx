@@ -159,6 +159,7 @@ export default function ContactForm({
               ? "App sign-up"
               : "Contact form",
           page: window.location.href,
+          pageTitle: document.title,
           consentToProcess: isConsumer ? undefined : consentProcess,
           consentToComms: isConsumer ? undefined : consentComms,
           hutk: hubspotCookie(),

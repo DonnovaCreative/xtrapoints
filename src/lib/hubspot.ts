@@ -122,7 +122,10 @@ export async function submitToHubSpot(lead: Lead): Promise<HubSpotResult> {
       // cookie. Omitted entirely otherwise — sending an empty hutk is an error.
       ...(lead.hutk ? { hutk: lead.hutk } : {}),
       ...(lead.page ? { pageUri: lead.page } : {}),
-      pageName: lead.source || "XtraPoint contact form",
+      // The page's real <title>. NOT lead.source — that's our own submission
+      // label, and HubSpot groups page analytics by pageName, so putting a form
+      // label here mislabels the reporting as well as the timeline entry.
+      pageName: lead.pageTitle || lead.source || "XtraPoint contact form",
     },
   };
 
