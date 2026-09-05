@@ -82,7 +82,10 @@ npm run build    # static build — source of truth for "is it broken"
 ## 🎓 Co-branded school pages — now fully CMS-driven (READ ADDING-A-SCHOOL.md)
 
 Two pages per school (`/schools/[slug]` donor + `/schools/[slug]/ambassadors`) +
-an auto OG image, all re-skinned to the school. **Content lives in Sanity**, not
+an auto OG image, all re-skinned to the school. Plus
+`/schools/[slug]/ambassadors/qr-code` — a chromeless, school-branded full-screen
+QR card for reps to hold up at events (noindex, out of the sitemap, one screen,
+never scrolls; it follows the ambassador page's live switch). **Content lives in Sanity**, not
 the repo.
 
 - **Sanity project** `xjhhxbqk`, dataset `production` (⚠ **private** — anonymous

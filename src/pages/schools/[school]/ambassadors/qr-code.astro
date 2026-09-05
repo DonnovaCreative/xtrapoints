@@ -1,0 +1,300 @@
+---
+// =============================================================================
+// AMBASSADOR QR CARD — /schools/<slug>/ambassadors/qr-code
+//
+// A rep holds a phone or tablet up at a table and a student scans it. That's the
+// whole job, and it's why this page is not built like the rest of the site:
+//
+//   • No header, no footer, no navigation, nothing to tap by accident.
+//   • One screen, never scrolls — the QR is sized off the SHORT viewport edge so
+//     it survives portrait, landscape, phone and tablet without a media query.
+//   • Co-branded from the school's own CMS colors, but deliberately thin on copy.
+//     Nobody reads a screen being waved at them; they scan it.
+//
+// The QR is generated at render from the same `brand.url` the flyer uses, so it
+// can never drift from wherever the ambassador page actually lives.
+// =============================================================================
+import QRCode from "qrcode";
+import Layout from "@/layouts/Layout.astro";
+import { brand } from "@/config/brand";
+import { getSchools } from "@/data/schoolsSource";
+import { flyerTheme } from "@/lib/flyerTheme";
+import { sizedImage } from "@/lib/sanityImage";
+
+export async function getStaticPaths() {
+  const schools = await getSchools();
+  // Gated exactly like the page it points at: a card whose QR leads to a 404 is
+  // worse than no card, and it would be handed to a student in person.
+  return schools
+    .filter((school) => school.livePages.ambassador)
+    .map((school) => ({ params: { school: school.slug }, props: { school } }));
+}
+
+const { school } = Astro.props;
+
+// The flyer's contrast-aware roles, not the raw theme: a school's brand colors
+// arrive in every shape (UAlbany's gold can't carry white copy; their purple
+// can), and this resolves which one is the field and which one is the accent.
+// Same resolver the printed flyer uses, so the card and the flyer match.
+const t = flyerTheme(school.theme);
+
+const applyUrl = `${brand.url}/schools/${school.slug}/ambassadors`;
+const applyUrlDisplay = applyUrl.replace(/^https?:\/\/(www\.)?/, "");
+
+// Rendered as inline SVG so it scales to whatever the screen gives it with no
+// second request and no raster blur on a tablet.
+const qrSvg = await QRCode.toString(applyUrl, {
+  type: "svg",
+  margin: 0,
+  // A phone camera at arm's length in bad lighting is the worst case this has to
+  // survive, so buy the extra redundancy — the code is huge here either way.
+  errorCorrectionLevel: "Q",
+  color: { dark: t.base, light: "#ffffff" },
+});
+
+// `logo` is the white/mono artwork for dark headers, which is what this field is.
+// A school that only has a COLORED logo flags it (logoBadge / whiteHeader) and
+// gets the same white badge treatment the site header gives it.
+const logo = school.logo ? sizedImage(school.logo, 900) : undefined;
+const logoOnBadge = Boolean(school.logoBadge || school.whiteHeader);
+
+const cardStyle = [
+  `--qr-base:${t.base}`,
+  `--qr-base-deep:${t.baseDeep}`,
+  `--qr-accent:${t.accent}`,
+  `--qr-accent-ink:${t.accentInk}`,
+].join(";");
+---
+
+<Layout
+  title={`Scan to join — ${school.short} Ambassador Program`}
+  description={`Scan the code to open the ${school.programName} Ambassador Program sign-up page.`}
+  noindex
+>
+  <main class="qr-card" style={cardStyle}>
+    <div class="qr-glow" aria-hidden="true"></div>
+
+    <div class="qr-inner">
+      <!-- ── school lockup ── -->
+      <header class="qr-head">
+        {logo ? (
+          <span class:list={["qr-logo", logoOnBadge && "qr-logo--badge"]}>
+            <img src={logo} alt={school.name} />
+          </span>
+        ) : (
+          <span class="qr-wordmark">{school.short}</span>
+        )}
+        <p class="qr-eyebrow">{school.programName} Ambassador Program</p>
+      </header>
+
+      <!-- ── the point of the page ── -->
+      <div class="qr-code" set:html={qrSvg}></div>
+
+      <!-- ── what to do with it ── -->
+      <footer class="qr-foot">
+        <p class="qr-cta">Scan to become an ambassador</p>
+        <p class="qr-url">{applyUrlDisplay}</p>
+        <img class="qr-brand" src={brand.logo.white} alt={brand.name} />
+      </footer>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  /* One screen, no scroll. `dvh` so mobile browser chrome can't crop the code;
+     `vh` stays as the fallback for anything that doesn't know it. */
+  :global(html),
+  :global(body) {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  .qr-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    padding: clamp(0.75rem, 3vmin, 2.5rem);
+    background: var(--qr-base-deep);
+    overflow: hidden;
+  }
+
+  /* Keeps a flat brand field from reading as a dead screen under table lighting. */
+  .qr-glow {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 50% 22%, color-mix(in srgb, var(--qr-accent) 22%, transparent) 0%, transparent 58%),
+      radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--qr-base) 90%, white 10%) 0%, transparent 62%);
+    pointer-events: none;
+  }
+
+  .qr-inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.75rem, 2.5vmin, 2rem);
+    width: 100%;
+    height: 100%;
+    max-width: 46rem;
+    text-align: center;
+  }
+
+  .qr-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(0.4rem, 1.4vmin, 0.9rem);
+  }
+
+  .qr-logo img {
+    display: block;
+    height: clamp(2.25rem, 9vmin, 4.5rem);
+    width: auto;
+    max-width: min(80vw, 28rem);
+    object-fit: contain;
+  }
+  .qr-logo--badge {
+    display: inline-flex;
+    padding: clamp(0.35rem, 1.2vmin, 0.7rem) clamp(0.6rem, 2vmin, 1.1rem);
+    background: #fff;
+    border-radius: 0.75rem;
+  }
+
+  .qr-wordmark {
+    font-family: var(--font-display, inherit);
+    font-size: clamp(1.5rem, 5.5vmin, 2.75rem);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  .qr-eyebrow {
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: clamp(0.625rem, 1.9vmin, 0.9375rem);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--qr-accent);
+  }
+
+  /* Sized off the SHORT edge (vmin), which is what makes one rule work in both
+     orientations — the code can never grow past the screen it's held up on. */
+  .qr-code {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: min(86vmin, 36rem);
+    max-width: 92vw;
+    aspect-ratio: 1;
+    /* The quiet zone is part of the code: scanners need the white border, so it's
+       padding on a white panel rather than a margin baked into the SVG. */
+    padding: clamp(0.7rem, 2.6vmin, 1.5rem);
+    background: #fff;
+    border-radius: clamp(0.75rem, 2.4vmin, 1.5rem);
+    box-shadow: 0 1.5rem 3rem rgb(0 0 0 / 0.32);
+  }
+  .qr-code :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* Crisp module edges when the SVG lands on a fractional pixel. */
+    shape-rendering: crispEdges;
+  }
+
+  .qr-foot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(0.35rem, 1.4vmin, 0.75rem);
+  }
+
+  .qr-cta {
+    padding: clamp(0.5rem, 1.8vmin, 0.9rem) clamp(1rem, 4vmin, 2rem);
+    background: var(--qr-accent);
+    border-radius: 999px;
+    font-size: clamp(0.9375rem, 2.8vmin, 1.5rem);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--qr-accent-ink);
+  }
+
+  .qr-url {
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: clamp(0.625rem, 1.7vmin, 0.875rem);
+    color: rgb(255 255 255 / 0.62);
+    word-break: break-all;
+  }
+
+  .qr-brand {
+    height: clamp(0.75rem, 2.2vmin, 1.125rem);
+    width: auto;
+    margin-top: clamp(0.15rem, 0.8vmin, 0.5rem);
+    opacity: 0.65;
+  }
+
+  /* Landscape on a phone is the one shape a single column can't hold: the code
+     would shrink to nothing between the lockup and the CTA. Side by side instead. */
+  @media (orientation: landscape) and (max-height: 30rem) {
+    .qr-inner {
+      display: grid;
+      /* The code's column is declared, not derived: an `auto` track gets squeezed
+         by the copy beside it and the QR spills out of its own panel. */
+      grid-template-columns: min(72vmin, 20rem) minmax(0, 1fr);
+      align-items: center;
+      gap: clamp(1rem, 4vmin, 2.5rem);
+      max-width: 60rem;
+      text-align: left;
+    }
+    /* Placed explicitly — auto-placement reads the DOM order (lockup, code,
+       caption) and drops the code into the copy column. */
+    .qr-code {
+      grid-column: 1;
+      grid-row: 1 / span 2;
+      width: 100%;
+      max-width: none;
+    }
+    .qr-head,
+    .qr-foot {
+      grid-column: 2;
+      align-items: flex-start;
+    }
+    .qr-head {
+      grid-row: 1;
+      align-self: end;
+    }
+    .qr-foot {
+      grid-row: 2;
+      align-self: start;
+    }
+  }
+</style>
+
+<script>
+  // An event table is exactly where a screen dimming to black is most annoying,
+  // and Wake Lock is the only thing that can stop it. Best-effort by design:
+  // unsupported browsers, denied permission and backgrounded tabs all just fall
+  // through to normal behaviour. Re-acquired on visibility change because the
+  // lock is dropped whenever the tab is hidden.
+  const wakeLock = navigator as Navigator & {
+    wakeLock?: { request: (type: "screen") => Promise<unknown> };
+  };
+
+  async function keepAwake() {
+    if (!wakeLock.wakeLock || document.visibilityState !== "visible") return;
+    try {
+      await wakeLock.wakeLock.request("screen");
+    } catch {
+      /* denied, low battery, or not allowed here — the page still works. */
+    }
+  }
+
+  void keepAwake();
+  document.addEventListener("visibilitychange", () => void keepAwake());
+</script>
