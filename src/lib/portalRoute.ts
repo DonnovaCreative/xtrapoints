@@ -47,6 +47,12 @@ export interface PortalContext {
    * been switched off and it should render the notice instead of the dashboard.
    */
   enabled: boolean;
+  /**
+   * Which of the school's two pages are switched on for production, as set in
+   * the CMS. Meaningful only alongside `live` — a page can be switched on for a
+   * school that hasn't been approved yet, and it still isn't public.
+   */
+  livePages: { donor: boolean; ambassador: boolean };
 }
 
 export type PortalGate = ({ ok: true } & PortalContext) | { ok: false; response: Response };
@@ -92,6 +98,7 @@ export async function gatePortal(
   let enabled = false;
   let staff = false;
   let live = false;
+  let livePages = { donor: true, ambassador: true };
 
   try {
     if (isToken) {
@@ -100,6 +107,7 @@ export async function gatePortal(
         school = portal.school;
         enabled = portal.enabled;
         live = portal.live;
+        livePages = portal.livePages;
       }
     } else {
       // Slug path: the slug is public (it's in every school's public page URL),
@@ -129,6 +137,7 @@ export async function gatePortal(
       // exception: they need to see a deactivated portal in order to help.)
       enabled = Boolean(portal) && (staff || portal!.enabled);
       live = portal?.live ?? false;
+      if (portal) livePages = portal.livePages;
     }
   } catch (err) {
     console.error("portal lookup failed:", err);
@@ -149,5 +158,14 @@ export async function gatePortal(
   // access was turned off (and who to ask), not that their bookmark is broken.
   if (!enabled) ctx.response.status = 403;
 
-  return { ok: true, school, base, via: isToken ? "token" : "session", enabled, staff, live };
+  return {
+    ok: true,
+    school,
+    base,
+    via: isToken ? "token" : "session",
+    enabled,
+    staff,
+    live,
+    livePages,
+  };
 }

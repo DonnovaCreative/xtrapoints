@@ -27,9 +27,21 @@ const { school, settings } = Astro.props;
 const t = school.theme;
 const themeStyle = schoolThemeVars(t);
 const donorUrl = `/schools/${school.slug}`;
+// The donor page may not be live yet (CMS → Publishing → Pages on
+// xtrapoint.com). When it isn't, every link to it comes off rather than
+// pointing students at a 404.
+const donorLive = school.livePages.donor;
 
 // ⚠ Placeholder until the online application is built (Plaid + fund approval pending).
 const enrollEmail = "enrollment@xtrapoint.com";
+
+// TIERS TO BE ANNOUNCED (CMS → Ambassador program). The program's shape is real
+// and worth saying — there are tiers, and climbing them unlocks more — but what
+// each one includes isn't settled, so the page must not print perks as promises.
+// In this mode the tier cards become locked placeholders and the specifics move
+// to the live call every waitlist signup is invited to, which is the point: the
+// unanswered question is what gets students onto that call.
+const tba = school.tiersToBeAnnounced === true;
 
 const whatTheyDo = [
   "Share your referral link & QR codes",
@@ -42,7 +54,13 @@ const steps = [
   { n: "01", title: "Apply & onboard", body: `Submit a short application. Once ${school.approver} approves you, complete a quick online training.` },
   { n: "02", title: "Get your toolkit", body: "Your own referral link, QR codes, social templates, scripts & FAQs — everything done for you." },
   { n: "03", title: "Promote on campus", body: "Spread the word across campus, your network, and social channels." },
-  { n: "04", title: "Advance through tiers", body: "As you sign up donors, climb from Bronze to Gold and unlock bigger rewards." },
+  {
+    n: "04",
+    title: "Advance through tiers",
+    body: tba
+      ? "The program runs on tiers. The more donors you sign up, the further you climb — and the more you unlock."
+      : "As you sign up donors, climb from Bronze to Gold and unlock bigger rewards.",
+  },
 ];
 
 const criteria = [
@@ -86,17 +104,27 @@ const tiers = school.ambassadorTiers?.length ? school.ambassadorTiers : DEFAULT_
 const recognition = school.ambassadorPrograms?.length
   ? school.ambassadorPrograms
   : DEFAULT_PROGRAMS;
+
+// Spelled out for the teaser copy ("runs on three tiers"), so it stays true to
+// whatever tiers the school actually has configured.
+const COUNT_WORDS = ["", "one", "two", "three", "four", "five", "six"];
+const tierCountWord = COUNT_WORDS[tiers.length] ?? String(tiers.length);
 ---
 
 <Layout
   title={`${school.programName} Ambassador Program × ${brand.name}`}
-  description={`Become a ${school.programName} Ambassador: bring round-up giving to campus and earn swag, gift cards, and VIP perks. From ${brand.name}.`}
+  description={
+    tba
+      ? `Become a ${school.programName} Ambassador: bring round-up giving to campus and earn your way up the program's reward tiers. From ${brand.name}.`
+      : `Become a ${school.programName} Ambassador: bring round-up giving to campus and earn swag, gift cards, and VIP perks. From ${brand.name}.`
+  }
   ogImage={`/schools/${school.slug}/og.png`}
 >
   <div style={`${themeStyle}--header-h:${school.headerHeightPx ?? 68}px;`}>
     <SchoolHeader
       school={school}
-      nav={{ label: "For donors", href: donorUrl }}
+      home={donorLive ? undefined : `/schools/${school.slug}/ambassadors`}
+      nav={donorLive ? { label: "For donors", href: donorUrl } : undefined}
       cta={{ label: "How to enroll", href: "#enroll" }}
     />
 
@@ -138,7 +166,7 @@ const recognition = school.ambassadorPrograms?.length
             </p>
             <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
               <CtaButton href="#enroll" variant="lime" glow={false}>How to enroll</CtaButton>
-              <a href="#incentives" class="font-mono text-xs uppercase tracking-[0.06em] text-white/60 underline-offset-4 hover:text-white hover:underline">See what you'll earn ↓</a>
+              <a href="#incentives" class="font-mono text-xs uppercase tracking-[0.06em] text-white/60 underline-offset-4 hover:text-white hover:underline">{tba ? "See what's coming ↓" : "See what you'll earn ↓"}</a>
             </div>
           </div>
         </div>
@@ -179,7 +207,7 @@ const recognition = school.ambassadorPrograms?.length
           <div class="reveal max-w-3xl">
             <Eyebrow index="02" label="How it works" />
             <h2 class="font-display mt-4 text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900">
-              From apply to <span class="ed ed-dark">Gold</span>.
+              From apply to <span class="ed ed-dark">{tba ? "Ambassador" : "Gold"}</span>.
             </h2>
           </div>
           <div class="stagger mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -234,43 +262,100 @@ const recognition = school.ambassadorPrograms?.length
         <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">
           <div class="reveal max-w-3xl">
             <Eyebrow index="04" label="Incentives" dark />
-            <h2 class="font-display mt-4 text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-white">
-              The three-tier <span class="ed">Structure</span>.
-            </h2>
-            <p class="mt-5 text-lg leading-relaxed text-white/75">
-              Tiers reward you for sign-ups, active donors, and campus engagement.
-              Exact thresholds are shared during onboarding.
-            </p>
+            {tba ? (
+              <Fragment>
+                <h2 class="font-display mt-4 text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-white">
+                  Rewards worth <span class="ed">Showing Up</span> for.
+                </h2>
+                <p class="mt-5 text-lg leading-relaxed text-white/75">
+                  The program runs on {tierCountWord} tiers: the more donors you
+                  sign up and the more you do on campus, the further you climb —
+                  and the more you unlock.
+                </p>
+                <p class="mt-4 text-lg leading-relaxed text-white/75">
+                  We're finalising exactly what each tier includes with
+                  {" "}{school.approver}, and the founding group of {school.short}
+                  {" "}ambassadors hears it first — live, on a call before the
+                  program opens. Join the waitlist and you're on it.
+                </p>
+              </Fragment>
+            ) : (
+              <Fragment>
+                <h2 class="font-display mt-4 text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-white">
+                  The three-tier <span class="ed">Structure</span>.
+                </h2>
+                <p class="mt-5 text-lg leading-relaxed text-white/75">
+                  Tiers reward you for sign-ups, active donors, and campus engagement.
+                  Exact thresholds are shared during onboarding.
+                </p>
+              </Fragment>
+            )}
           </div>
-          <div class="stagger mt-14 grid gap-6 lg:grid-cols-3">
-            {tiers.map((tier) => (
-              <div class={`flex flex-col rounded-3xl p-8 ring-1 ${tier.highlight ? "bg-lime text-on-accent ring-lime" : "bg-white/[0.04] text-white ring-white/10"}`}>
-                <div class="flex items-center justify-between">
-                  <span class="font-display text-2xl uppercase tracking-tight">{tier.name}</span>
-                  <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5"/><path d="M9 12.5L7 22l5-3 5 3-2-9.5"/></svg>
-                </div>
-                <p class={`mt-1 font-mono text-[0.6875rem] font-bold uppercase tracking-[0.1em] ${tier.highlight ? "text-on-accent/70" : "text-lime"}`}>{tier.role}</p>
-                <ul class="mt-6 flex flex-col gap-2.5">
-                  {(tier.perks ?? []).map((p) => (
-                    <li class="flex items-start gap-2.5 text-[0.9375rem]">
-                      <svg class={`mt-0.5 h-4 w-4 shrink-0 ${tier.highlight ? "text-on-accent" : "text-lime"}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
-                      <span class={tier.highlight ? "text-on-accent/90" : "text-white/85"}>{p}</span>
-                    </li>
-                  ))}
-                </ul>
+          {tba ? (
+            <Fragment>
+              <div class="stagger mt-14 grid gap-6 lg:grid-cols-3">
+                {tiers.map((_tier, i) => (
+                  <div class="flex flex-col rounded-3xl bg-white/[0.04] p-8 ring-1 ring-white/10">
+                    <div class="flex items-center justify-between">
+                      <span class="font-display text-2xl uppercase tracking-tight text-white">
+                        Tier {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-lime ring-1 ring-white/10">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>
+                      </span>
+                    </div>
+                    <p class="mt-1 font-mono text-[0.6875rem] font-bold uppercase tracking-[0.1em] text-lime">
+                      To be announced
+                    </p>
+                    <p class="mt-6 text-[0.9375rem] leading-relaxed text-white/60">
+                      What this tier unlocks — and what it takes to reach it — is
+                      revealed on the ambassador kickoff call.
+                    </p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          <!-- recognition & fun -->
-          <div class="stagger mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {recognition.map((r) => (
-              <div class="rounded-2xl bg-white/[0.04] p-6 ring-1 ring-white/10">
-                <h3 class="text-base font-bold tracking-tight text-white">{r.title}</h3>
-                <p class="mt-1.5 text-sm leading-relaxed text-white/65">{r.body}</p>
+              <div class="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+                <CtaButton href="#enroll" variant="lime" glow={false}>Join the waitlist to find out</CtaButton>
+                <p class="text-sm leading-relaxed text-white/55">
+                  Takes a minute. We'll send you the invite — no commitment until
+                  you've heard what's in it.
+                </p>
               </div>
-            ))}
-          </div>
+            </Fragment>
+          ) : (
+            <Fragment>
+              <div class="stagger mt-14 grid gap-6 lg:grid-cols-3">
+                {tiers.map((tier) => (
+                  <div class={`flex flex-col rounded-3xl p-8 ring-1 ${tier.highlight ? "bg-lime text-on-accent ring-lime" : "bg-white/[0.04] text-white ring-white/10"}`}>
+                    <div class="flex items-center justify-between">
+                      <span class="font-display text-2xl uppercase tracking-tight">{tier.name}</span>
+                      <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5"/><path d="M9 12.5L7 22l5-3 5 3-2-9.5"/></svg>
+                    </div>
+                    <p class={`mt-1 font-mono text-[0.6875rem] font-bold uppercase tracking-[0.1em] ${tier.highlight ? "text-on-accent/70" : "text-lime"}`}>{tier.role}</p>
+                    <ul class="mt-6 flex flex-col gap-2.5">
+                      {(tier.perks ?? []).map((p) => (
+                        <li class="flex items-start gap-2.5 text-[0.9375rem]">
+                          <svg class={`mt-0.5 h-4 w-4 shrink-0 ${tier.highlight ? "text-on-accent" : "text-lime"}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
+                          <span class={tier.highlight ? "text-on-accent/90" : "text-white/85"}>{p}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+
+              <!-- recognition & fun -->
+              <div class="stagger mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {recognition.map((r) => (
+                  <div class="rounded-2xl bg-white/[0.04] p-6 ring-1 ring-white/10">
+                    <h3 class="text-base font-bold tracking-tight text-white">{r.title}</h3>
+                    <p class="mt-1.5 text-sm leading-relaxed text-white/65">{r.body}</p>
+                  </div>
+                ))}
+              </div>
+            </Fragment>
+          )}
         </div>
       </section>
 
@@ -287,13 +372,22 @@ const recognition = school.ambassadorPrograms?.length
               reviewed and approved by {school.approver}. Join the waitlist and we'll
               email you the moment enrollment opens.
             </p>
+            {tba && (
+              <p class="mt-4 text-lg leading-relaxed text-gray-600">
+                Everyone on the list gets an invite to the kickoff call, where we
+                walk through the tiers, what each one unlocks, and what it takes
+                to get there — before any of it is public.
+              </p>
+            )}
             <div class="mx-auto mt-8 max-w-md">
               <WaitlistForm client:only="react" school={school.name} source="Ambassador waitlist" buttonLabel="Join the waitlist" />
             </div>
             <p class="mt-5 text-sm text-gray-500">
               Questions? Email <a href={`mailto:${enrollEmail}`} class="font-semibold text-lime-dark hover:underline">{enrollEmail}</a>
             </p>
-            <a href={donorUrl} class="mt-6 inline-block font-mono text-xs uppercase tracking-[0.06em] text-gray-500 underline-offset-4 hover:text-gray-900 hover:underline">← Back to donor sign-up</a>
+            {donorLive && (
+              <a href={donorUrl} class="mt-6 inline-block font-mono text-xs uppercase tracking-[0.06em] text-gray-500 underline-offset-4 hover:text-gray-900 hover:underline">← Back to donor sign-up</a>
+            )}
           </div>
         </div>
       </section>

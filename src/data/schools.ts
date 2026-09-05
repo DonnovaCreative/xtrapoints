@@ -100,6 +100,21 @@ export interface School {
     /** Optional second cutout, tucked behind and left of the primary. */
     cutoutSecondary?: string;
   };
+  /**
+   * Which of this school's two public pages exist in THIS build, already
+   * resolved for the environment: production honours the CMS switches, every
+   * other environment renders both so a page that isn't public yet can still be
+   * previewed. Templates read it for cross-links (the donor page stops linking
+   * to an ambassador page that isn't there), and the routes read it to decide
+   * what to build at all. See schoolsSource `resolveLivePages`.
+   */
+  livePages: { donor: boolean; ambassador: boolean };
+  /**
+   * Ambassador page: the program runs on tiers, but what they include isn't
+   * being announced yet — the tier cards render as a locked teaser instead, and
+   * the copy around them stops naming specific rewards.
+   */
+  tiersToBeAnnounced?: boolean;
   /** Optional custom Ambassador page reward tiers. Empty → the standard
    *  Bronze/Silver/Gold defaults (see SchoolAmbassadors.astro). */
   ambassadorTiers?: {

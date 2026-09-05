@@ -65,6 +65,14 @@ one school never carries another school's half-finished edits live with it.
 - **Taking a school off production:** *Take off production* on its Publishing
   tab. It stays on staging, and its snapshot is kept, so putting it back doesn't
   need re-approving content nobody changed.
+- **Launching one page but not the other:** *Pages on xtrapoint.com* on the
+  Publishing tab — one switch for the donor page, one for the ambassador page.
+  Switch one off and it isn't built at all on production: its URL 404s and the
+  page that IS live stops linking to it (header, cross-links, sitemap). Both keep
+  working on staging either way, so the page that isn't public yet is still there
+  to work on. These switches aren't part of the approved snapshot, so changing
+  one doesn't drag in unrelated edits — publish the school, then **Update
+  xtrapoint.com** (on the same field) or **Approve** to rebuild.
 - **Removing it everywhere:** **Unpublish** as usual, then use **Deploy
   production** so the removal reaches the live site.
 - **Deploy production** (sidebar) is now just the plumbing — for changes not tied

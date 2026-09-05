@@ -9,10 +9,16 @@ export async function getStaticPaths() {
     getSchools(),
     getSiteSettings(),
   ]);
-  return schools.map((school) => ({
-    params: { school: school.slug },
-    props: { school, settings },
-  }));
+  // A school can launch its ambassador page before its donor page (CMS →
+  // Publishing → Pages on xtrapoint.com), so a switched-off donor page isn't
+  // built at all on production and its URL 404s. Off production every school
+  // renders — see schoolsSource `resolveLivePages`.
+  return schools
+    .filter((school) => school.livePages.donor)
+    .map((school) => ({
+      params: { school: school.slug },
+      props: { school, settings },
+    }));
 }
 
 const { school, settings } = Astro.props;

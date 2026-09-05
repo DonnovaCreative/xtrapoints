@@ -27,6 +27,15 @@ const { school, settings } = Astro.props;
 const t = school.theme;
 const themeStyle = schoolThemeVars(t);
 const ambassadorUrl = `/schools/${school.slug}/ambassadors`;
+// The ambassador page may not be live yet (CMS → Publishing → Pages on
+// xtrapoint.com); when it isn't, the callout section and its links come off.
+// The section number that follows shifts up so the eyebrows don't skip one.
+const ambassadorLive = school.livePages.ambassador;
+const earlyAccessIndex = ambassadorLive ? "04" : "03";
+// Tier perks aren't being announced yet — see SchoolAmbassadors.astro. The
+// callout has to stop listing them too, or the donor page promises what the
+// ambassador page deliberately withholds.
+const tba = school.tiersToBeAnnounced === true;
 
 // Simple, donor-facing "how to sign up" steps (the step-by-step the page should push).
 const steps = [
@@ -84,7 +93,7 @@ const whyGivePhotoCredit = whyGivePhotoKey
   <div style={`${themeStyle}--header-h:${school.headerHeightPx ?? 68}px;`}>
     <SchoolHeader
       school={school}
-      nav={{ label: "Become an Ambassador", href: ambassadorUrl }}
+      nav={ambassadorLive ? { label: "Become an Ambassador", href: ambassadorUrl } : undefined}
       cta={{ label: "Get early access", href: "#start" }}
     />
 
@@ -268,6 +277,7 @@ const whyGivePhotoCredit = whyGivePhotoKey
       </section>
 
       <!-- ===================== AMBASSADOR CALLOUT ===================== -->
+      {ambassadorLive && (
       <section class="relative overflow-hidden bg-ink py-20 text-white lg:py-28">
         <div class="dot-grid"></div>
         <PlaybookMark mark="o" class="left-[5%] top-[16%] hidden h-16 w-16 lg:block" rotate={-8} opacity={0.18} color="var(--color-accent-2)" />
@@ -279,9 +289,12 @@ const whyGivePhotoCredit = whyGivePhotoKey
             </h2>
             <p class="mt-5 max-w-xl text-lg leading-relaxed text-white/75">
               Are you a {school.short} student? Lead the movement on campus —
-              spread the word, sign up donors, and earn swag, gift cards, VIP
-              experiences, and leadership recognition as you climb from Bronze to
-              Gold.
+              spread the word, sign up donors, and {tba ? (
+                <Fragment>climb the program's reward tiers as you go.</Fragment>
+              ) : (
+                <Fragment>earn swag, gift cards, VIP experiences, and leadership
+                recognition as you climb from Bronze to Gold.</Fragment>
+              )}
             </p>
             <a href={ambassadorUrl} class="mt-8 inline-flex w-fit items-center gap-2.5 rounded-full bg-lime px-6 py-3.5 text-[0.9375rem] font-bold text-on-accent transition-all duration-300 hover:bg-lime-deep hover:-translate-y-0.5">
               Explore the Ambassador Program
@@ -294,13 +307,14 @@ const whyGivePhotoCredit = whyGivePhotoKey
           </div>
         </div>
       </section>
+      )}
 
       <!-- ===================== INTEREST / GET EARLY ACCESS ===================== -->
       <section id="start" class="relative overflow-hidden bg-white py-20 lg:py-28">
         <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">
           <div class="grid items-center gap-12 lg:grid-cols-[1fr_1fr] lg:gap-16">
             <div class="reveal-left">
-              <Eyebrow index="04" label="Get early access" />
+              <Eyebrow index={earlyAccessIndex} label="Get early access" />
               <h2 class="font-display mt-4 text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900">
                 Be first to back the <span class="ed ed-dark">{school.mascot}</span>.
               </h2>

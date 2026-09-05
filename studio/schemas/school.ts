@@ -5,6 +5,7 @@ import { LogoHeightInput } from "../components/LogoHeightInput";
 import { PortalLinkInput } from "../components/PortalLinkInput";
 import { PortalAccessInput } from "../components/PortalAccessInput";
 import { ProductionStatusInput } from "../components/ProductionStatusInput";
+import { LivePagesInput } from "../components/LivePagesInput";
 import {
   DEFAULT_AMBASSADOR_TIERS,
   DEFAULT_AMBASSADOR_PROGRAMS,
@@ -161,6 +162,41 @@ export default defineType({
       hidden: true,
     }),
 
+    // Which of the two public pages the school's live status covers. A second
+    // axis under productionStatus, so a school can launch one page before the
+    // other (ambassador recruiting opens while the donor page is still being
+    // finished). Read live off the published doc rather than the approved
+    // snapshot — taking a page down must not require approving unrelated edits
+    // that happen to be in flight. Unset = live, so schools that predate this
+    // field are unaffected.
+    defineField({
+      name: "livePages",
+      title: "Pages on xtrapoint.com",
+      type: "object",
+      group: "publishing",
+      components: { input: LivePagesInput },
+      options: { columns: 2 },
+      initialValue: { donor: true, ambassador: true },
+      description:
+        "Which of this school's pages go live once it's approved. Switch one off to launch the other on its own — the switched-off page 404s on xtrapoint.com and the live page stops linking to it. Both keep working on staging regardless.",
+      fields: [
+        defineField({
+          name: "donor",
+          title: "Donor page",
+          type: "boolean",
+          initialValue: true,
+          description: "/schools/<slug> — where supporters sign up to give.",
+        }),
+        defineField({
+          name: "ambassador",
+          title: "Ambassador page",
+          type: "boolean",
+          initialValue: true,
+          description: "/schools/<slug>/ambassadors — student recruiting page.",
+        }),
+      ],
+    }),
+
     // Set by the school from their portal ("Submit for review"). Deliberately a
     // SEPARATE axis from productionStatus: a school that's already live can
     // submit changes, and that must not take them off production. Lives on the
@@ -261,6 +297,15 @@ export default defineType({
 
     // ── Ambassador program (all optional — defaults to the standard 3-tier
     // Bronze/Silver/Gold structure + recognition cards when left empty) ──────
+    defineField({
+      name: "tiersToBeAnnounced",
+      title: "Hold the tier details back",
+      type: "boolean",
+      group: "ambassador",
+      initialValue: false,
+      description:
+        "ON: the Ambassador page still says the program runs on tiers with incentives, but doesn't say what they are — the tier cards below are replaced with a locked “revealed once you're signed up” teaser, and the recognition cards are hidden. Use it while the rewards aren't finalised: students join the waitlist on the promise of finding out, and nothing is promised that can't be delivered. OFF: the tiers and perks below are published as written.",
+    }),
     defineField({
       name: "ambassadorTiers",
       title: "Ambassador tiers",

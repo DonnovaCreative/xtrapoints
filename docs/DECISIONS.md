@@ -4,6 +4,68 @@ Short log of non-obvious engineering decisions. Newest first.
 
 ---
 
+## 2026-09-04 — Per-page publishing, and an ambassador program with nothing promised yet
+
+**Context:** The first partner (Danes of Greatness / UAlbany) goes live as an MVP
+beta. Two things didn't fit: their donor page is approved and live but shouldn't
+be — onboarding isn't finished — and the Ambassador page's incentives section
+prints a Bronze/Silver/Gold structure with specific perks (gift cards, VIP
+experiences, internship consideration) that nobody has committed to yet. Neither
+was adjustable without a deploy.
+
+**Decision (per-page publishing):** New `livePages` object on `school`
+(`donor`/`ambassador` booleans, Publishing group,
+`studio/components/LivePagesInput.tsx`). Unset means live, so every school that
+predates the field is untouched.
+
+It sits BESIDE `productionStatus` rather than inside `approvedVersion`, for the
+same reason *Take off production* does: pulling a page down must not require
+approving whatever content edits happen to be in flight. So it's read live off
+the published document (`LIVE_PAGES` in `schoolsSource.ts`, projected alongside
+the snapshot rather than into it) and takes effect on the next production build —
+hence the field's own "Update xtrapoint.com" button, which fires the same deploy
+hook the approve/takedown buttons do.
+
+Enforcement is at the ROUTE: `getStaticPaths` filters on the flag, so a
+switched-off page isn't built at all — its URL 404s and it leaves the sitemap on
+its own. Cross-links come off with it (`School.livePages` is read by the header,
+the donor page's ambassador callout, the ambassador page's back-link) so the live
+page never points at a 404. The header logo needed a new `home` prop for this: it
+hardcoded the donor page.
+
+**Only production honours the switches.** Staging, local, the draft previews and
+the portal render both pages, because the page that isn't public yet is exactly
+the one someone still needs to look at — the same reasoning that has the portal
+ignore production status entirely. The two meanings are kept apart by type:
+`School.livePages` is resolved-for-this-environment (what templates render),
+`SchoolPortal.livePages` is the raw switches (what "Your pages" reports). That
+card is now per-row — a school can be live with one page, and showing a Copy link
+for the other would hand them a 404.
+
+**Decision (tiers to be announced):** New `tiersToBeAnnounced` boolean
+(Ambassador group). A toggle, not a copy edit, because the tiers come back the
+moment the program is finalised — and it's per school, so the next partner isn't
+bound by this one's timing. It IS content, so it rides in the approved snapshot
+like every other copy field.
+
+ON, the page keeps the structural claim (there are N tiers, climbing them unlocks
+more — N derived from the school's own configured tiers so it can't go stale) and
+drops every specific: tier cards become locked "Tier 01/02/03 — to be announced"
+placeholders, the recognition cards are hidden, and the perk names disappear from
+step 04, the "From apply to Gold" heading, the hero jump link, the meta
+description, and the donor page's ambassador callout. The unanswered question is
+the point — it's what gets a signup onto the kickoff call, which is where the
+tiers actually get announced, so the teaser and the enroll section both say so.
+Waitlist capture (Google Sheets, first/last/email) is untouched.
+
+**Known inconsistency, deliberately left:** the printed ambassador flyer
+(`src/lib/flyerContent.ts`) still lists reward chips derived from the same tier
+perks — hedged as "potential rewards may include", with a disclaimer, and
+school-editable in the portal. It doesn't read `tiersToBeAnnounced`. If the flyer
+ships alongside a page in teaser mode, the two say different things.
+
+---
+
 ## 2026-08-17 (follow-up 3) — Trimming `mark`; page status made explicit
 
 **Removed the `mark` field.** It predated `avatar` and had been superseded:

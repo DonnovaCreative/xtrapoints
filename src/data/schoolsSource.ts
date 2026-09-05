@@ -44,6 +44,7 @@ interface SchoolDoc {
   photoCredits: Partial<
     Record<"team" | "fans" | "celebrate" | "mascot" | "action", string | null>
   > | null;
+  tiersToBeAnnounced: boolean | null;
   ambassadorTiers:
     | { name: string; role: string | null; perks: string[] | null; highlight: boolean | null }[]
     | null;
@@ -55,6 +56,15 @@ interface SchoolDoc {
     onAccent: string | null;
     primaryDarkOverride: string | null;
   } | null;
+}
+
+/**
+ * Publishing state, read live off the document rather than out of the approved
+ * snapshot (see LIVE_PAGES below).
+ */
+interface LivePagesDoc {
+  donor: boolean | null;
+  ambassador: boolean | null;
 }
 
 // Any school with a slug renders — colors default to the XtraPoint brand.
@@ -102,6 +112,7 @@ const PROJECTION_FIELDS = `
     "mascot": photos.mascot.credit,
     "action": photos.action.credit
   },
+  tiersToBeAnnounced,
   ambassadorTiers[]{ name, role, perks, highlight },
   ambassadorPrograms[]{ title, body },
   "theme": {
@@ -114,10 +125,18 @@ const PROJECTION_FIELDS = `
 `;
 const PROJECTION = `{${PROJECTION_FIELDS}}`;
 
+// Which pages are live is PUBLISHING state, not content, so it sits outside
+// PROJECTION_FIELDS: it must never end up inside `approvedVersion`, or taking a
+// page down would mean approving whatever content edits are in flight too. Read
+// off the live document on every environment, exactly like productionStatus.
+const LIVE_PAGES = `"livePages": { "donor": livePages.donor, "ambassador": livePages.ambassador }`;
+
 // On production the content IS the snapshot, so fetch that instead of the live
 // fields. It stores the already-resolved projection (asset URLs and all), which
 // is why it can be handed straight to toSchool.
-const PUBLIC_PROJECTION = isProduction ? `{ "approved": approvedVersion }` : PROJECTION;
+const PUBLIC_PROJECTION = isProduction
+  ? `{ "approved": approvedVersion, ${LIVE_PAGES} }`
+  : `{${PROJECTION_FIELDS}, ${LIVE_PAGES}}`;
 
 /**
  * Live doc on staging; parsed snapshot on production. A snapshot that won't
@@ -223,7 +242,18 @@ const mapPrograms = (
     ? programs.map((p) => ({ title: p.title, ...(p.body ? { body: p.body } : {}) }))
     : undefined;
 
-const toSchool = (doc: SchoolDoc): School => ({
+/**
+ * Which of the school's pages this build renders. Only production honours the
+ * CMS switches; staging, local, the draft previews and the portal all pass
+ * nothing (or run outside production) and get both pages, because a page that
+ * isn't public yet is exactly the one someone still needs to look at.
+ */
+const resolveLivePages = (live?: LivePagesDoc | null): School["livePages"] =>
+  isProduction && live
+    ? { donor: live.donor !== false, ambassador: live.ambassador !== false }
+    : { donor: true, ambassador: true };
+
+const toSchool = (doc: SchoolDoc, live?: LivePagesDoc | null): School => ({
   slug: doc.slug!,
   name: doc.name ?? "",
   short: doc.short ?? "",
@@ -252,6 +282,8 @@ const toSchool = (doc: SchoolDoc): School => ({
   ...(mapPrograms(doc.ambassadorPrograms)
     ? { ambassadorPrograms: mapPrograms(doc.ambassadorPrograms) }
     : {}),
+  ...(doc.tiersToBeAnnounced ? { tiersToBeAnnounced: true } : {}),
+  livePages: resolveLivePages(live),
   theme: deriveSchoolTheme({
     primary: doc.theme?.primary ?? undefined,
     secondary: doc.theme?.secondary ?? undefined,
@@ -263,25 +295,33 @@ const toSchool = (doc: SchoolDoc): School => ({
 
 /** All schools, ordered by name. */
 export async function getSchools(): Promise<School[]> {
-  const docs = await sanityClient.fetch<(SchoolDoc & { approved?: string })[]>(
+  const docs = await sanityClient.fetch<
+    (SchoolDoc & { approved?: string; livePages?: LivePagesDoc | null })[]
+  >(
     // Order BEFORE projecting: on production the projection is just the snapshot
     // blob, so `name` has to be read off the source document.
     `*[${VALID}] | order(name asc) ${PUBLIC_PROJECTION}`,
   );
   return docs
-    .map(publicDoc)
-    .filter((d): d is SchoolDoc => Boolean(d))
-    .map(toSchool);
+    .map((doc) => {
+      // The snapshot carries the content; which pages are live is read off the
+      // document beside it, so the two are recombined here.
+      const content = publicDoc(doc);
+      return content ? toSchool(content, doc.livePages) : undefined;
+    })
+    .filter((s): s is School => Boolean(s));
 }
 
 /** One school by slug, or undefined if there's no match. */
 export async function getSchool(slug: string): Promise<School | undefined> {
-  const doc = await sanityClient.fetch<(SchoolDoc & { approved?: string }) | null>(
+  const doc = await sanityClient.fetch<
+    (SchoolDoc & { approved?: string; livePages?: LivePagesDoc | null }) | null
+  >(
     `*[${VALID} && slug.current == $slug]${PUBLIC_PROJECTION}[0]`,
     { slug },
   );
-  const resolved = doc ? publicDoc(doc) : undefined;
-  return resolved ? toSchool(resolved) : undefined;
+  const content = doc ? publicDoc(doc) : undefined;
+  return content ? toSchool(content, doc?.livePages) : undefined;
 }
 
 // -----------------------------------------------------------------------------
@@ -319,7 +359,7 @@ export async function getSchoolDraft(
 // school rather than slug to school. `portalToken` is never projected into the
 // returned `School`, so it can't leak into rendered HTML.
 // -----------------------------------------------------------------------------
-const PORTAL_PROJECTION = `{${PROJECTION_FIELDS}, portalEnabled, productionStatus}`;
+const PORTAL_PROJECTION = `{${PROJECTION_FIELDS}, portalEnabled, productionStatus, ${LIVE_PAGES}}`;
 
 export interface SchoolPortal {
   school: School;
@@ -327,17 +367,30 @@ export interface SchoolPortal {
   enabled: boolean;
   /** True once approved for production — decides where "your pages" links point. */
   live: boolean;
+  /**
+   * The RAW per-page switches, not `school.livePages`: the portal has to report
+   * what's true of xtrapoint.com whichever environment it's running on, where
+   * the rendering flags deliberately say "both" off production.
+   */
+  livePages: { donor: boolean; ambassador: boolean };
 }
 
 type PortalDoc = SchoolDoc & {
   portalEnabled: boolean | null;
   productionStatus: string | null;
+  livePages: LivePagesDoc | null;
 };
 
 const toPortal = (doc: PortalDoc): SchoolPortal => ({
+  // No live-pages argument: inside the portal every page is reachable, since
+  // this is where a school works on the one that isn't public yet.
   school: toSchool(doc),
   enabled: doc.portalEnabled === true,
   live: doc.productionStatus === "live",
+  livePages: {
+    donor: doc.livePages?.donor !== false,
+    ambassador: doc.livePages?.ambassador !== false,
+  },
 });
 
 /** Resolve a portal token to its school. undefined when no school matches. */

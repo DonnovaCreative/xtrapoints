@@ -20,35 +20,50 @@ import { brand } from "@/config/brand";
 
 const gate = await gatePortal(Astro);
 if (!gate.ok) return gate.response;
-const { school, base, via, staff, live } = gate;
+const { school, base, via, staff, live, livePages } = gate;
 
 const productionOrigin = (Astro.site ?? new URL(Astro.url.origin)).origin;
 const stagingOrigin =
   import.meta.env.PUBLIC_STAGING_ORIGIN ?? "https://staging.xtrapoint.com";
 
+// A school can be live with only one of its two pages published (XtraPoint sets
+// that per page in the CMS), so "live" is per row, not per school — otherwise
+// this card would show a link to a page that 404s.
 const pages = [
   {
     title: "Donor page",
     note: `Where supporters sign up to give to ${school.givingDest}.`,
     path: `/schools/${school.slug}`,
+    live: live && livePages.donor,
   },
   {
     title: "Ambassador page",
     note: `Recruiting page for the ${school.programName} Ambassador program.`,
     path: `/schools/${school.slug}/ambassadors`,
+    live: live && livePages.ambassador,
   },
 ];
+// The banner still speaks for the school as a whole.
+const anyLive = pages.some((p) => p.live);
+const allLive = pages.every((p) => p.live);
 ---
 
 <PortalLayout school={school} base={base} active="pages" via={via} staff={staff}>
   <div
     class={`mt-6 rounded-card border px-5 py-4 ${
-      live ? "border-gray-200 bg-white" : "border-amber-200 bg-amber-50"
+      anyLive ? "border-gray-200 bg-white" : "border-amber-200 bg-amber-50"
     }`}
   >
-    <p class={`text-sm leading-relaxed ${live ? "text-gray-600" : "text-amber-900"}`}>
+    <p class={`text-sm leading-relaxed ${anyLive ? "text-gray-600" : "text-amber-900"}`}>
       {
-        live ? (
+        anyLive && !allLive ? (
+          <>
+            <strong class="font-bold text-gray-900">Part of your site is live.</strong>{" "}
+            The pages marked Live below are public — share those links. The rest
+            are still previews while we finish getting them ready, so please
+            don't share those in the meantime.
+          </>
+        ) : allLive ? (
           <>
             <strong class="font-bold text-gray-900">Your pages are live.</strong> Share
             the {brand.name} links below. Anything you change shows on the preview
@@ -78,14 +93,14 @@ const pages = [
             <div class="flex flex-wrap items-center gap-x-3 gap-y-2 py-3">
               <span
                 class={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 font-mono text-[0.625rem] uppercase tracking-wider ${
-                  live ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-500"
+                  page.live ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-500"
                 }`}
               >
                 <span
-                  class={`h-1.5 w-1.5 rounded-full ${live ? "bg-green-500" : "bg-gray-400"}`}
+                  class={`h-1.5 w-1.5 rounded-full ${page.live ? "bg-green-500" : "bg-gray-400"}`}
                   aria-hidden="true"
                 />
-                {live ? "Live" : "Not live"}
+                {page.live ? "Live" : "Not live"}
               </span>
 
               <span class="min-w-0 flex-1">
@@ -93,11 +108,11 @@ const pages = [
                   {brand.domain}
                 </span>
                 <span class="block truncate font-mono text-xs text-gray-400">
-                  {live ? `${productionOrigin}${page.path}` : "Not published yet"}
+                  {page.live ? `${productionOrigin}${page.path}` : "Not published yet"}
                 </span>
               </span>
 
-              {live ? (
+              {page.live ? (
                 <span class="flex shrink-0 items-center gap-2">
                   <a
                     href={`${productionOrigin}${page.path}`}

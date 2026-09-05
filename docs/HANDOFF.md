@@ -308,6 +308,14 @@ the repo.
 - **This is why editing a live school is safe.** Their changes go to staging for
   review while production keeps serving the approved snapshot. The Publishing tab
   shows *"Live — changes not approved"* when the two have diverged.
+- **Which of the two pages that covers is a second switch** — `livePages.donor` /
+  `livePages.ambassador` on the same tab, so a school can launch ambassador
+  recruiting before its donor page is finished. A switched-off page isn't built
+  on production (`getStaticPaths` filters on it) and every link to it is dropped;
+  staging renders both regardless, since a page that isn't public is the one
+  someone is still working on. Deliberately NOT inside `approvedVersion` — read
+  live off the published doc like `productionStatus`, so taking a page down never
+  requires approving unrelated edits.
 - The sidebar tool is now **"Deploy production"** — plumbing only, for changes not
   tied to one school (site settings, legal pages, resource library). Approving a
   school already fires the deploy hook.
