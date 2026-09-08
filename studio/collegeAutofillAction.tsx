@@ -1,10 +1,9 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useClient, type DocumentActionComponent } from "sanity";
 import {
   Box,
   Button,
   Card,
-  Dialog,
   Flex,
   Grid,
   Spinner,
@@ -42,11 +41,16 @@ interface Logo {
   contentType: string;
   filename: string;
 }
+interface Candidate {
+  // Optional only for compatibility with the previous API during deployment.
+  id?: string;
+  displayName: string;
+}
 type View =
   | { status: "idle" }
   | { status: "loading" }
   | { status: "error"; message: string }
-  | { status: "candidates"; candidates: string[] }
+  | { status: "candidates"; candidates: Candidate[] }
   | { status: "match"; match: string; fields: Fields; logo: Logo | null };
 
 const Swatch = ({ hex }: { hex?: string }) =>
@@ -66,16 +70,21 @@ export const collegeAutofillAction: DocumentActionComponent = (props) => {
   const client = useClient({ apiVersion: "2025-01-01" });
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [resultFilter, setResultFilter] = useState("");
   const [view, setView] = useState<View>({ status: "idle" });
   const [applying, setApplying] = useState(false);
+  const request = useRef<AbortController | null>(null);
+
+  useEffect(() => () => request.current?.abort(), []);
 
   const close = useCallback(() => {
+    request.current?.abort();
     setOpen(false);
     setApplying(false);
     props.onComplete();
   }, [props]);
 
-  const search = useCallback(async (raw: string) => {
+  const search = useCallback(async (raw: string, teamId?: string) => {
     const q = raw.trim();
     if (!q) return;
     if (!SECRET) {
@@ -86,16 +95,27 @@ export const collegeAutofillAction: DocumentActionComponent = (props) => {
       });
       return;
     }
+    request.current?.abort();
+    const controller = new AbortController();
+    request.current = controller;
+    setResultFilter("");
     setView({ status: "loading" });
     try {
+      const params = new URLSearchParams({ q, secret: SECRET });
+      if (teamId) params.set("teamId", teamId);
       const res = await fetch(
-        `${ORIGIN}/api/seed-college?q=${encodeURIComponent(q)}&secret=${encodeURIComponent(SECRET)}`,
+        `${ORIGIN}/api/seed-college?${params}`,
+        { signal: controller.signal },
       );
       const body = await res.json();
-      if (body.candidates) {
-        setView({ status: "candidates", candidates: body.candidates });
-      } else if (!res.ok || body.error) {
+      if (controller.signal.aborted) return;
+      if (!res.ok || body.error) {
         setView({ status: "error", message: body.message || `No match for “${q}”.` });
+      } else if (body.teams || body.candidates) {
+        setView({
+          status: "candidates",
+          candidates: body.teams ?? body.candidates.map((displayName: string) => ({ displayName })),
+        });
       } else {
         setView({
           status: "match",
@@ -105,6 +125,7 @@ export const collegeAutofillAction: DocumentActionComponent = (props) => {
         });
       }
     } catch (err) {
+      if (controller.signal.aborted) return;
       setView({
         status: "error",
         message: err instanceof Error ? err.message : String(err),
@@ -158,15 +179,23 @@ export const collegeAutofillAction: DocumentActionComponent = (props) => {
     }
   }, [view, client, props.id, close]);
 
+  const candidates = view.status === "candidates"
+    ? view.candidates.filter((team) =>
+        team.displayName.toLowerCase().includes(resultFilter.trim().toLowerCase()),
+      )
+    : [];
+
   return {
     label: "Auto-fill from ESPN",
     icon: DownloadIcon,
     onHandle: () => {
+      request.current?.abort();
       const doc = (props.draft ?? props.published ?? {}) as {
         short?: string;
         name?: string;
       };
       setQuery(doc.short || doc.name || "");
+      setResultFilter("");
       setView({ status: "idle" });
       setOpen(true);
     },
@@ -174,8 +203,8 @@ export const collegeAutofillAction: DocumentActionComponent = (props) => {
       type: "dialog",
       id: "college-autofill",
       header: "Auto-fill a college from ESPN",
-      width: 1,
-      onClose: close,
+      width: "medium",
+      onClose: applying ? () => {} : close,
       content: (
         <Stack space={4} padding={1}>
           <Stack space={2}>
@@ -186,9 +215,20 @@ export const collegeAutofillAction: DocumentActionComponent = (props) => {
             <Flex gap={2}>
               <Box flex={1}>
                 <TextInput
+                  aria-label="College or team name"
                   value={query}
-                  onChange={(e) => setQuery(e.currentTarget.value)}
-                  onKeyDown={(e) => e.key === "Enter" && search(query)}
+                  disabled={applying}
+                  onChange={(e) => {
+                    request.current?.abort();
+                    setQuery(e.currentTarget.value);
+                    setView({ status: "idle" });
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      if (!applying && view.status !== "loading") search(query);
+                    }
+                  }}
                   placeholder="Oregon Ducks"
                   autoFocus
                 />
@@ -197,7 +237,7 @@ export const collegeAutofillAction: DocumentActionComponent = (props) => {
                 icon={SearchIcon}
                 text="Search"
                 tone="primary"
-                disabled={!query.trim() || view.status === "loading"}
+                disabled={!query.trim() || view.status === "loading" || applying}
                 onClick={() => search(query)}
               />
             </Flex>
@@ -221,20 +261,35 @@ export const collegeAutofillAction: DocumentActionComponent = (props) => {
           {view.status === "candidates" && (
             <Stack space={2}>
               <Text size={1} weight="semibold">
-                Multiple matches — pick one:
+                {view.candidates.length} matches — choose a school:
               </Text>
-              {view.candidates.map((c) => (
-                <Button
-                  key={c}
-                  mode="ghost"
-                  justify="flex-start"
-                  text={c}
-                  onClick={() => {
-                    setQuery(c);
-                    search(c);
-                  }}
-                />
-              ))}
+              <TextInput
+                aria-label="Filter matching schools"
+                placeholder="Filter these results…"
+                value={resultFilter}
+                onChange={(e) => setResultFilter(e.currentTarget.value)}
+              />
+              <Box style={{ maxHeight: 280, overflowY: "auto" }}>
+                <Stack space={2}>
+                  {candidates.map((team) => (
+                    <Button
+                      key={team.id ?? team.displayName}
+                      mode="ghost"
+                      justify="flex-start"
+                      text={team.displayName}
+                      onClick={() => {
+                        setQuery(team.displayName);
+                        search(team.displayName, team.id);
+                      }}
+                    />
+                  ))}
+                  {candidates.length === 0 && (
+                    <Text size={1} muted>
+                      No schools match this filter. Clear it to see all results.
+                    </Text>
+                  )}
+                </Stack>
+              </Box>
             </Stack>
           )}
 

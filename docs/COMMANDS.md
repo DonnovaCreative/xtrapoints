@@ -119,13 +119,23 @@ PUBLISH=1 npm run seed:legal    # re-seed and publish live
 
 ### Deploy the Studio itself
 
-Only needed after a **schema** change (adding a new field, doc type, etc.), from
-`studio/`:
+Needed after a **Studio code** change (schema, custom actions, inputs, etc.),
+from `studio/`:
 
 ```sh
 cd studio
 npx sanity deploy
 ```
+
+For changes to **Auto-fill from ESPN**, deploy the site's `/api/seed-college`
+changes through staging → production first, then deploy the Studio. The API
+keeps the previous name-only results alongside the new ESPN IDs so existing
+Studio tabs keep working during the rollout. Reload the Studio to get the new
+result filtering and selection controls.
+
+Run the college lookup regression checks from the repo root with `npm test`.
+Build both projects before deploying: `npm run build` and
+`npm run build --prefix studio`.
 
 Check your Sanity login if a script errors with an auth message:
 

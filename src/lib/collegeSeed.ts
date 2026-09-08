@@ -8,16 +8,22 @@
 // colors are approximate and the logo is an UNVERIFIED preview.
 
 const env = (k: string): string | undefined =>
-  (import.meta.env as Record<string, string | undefined>)[k] ??
+  (import.meta.env as Record<string, string | undefined> | undefined)?.[k] ??
   process.env[k];
 
 interface EspnTeam {
+  id: string;
   displayName: string;
   name: string; // mascot, e.g. "Bearkats"
   location: string; // e.g. "Sam Houston"
   color?: string;
   alternateColor?: string;
   logos?: { href: string }[];
+}
+
+export interface CollegeCandidate {
+  id: string;
+  displayName: string;
 }
 
 export interface CollegeSeedFields {
@@ -37,7 +43,7 @@ export interface CollegeSeedFields {
 
 export type LookupResult =
   | { status: "none" }
-  | { status: "ambiguous"; candidates: string[] }
+  | { status: "ambiguous"; candidates: CollegeCandidate[] }
   | { status: "ok"; match: string; fields: CollegeSeedFields; logoUrl?: string };
 
 // ESPN's alternateColor is often just white/black — only use it as a real
@@ -82,10 +88,20 @@ async function espnTeams(): Promise<EspnTeam[]> {
 function findMatches(teams: EspnTeam[], query: string): EspnTeam[] {
   const nq = norm(query);
   if (!nq) return [];
+
+  // A chosen team name must resolve before fuzzy matching. Otherwise, e.g.
+  // "Maryland Terrapins" also matches "University of Mary" and loops forever.
+  const exactNames = teams.filter((t) => norm(t.displayName) === nq);
+  if (exactNames.length) return exactNames;
+  const exactLocations = teams.filter((t) => norm(t.location) === nq);
+  if (exactLocations.length) return exactLocations;
+
   return teams.filter((t) => {
     const nd = norm(t.displayName);
     const nl = norm(t.location);
-    return nd.includes(nq) || nl.includes(nq) || nq.includes(nl);
+    // Allow partial search terms, but only match a location inside a longer
+    // query at word boundaries ("Mary" must not match inside "Maryland").
+    return nd.includes(nq) || nl.includes(nq) || (nl && ` ${nq} `.includes(` ${nl} `));
   });
 }
 
@@ -118,15 +134,17 @@ async function scorecard(location: string) {
   }
 }
 
-/** Look up one college by name/team; returns a prefill payload or a disambiguation list. */
-export async function lookupCollege(query: string): Promise<LookupResult> {
+/** An explicit ESPN ID selects exactly one team and never falls back to a fuzzy search. */
+export async function lookupCollege(query: string, teamId?: string): Promise<LookupResult> {
   const teams = await espnTeams();
-  const matches = findMatches(teams, query);
+  const matches = teamId !== undefined
+    ? teams.filter((t) => t.id === teamId)
+    : findMatches(teams, query);
   if (matches.length === 0) return { status: "none" };
   if (matches.length > 1) {
     return {
       status: "ambiguous",
-      candidates: matches.slice(0, 15).map((m) => m.displayName),
+      candidates: matches.map(({ id, displayName }) => ({ id, displayName })),
     };
   }
 

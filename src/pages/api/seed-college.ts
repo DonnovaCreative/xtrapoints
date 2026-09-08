@@ -4,8 +4,9 @@
 // logo bytes so the Studio can upload them under the editor's own session.
 //
 //   GET /api/seed-college?q=<college>&secret=<PREVIEW_SECRET>
+//   GET /api/seed-college?teamId=<espn-id>&secret=<PREVIEW_SECRET>
 //     → 200 { match, fields, logo }        (single match)
-//     → 200 { candidates: [...] }          (needs disambiguation)
+//     → 200 { candidates: [...], teams: [{ id, displayName }] } (choose a team)
 //     → 404 { error: "no_match", message } / 401 / 400 / 502
 //
 // Read-only + gated, so CORS is open (the Studio is a different origin).
@@ -28,12 +29,18 @@ export const GET: APIRoute = async ({ url }) => {
     return json({ error: "unauthorized" }, 401);
   }
 
-  const q = url.searchParams.get("q")?.trim();
-  if (!q) return json({ error: "missing_query", message: "Provide ?q=<college>." }, 400);
+  const q = url.searchParams.get("q")?.trim() ?? "";
+  const teamId = url.searchParams.get("teamId")?.trim();
+  if (teamId !== undefined && !/^\d+$/.test(teamId)) {
+    return json({ error: "invalid_team_id", message: "Choose a team from the search results." }, 400);
+  }
+  if (!q && !teamId) {
+    return json({ error: "missing_query", message: "Provide ?q=<college> or ?teamId=<espn-id>." }, 400);
+  }
 
   let result;
   try {
-    result = await lookupCollege(q);
+    result = await lookupCollege(q, teamId);
   } catch (err) {
     return json(
       { error: "lookup_failed", message: err instanceof Error ? err.message : String(err) },
@@ -45,13 +52,19 @@ export const GET: APIRoute = async ({ url }) => {
     return json(
       {
         error: "no_match",
-        message: `No ESPN college match for “${q}”. (K-12 / non-football schools aren’t in ESPN — add those manually.)`,
+        message: teamId
+          ? "That ESPN team is no longer available. Search again and choose another result."
+          : `No ESPN college match for “${q}”. (K-12 / non-football schools aren’t in ESPN — add those manually.)`,
       },
       404,
     );
   }
   if (result.status === "ambiguous") {
-    return json({ candidates: result.candidates });
+    // Keep names for Studios still running the previous bundle during rollout.
+    return json({
+      candidates: result.candidates.map((team) => team.displayName),
+      teams: result.candidates,
+    });
   }
 
   // Proxy the logo bytes (base64) so the Studio can upload without a CORS-blocked

@@ -30,7 +30,10 @@ For one-off additions by anyone, technical or not:
    photos, and pick the two brand colors.
 3. **Colleges: prefill it automatically.** On the new (empty) school, open the
    ⋯ menu and click **"Auto-fill from ESPN"**, then type the team name (e.g.
-   `Oregon Ducks`). It fills in the mascot, brand colors, fund name, and a
+   `Maryland Terrapins`). Exact team names open a preview directly. If several
+   schools match, use **Filter these results** to narrow the list, then click the
+   school you want. Review the preview and click **Fill in this school**.
+   It fills in the mascot, brand colors, fund name, and a
    **logo preview** — and city/state + the official name when the DataGov key is
    configured (see below). It only fills **blank** fields, so anything you've
    already typed is safe. ⚠ Colors are approximate and the logo is an
