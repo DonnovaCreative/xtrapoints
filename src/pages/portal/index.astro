@@ -31,9 +31,12 @@ try {
   memberships = list.totalCount ?? list.data.length;
 } catch { return new Response("Workspace selection is temporarily unavailable. Please try again.", { status: 503 }); }
 const needsToPick = memberships > 0;
+const choosingAdmin = Astro.url.searchParams.get("reason") === "admin";
 const heading = needsToPick ? "Choose your workspace" : "Your workspace is being prepared";
 const blurb = needsToPick
-  ? "Choose your school or XtraPoint team to continue."
+  ? choosingAdmin
+    ? "Choose the XtraPoint team workspace to manage schools. Your account must have an administrator role in that workspace."
+    : "Choose your school or XtraPoint team to continue."
   : "Your account is ready. Your XtraPoint contact can connect it to your school's workspace.";
 ---
 <AuthLayout title="Partner portal" heading={heading} blurb={blurb}>
