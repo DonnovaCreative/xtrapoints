@@ -26,6 +26,14 @@ New invitations bind the Clerk organization to immutable `partnerId` plus the cu
 
 The verified migration retained **101 partners / 104 school documents**, one resource override, 238 asset records and 239 asset binaries. The user-approved Oregon Ducks address is `oregon-ducks`; University of Oregon remains `oregon`. The retained Missouri Southern record still contains a historical approval snapshot with an older slug. It was preserved and must be reviewed before that school's next publication. See [the migration runbook](SCHOOL-MIGRATION-RUNBOOK.md) for recovery and verification.
 
+## Product navigation
+
+The marketing portal and Ambassador Toolkit use the same XtraPoint-styled, neutral sidebar with a top product switcher. School logos and theme colors belong to school pages and collateral; the application navigation identifies the current school with text. The Marketing Portal's former Resource library is labeled Marketing materials.
+
+The toolkit sidebar lists its six resources. Article topics expand inside the reading area, avoiding a second full sidebar. `/resources` redirects to `/resources/ambassador-toolkit` while the toolkit is the only shared guide collection. Main-site articles, search and downloads keep the existing private access gate; the navigation redesign does not make them public or add a public homepage link.
+
+A successful signed-in school portal visit may remember only its validated canonical slug in per-tab session storage for the switcher's return link. This is a navigation preference, never authorization; the destination still rechecks access. Legacy bearer links are never persisted. The owner-private Sites edition uses an absolute link back to the main website's portal and does not depend on the main app's sign-in services during static export.
+
 ## Toolkit ownership and release workflow
 
 The Resource Center is available at `/resources`, and the six-resource toolkit at `/resources/ambassador-toolkit`. The partner portal links to the same guidance. Anonymous access is disabled unless `XP_RESOURCE_CENTER_PUBLIC=true`; content, search and downloads share the gate. The separate existing Sites address remains owner-private.

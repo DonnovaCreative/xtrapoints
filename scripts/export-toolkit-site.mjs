@@ -88,7 +88,7 @@ const build = spawnSync(
   {
     cwd: work,
     stdio: "inherit",
-    env: { ...process.env, XP_RESOURCE_CENTER_PUBLIC: "false", VERCEL_ENV: "preview" },
+    env: { ...process.env, XP_RESOURCE_CENTER_PUBLIC: "false", XP_TOOLKIT_STANDALONE: "true", VERCEL_ENV: "preview" },
   },
 );
 if (build.status !== 0) throw new Error(`Toolkit static export failed (${build.status}).`);

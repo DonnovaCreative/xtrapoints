@@ -4,11 +4,4 @@ const { resource, current, publication: toolkit = bundledToolkit } = Astro.props
 const entries = toolkit.articles.filter(entry => entry.resource === resource.id);
 const categories = [...new Set(entries.map(entry => entry.category))];
 ---
-<aside class="rc-outline"><details open><summary>In this resource</summary><div><a class="rc-outline-title" href={resource.href}>{resource.title}</a><nav aria-label="Resource topics">{categories.map(category => <details class="rc-outline-group" open={entries.some(entry => entry.category === category && entry.id === current)}><summary>{category}</summary>{entries.filter(entry => entry.category === category).map(entry => <a href={entry.href} aria-current={entry.id === current ? 'page' : undefined}>{entry.title}</a>)}</details>)}</nav><div class="rc-outline-other"><label for="rc-switch-resource">Change resource</label><select id="rc-switch-resource"><option value="">Choose a resource</option>{toolkit.resources.filter(item => item.id !== resource.id).map(item => <option value={item.href}>{item.title}</option>)}</select></div></div></details></aside>
-<script>
-  if (window.matchMedia('(max-width:760px)').matches) {
-    const topics = document.querySelector<HTMLDetailsElement>('.rc-outline > details');
-    if (topics) topics.open = false;
-  }
-  document.querySelector<HTMLSelectElement>('#rc-switch-resource')?.addEventListener('change', event => { const value = (event.currentTarget as HTMLSelectElement).value; if (value.startsWith('/resources/ambassador-toolkit/')) window.location.href = value; });
-</script>
+<aside class="rc-outline"><details><summary>Topics in this resource</summary><div><a class="rc-outline-title" href={resource.href}>{resource.title}</a><nav aria-label="Resource topics">{categories.map(category => <details class="rc-outline-group" open={entries.some(entry => entry.category === category && entry.id === current)}><summary>{category}</summary>{entries.filter(entry => entry.category === category).map(entry => <a href={entry.href} aria-current={entry.id === current ? 'page' : undefined}>{entry.title}</a>)}</details>)}</nav></div></details></aside>

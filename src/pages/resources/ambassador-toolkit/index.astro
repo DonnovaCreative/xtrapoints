@@ -8,4 +8,4 @@ const denied = await gateResourceCenter(Astro); if (denied) return denied;
 const { toolkit } = await getToolkitPublication();
 Astro.response.headers.set('Cache-Control', 'private, no-store');
 ---
-<ResourceLayout title="Ambassador Toolkit" description="Six connected resources to help your organization design, launch and operate its ambassador program." crumbs={[{ label: 'Ambassador Toolkit' }]} search={false}><ToolkitOverview publication={toolkit} /></ResourceLayout>
+<ResourceLayout publication={toolkit} title="Ambassador Toolkit" description="Six connected resources to help your organization design, launch and operate its ambassador program." crumbs={[{ label: 'Ambassador Toolkit' }]} search={false}><ToolkitOverview publication={toolkit} /></ResourceLayout>

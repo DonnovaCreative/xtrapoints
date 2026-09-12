@@ -3,13 +3,13 @@
 // MARKETING PORTAL layout — the dashboard chrome shared by every portal page.
 //
 // Pages supply their body; this owns the sidebar, breadcrumbs, page heading and
-// the per-school theming. A page therefore never has to know the token exists
+// the shared XtraPoint navigation. A page therefore never has to know the token exists
 // beyond passing `base` through, and can't ship without the nav.
 // =============================================================================
 import Layout from "@/layouts/Layout.astro";
 import PortalShell from "@/components/portal/PortalShell";
 import PortalInteractions from "@/components/portal/PortalInteractions.astro";
-import { schoolThemeVars, type School } from "@/data/schools";
+import { type School } from "@/data/schools";
 import { PORTAL_NAV, navHref, navItem } from "@/lib/portalNav";
 import { brand } from "@/config/brand";
 import { getPortalIdentity } from "@/lib/portalAuth";
@@ -36,7 +36,6 @@ interface Props {
 }
 
 const { school, base, active, crumb, heading, blurb, via = "token", staff = false } = Astro.props;
-const t = school.theme;
 const section = navItem(active);
 const identity = via === "session" ? await getPortalIdentity(Astro) : undefined;
 const canEdit = Boolean(identity && canEditPartnerContent(identity));
@@ -47,32 +46,12 @@ const nav = PORTAL_NAV.map((item) => ({
   href: navHref(base, item.segment),
   icon: item.icon,
 }));
-nav.push({ title: "Ambassador toolkit", href: "/resources/ambassador-toolkit", icon: "library" });
 
 const crumbs = [
   { label: school.short, href: base },
   ...(active ? [{ label: section.title, href: navHref(base, active) }] : []),
   ...(crumb ? [{ label: crumb }] : []),
 ];
-
-// The school's logo art is drawn for a dark bar; a colored logo (either flag)
-// needs a white badge behind it to stay legible on the ink sidebar.
-const badgeLogo = Boolean(school.logoBadge || school.whiteHeader);
-
-// Re-skin shadcn's sidebar to the school. Its defaults are a light neutral gray;
-// the portal reads as *theirs* when the rail is their dark brand color, and this
-// is the whole surface where that lands. schoolThemeVars supplies --color-ink /
-// --color-lime, so these follow whatever the school document says.
-const sidebarVars = [
-  "--sidebar:var(--color-ink)",
-  "--sidebar-foreground:rgba(255,255,255,0.72)",
-  "--sidebar-accent:rgba(255,255,255,0.10)",
-  "--sidebar-accent-foreground:#ffffff",
-  "--sidebar-border:rgba(255,255,255,0.12)",
-  "--sidebar-primary:var(--color-lime)",
-  "--sidebar-primary-foreground:var(--color-on-accent)",
-  "--sidebar-ring:var(--color-lime)",
-].join(";");
 
 const pageTitle = heading ?? section.title;
 const pageBlurb = blurb ?? section.blurb;
@@ -83,19 +62,17 @@ const pageBlurb = blurb ?? section.blurb;
   description={`Private marketing resources for ${school.name}.`}
   noindex
 >
-  <div style={schoolThemeVars(t) + sidebarVars} class="font-sans">
+  <div class="font-sans">
     <PortalShell
       client:load
       nav={nav}
       activeHref={navHref(base, active)}
       crumbs={crumbs}
-      school={{
-        short: school.short,
-        name: school.name,
-        logo: school.logo,
-        badgeLogo,
-      }}
-      brandLogo={brand.logo.white}
+      product="marketing"
+      marketingHref={via === "session" ? `/portal/${school.slug}` : base}
+      rememberSchool={via === "session" ? school.slug : undefined}
+      contextLabel={school.name}
+      brandLogo={brand.logo.navy}
       brandMark={brand.logo.mark}
       brandName={brand.nameSpaced}
       supportHref={`mailto:${brand.salesEmail}?subject=${encodeURIComponent(
@@ -123,7 +100,7 @@ const pageBlurb = blurb ?? section.blurb;
         )
       }
 
-      <main class="mx-auto w-full max-w-5xl px-5 pb-16 pt-8 sm:px-8">
+      <div class="mx-auto w-full max-w-5xl px-5 pb-16 pt-8 sm:px-8">
         <header>
           <h1 class="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">
             {pageTitle}
@@ -152,7 +129,7 @@ const pageBlurb = blurb ?? section.blurb;
             >.
           </p>
         </footer>
-      </main>
+      </div>
     </PortalShell>
   </div>
 
