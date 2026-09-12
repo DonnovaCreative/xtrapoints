@@ -28,8 +28,8 @@ export default defineConfig({
   // domain matches this (xtrapoint.com vs xtrapoints.com).
   site: brand.url,
 
-  // Static build. The Vercel adapter ships the prerendered output to Vercel's
-  // static hosting; no SSR runtime is used (the contact form posts client-side).
+  // Corporate marketing remains static; partner pages, admin and resources
+  // opt into Vercel rendering so a school update needs no global rebuild.
   output: 'static',
 
   // Keep the co-branded sales one-pagers (print/PDF collateral) out of the
@@ -51,6 +51,7 @@ export default defineConfig({
         !page.includes("/one-pager") &&
         !page.includes("/qr-code") &&
         !page.includes("/preview/") &&
+        !page.includes("/admin/") &&
         !page.includes("/portal/"),
     }),
   ],

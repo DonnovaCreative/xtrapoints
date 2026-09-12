@@ -12,6 +12,7 @@ import { isProduction } from "@/config/site-env";
 
 // Shape returned by the GROQ projection below (before mapping to `School`).
 interface SchoolDoc {
+  managementVersion?: number;
   slug: string | null;
   name: string | null;
   short: string | null;
@@ -82,14 +83,14 @@ interface LivePagesDoc {
 // while xtrapoint.com keeps serving the approved version until it's approved
 // again. Staging/preview/local builds ignore all of this and render live content.
 // See docs/DECISIONS.md.
-const PUBLISHED = `_type == "school" && !(_id in path("drafts.**")) && defined(slug.current)`;
+const PUBLISHED = `_type == "school" && !(_id in path("drafts.**")) && !(_id in path("versions.**")) && defined(slug.current)`;
 const VALID = `${PUBLISHED}${
-  isProduction ? ` && productionStatus == "live" && defined(approvedVersion)` : ""
+  isProduction ? ` && productionStatus == "live" && defined(approvedVersion)` : ` && (coalesce(managementVersion, 1) < 2 || (productionStatus == "live" && defined(approvedVersion)))`
 }`;
 
 // The field list is kept separate from its braces so the portal lookup at the
 // bottom of this file can re-wrap it with the portal's own access fields.
-const PROJECTION_FIELDS = `
+export const SCHOOL_PROJECTION_FIELDS = `
   "slug": slug.current,
   name, short, mascot, fund, city, state,
   fundShort, beneficiary, whyGiveHeading, whyGiveBody, videoUrl, videoHeading, videoCaption,
@@ -123,6 +124,7 @@ const PROJECTION_FIELDS = `
     "primaryDarkOverride": theme.primaryDarkOverride
   }
 `;
+const PROJECTION_FIELDS = SCHOOL_PROJECTION_FIELDS;
 const PROJECTION = `{${PROJECTION_FIELDS}}`;
 
 // Which pages are live is PUBLISHING state, not content, so it sits outside
@@ -135,8 +137,8 @@ const LIVE_PAGES = `"livePages": { "donor": livePages.donor, "ambassador": liveP
 // fields. It stores the already-resolved projection (asset URLs and all), which
 // is why it can be handed straight to toSchool.
 const PUBLIC_PROJECTION = isProduction
-  ? `{ "approved": approvedVersion, ${LIVE_PAGES} }`
-  : `{${PROJECTION_FIELDS}, ${LIVE_PAGES}}`;
+  ? `{ managementVersion, "approved": approvedVersion, ${LIVE_PAGES} }`
+  : `{${PROJECTION_FIELDS}, managementVersion, "approved": approvedVersion, ${LIVE_PAGES}}`;
 
 /**
  * Live doc on staging; parsed snapshot on production. A snapshot that won't
@@ -144,9 +146,11 @@ const PUBLIC_PROJECTION = isProduction
  * rest of the site than to have one bad record take everything down.
  */
 const publicDoc = (doc: SchoolDoc & { approved?: string }): SchoolDoc | undefined => {
-  if (!isProduction) return doc;
+  if (!isProduction && (doc.managementVersion ?? 1) < 2) return doc;
   try {
-    return JSON.parse(doc.approved ?? "") as SchoolDoc;
+    const snapshot = JSON.parse(doc.approved ?? "");
+    if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot) || typeof snapshot.slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(snapshot.slug) || typeof snapshot.name !== 'string' || !snapshot.name.trim()) return undefined;
+    return snapshot as SchoolDoc;
   } catch (err) {
     console.error("unreadable approvedVersion snapshot, skipping school:", err);
     return undefined;
@@ -248,8 +252,8 @@ const mapPrograms = (
  * nothing (or run outside production) and get both pages, because a page that
  * isn't public yet is exactly the one someone still needs to look at.
  */
-const resolveLivePages = (live?: LivePagesDoc | null): School["livePages"] =>
-  isProduction && live
+const resolveLivePages = (live?: LivePagesDoc | null, managed = false): School["livePages"] =>
+  (isProduction || managed) && live
     ? { donor: live.donor !== false, ambassador: live.ambassador !== false }
     : { donor: true, ambassador: true };
 
@@ -283,7 +287,7 @@ const toSchool = (doc: SchoolDoc, live?: LivePagesDoc | null): School => ({
     ? { ambassadorPrograms: mapPrograms(doc.ambassadorPrograms) }
     : {}),
   ...(doc.tiersToBeAnnounced ? { tiersToBeAnnounced: true } : {}),
-  livePages: resolveLivePages(live),
+  livePages: resolveLivePages(live, (doc.managementVersion ?? 1) >= 2),
   theme: deriveSchoolTheme({
     primary: doc.theme?.primary ?? undefined,
     secondary: doc.theme?.secondary ?? undefined,
@@ -307,7 +311,7 @@ export async function getSchools(): Promise<School[]> {
       // The snapshot carries the content; which pages are live is read off the
       // document beside it, so the two are recombined here.
       const content = publicDoc(doc);
-      return content ? toSchool(content, doc.livePages) : undefined;
+      return content ? toSchool({...content, managementVersion:doc.managementVersion}, doc.livePages) : undefined;
     })
     .filter((s): s is School => Boolean(s));
 }
@@ -321,7 +325,7 @@ export async function getSchool(slug: string): Promise<School | undefined> {
     { slug },
   );
   const content = doc ? publicDoc(doc) : undefined;
-  return content ? toSchool(content, doc?.livePages) : undefined;
+  return content ? toSchool({...content, managementVersion:doc?.managementVersion}, doc?.livePages) : undefined;
 }
 
 // -----------------------------------------------------------------------------
@@ -341,6 +345,16 @@ export async function getSchoolDraft(
     `*[_type == "school" && slug.current == $slug]${PROJECTION}[0]`,
     { slug },
   );
+  return doc ? toSchool(doc) : undefined;
+}
+
+/** ID-based preview keeps draft-only and duplicate-slug sales records distinct. */
+export async function getSchoolDraftById(partnerId: string): Promise<School | undefined> {
+  const result = await sanityClient.withConfig({perspective:'raw',useCdn:false}).fetch<{draft:SchoolDoc|null;live:SchoolDoc|null}>(
+    `{"draft":*[_type=="school" && _id==$draftId][0]${PROJECTION},"live":*[_type=="school" && _id==$id][0]${PROJECTION}}`,
+    {id:partnerId,draftId:`drafts.${partnerId}`},
+  );
+  const doc=result.draft??result.live;
   return doc ? toSchool(doc) : undefined;
 }
 
@@ -398,8 +412,8 @@ export async function getSchoolByPortalToken(
   token: string,
 ): Promise<SchoolPortal | undefined> {
   const doc = await sanityClient.fetch<PortalDoc | null>(
-    `*[${PUBLISHED} && defined(portalToken) && portalToken == $token]${PORTAL_PROJECTION}[0]`,
-    { token },
+    `*[${PUBLISHED} && defined(portalToken) && portalToken == $portalToken]${PORTAL_PROJECTION}[0]`,
+    { portalToken: token },
   );
   return doc ? toPortal(doc) : undefined;
 }
@@ -427,10 +441,11 @@ export async function getSchoolSnapshot(slug: string): Promise<SchoolDoc | undef
  */
 export async function getSchoolPortalBySlug(
   slug: string,
+  partnerId?: string,
 ): Promise<SchoolPortal | undefined> {
   const doc = await sanityClient.fetch<PortalDoc | null>(
-    `*[${PUBLISHED} && slug.current == $slug]${PORTAL_PROJECTION}[0]`,
-    { slug },
+    `*[${PUBLISHED} && slug.current == $slug && ($partnerId == null || _id == $partnerId)]${PORTAL_PROJECTION}[0]`,
+    { slug, partnerId: partnerId ?? null },
   );
   return doc ? toPortal(doc) : undefined;
 }

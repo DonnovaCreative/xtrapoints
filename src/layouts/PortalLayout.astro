@@ -12,6 +12,8 @@ import PortalInteractions from "@/components/portal/PortalInteractions.astro";
 import { schoolThemeVars, type School } from "@/data/schools";
 import { PORTAL_NAV, navHref, navItem } from "@/lib/portalNav";
 import { brand } from "@/config/brand";
+import { getPortalIdentity } from "@/lib/portalAuth";
+import { canAdministerPartners, canEditPartnerContent } from "@/lib/portalPermissions";
 
 interface Props {
   school: School;
@@ -36,12 +38,16 @@ interface Props {
 const { school, base, active, crumb, heading, blurb, via = "token", staff = false } = Astro.props;
 const t = school.theme;
 const section = navItem(active);
+const identity = via === "session" ? await getPortalIdentity(Astro) : undefined;
+const canEdit = Boolean(identity && canEditPartnerContent(identity));
+const staffAdmin = canAdministerPartners(identity);
 
 const nav = PORTAL_NAV.map((item) => ({
   title: item.title,
   href: navHref(base, item.segment),
   icon: item.icon,
 }));
+nav.push({ title: "Ambassador toolkit", href: "/resources/ambassador-toolkit", icon: "library" });
 
 const crumbs = [
   { label: school.short, href: base },
@@ -109,8 +115,8 @@ const pageBlurb = blurb ?? section.blurb;
                 Staff view — you're seeing <strong class="font-bold">{school.name}</strong>'s
                 portal, not your own.
               </span>
-              <a href="/portal" class="font-semibold underline underline-offset-2">
-                All schools
+              <a href={staffAdmin ? "/admin/schools" : "/portal?switch"} class="font-semibold underline underline-offset-2">
+                {staffAdmin ? "School administration" : "Switch workspace"}
               </a>
             </p>
           </div>
@@ -123,19 +129,27 @@ const pageBlurb = blurb ?? section.blurb;
             {pageTitle}
           </h1>
           <p class="mt-2 max-w-2xl text-sm leading-relaxed text-gray-600">{pageBlurb}</p>
+          {via === "session" && (
+            <div class="mt-4 flex flex-wrap items-center gap-3 text-sm">
+              {canEdit && <a href={`${base}/edit`} class="rounded-full bg-ink px-4 py-2 font-semibold text-white">Edit school pages</a>}
+              <a href={`${base}/preview`} class="rounded-full border border-gray-200 px-4 py-2 font-semibold text-gray-700">Preview current draft</a>
+              {!canEdit && <span class="text-xs text-gray-500">Viewer access · changes are managed by your school’s editors.</span>}
+            </div>
+          )}
         </header>
 
         <slot />
 
         <footer class="mt-14 border-t border-gray-200 pt-6">
           <p class="text-xs leading-relaxed text-gray-500">
-            This is a private link for {school.name}. Anyone with the URL can open
-            it, so please share it only inside your team — don't post it publicly.
-            Need it sent to someone else, or think it's been shared too widely?
-            Email <a
+            {via === "session" ? (
+              <>This workspace is available to authorized members of {school.name}’s team. Contact your school administrator for access changes. For marketing help, email </>
+            ) : (
+              <>This private link gives access to {school.name}’s resources. Share it only within your team. To replace the link or set up account access, email </>
+            )}<a
               href={`mailto:${brand.salesEmail}`}
               class="font-semibold text-gray-700 hover:underline">{brand.salesEmail}</a
-            > and we'll issue a new one.
+            >.
           </p>
         </footer>
       </main>

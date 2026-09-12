@@ -12,17 +12,18 @@ export function FundInput(props: StringInputProps) {
       <TextInput
         {...elementProps}
         value={value ?? ""}
+        readOnly={props.readOnly}
         onChange={(e) =>
-          onChange(e.currentTarget.value ? set(e.currentTarget.value) : unset())
+          !props.readOnly && onChange(e.currentTarget.value ? set(e.currentTarget.value) : unset())
         }
         style={{ flex: 1 }}
       />
       <Button
         mode="ghost"
         text="Generate"
-        disabled={!mascot}
+        disabled={Boolean(props.readOnly) || !mascot}
         title={mascot ? `Set to "${mascot} Athletics Fund"` : "Set a mascot first"}
-        onClick={() => mascot && onChange(set(`${mascot} Athletics Fund`))}
+        onClick={() => !props.readOnly && mascot && onChange(set(`${mascot} Athletics Fund`))}
       />
     </Flex>
   );

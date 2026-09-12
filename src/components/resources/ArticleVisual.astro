@@ -1,0 +1,14 @@
+---
+const { type, visuals } = Astro.props;
+const visual = visuals[type];
+---
+{type === 'qualification' && <figure class="rc-diagram">
+  <figcaption><strong>{visual.title}</strong><span>{visual.subtitle}</span></figcaption>
+  <ol class="rc-timeline">{visual.steps.map((step, index) => <li><span class="rc-timeline-dot">{index + 1}</span><strong>{step.title}</strong><span>{step.text}</span></li>)}</ol>
+  <p>{visual.note}</p>
+</figure>}
+{type === 'joining' && <figure class="rc-diagram">
+  <figcaption><strong>{visual.title}</strong><span>{visual.subtitle}</span></figcaption>
+  <ol class="rc-joining">{visual.steps.map(step => <li><strong>{step.title}</strong><span>{step.text}</span></li>)}</ol>
+  <p>{visual.note}</p>
+</figure>}

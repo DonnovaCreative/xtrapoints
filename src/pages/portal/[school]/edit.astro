@@ -1,0 +1,13 @@
+---
+export const prerender=false;
+import PortalLayout from '@/layouts/PortalLayout.astro';
+import SchoolEditor from '@/components/portal/SchoolEditor';
+import {gatePortal} from '@/lib/portalRoute';
+import {getPortalIdentity} from '@/lib/portalAuth';
+import {canEditPartnerContent} from '@/lib/portalPermissions';
+const gate=await gatePortal(Astro);if(!gate.ok)return gate.response;
+const {school,base,via,staff}=gate;
+const identity=via==='session'?await getPortalIdentity(Astro):undefined;
+const canEdit=Boolean(identity&&canEditPartnerContent(identity));
+---
+<PortalLayout school={school} base={base} via={via} staff={staff} active="pages" heading="Edit your pages" blurb="Update your story and program details. Preview your draft before publishing or requesting review.">{canEdit?<SchoolEditor client:load school={school.slug} canPublish={identity?.role==='org:admin'}/>:<p class="mt-8 rounded-card border border-gray-200 bg-white p-5 text-sm text-gray-600">{via==='session'?'Your account has viewer access. A school editor or administrator can make changes.':'Sign in with your school account to edit these pages.'}</p>}</PortalLayout>

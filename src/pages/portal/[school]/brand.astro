@@ -2,7 +2,7 @@
 // MARKETING PORTAL → Brand kit.
 //
 // Two halves: the school EDITS their brand here (logos, colors, photos — written
-// to the Sanity draft, reviewed by XtraPoint before it reaches their pages), and
+// to the school draft, published by an authorized administrator), and
 // below that they can DOWNLOAD the files we're currently using, which is what
 // this page was before editing existed and is still what they need when making
 // something themselves.
@@ -11,6 +11,8 @@ export const prerender = false;
 import PortalLayout from "@/layouts/PortalLayout.astro";
 import BrandEditor from "@/components/portal/BrandEditor";
 import { gatePortal } from "@/lib/portalRoute";
+import { getPortalIdentity } from "@/lib/portalAuth";
+import { canEditPartnerContent } from "@/lib/portalPermissions";
 import {
   EDITABLE_COLORS,
   EDITABLE_IMAGES,
@@ -21,7 +23,7 @@ import {
 
 const gate = await gatePortal(Astro);
 if (!gate.ok) return gate.response;
-const { school, base, via, staff } = gate;
+const { school, base, via, staff, partnerId } = gate;
 const t = school.theme;
 
 // Sanity's asset CDN takes ?dl=<filename> to force a download (and name the
@@ -55,9 +57,8 @@ const colors = Object.entries(EDITABLE_COLORS).map(([key, v]) => ({
   note: v.note,
 }));
 
-// A token visitor has no account, so there's nobody to attribute edits to —
-// they get the read-only view the portal had before. Staff edit in the Studio.
-const canEdit = via === "session" && !staff;
+const identity = via === "session" ? await getPortalIdentity(Astro) : undefined;
+const canEdit = Boolean(identity && canEditPartnerContent(identity));
 ---
 
 <PortalLayout
@@ -66,13 +67,15 @@ const canEdit = via === "session" && !staff;
   active="brand"
   via={via}
   staff={staff}
-  blurb="Your logo, colors and photos — change them here, and we'll review before anything reaches your live pages."
+  blurb="Manage your logo, colors and photos. Updates are saved to your school draft until an authorized administrator publishes them."
 >
   {
-    canEdit ? (
+    via === "session" ? (
       <BrandEditor
         client:load
         school={school.slug}
+        partnerId={partnerId}
+        readOnly={!canEdit}
         creditable={CREDITABLE_IMAGES}
         images={images}
         colors={colors}
@@ -81,19 +84,16 @@ const canEdit = via === "session" && !staff;
       />
     ) : (
       <p class="mt-8 rounded-card border border-gray-200 bg-white px-5 py-4 text-sm leading-relaxed text-gray-600">
-        {staff
-          ? "You're viewing this as XtraPoint staff — edit this school's brand in the Studio."
-          : "This is a view-only link. Ask your XtraPoint contact for an account if you'd like to update your brand yourself."}
+        This shared link provides a view of the current brand files. Sign in with a school editor or administrator account to update the draft.
       </p>
     )
   }
 
   <!-- ===================== CURRENT FILES ===================== -->
   <section class="mt-12 border-t border-gray-200 pt-8">
-    <h2 class="text-sm font-bold text-gray-900">What we're using now</h2>
+    <h2 class="text-sm font-bold text-gray-900">Current workspace files</h2>
     <p class="mt-1 text-sm text-gray-500">
-      The exact files and colors on your live pages today — grab these so
-      anything you make matches.
+      Download the school files available in this workspace. Draft updates appear in the editor above; the published page keeps its approved version until publication.
     </p>
 
     {

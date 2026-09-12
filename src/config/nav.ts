@@ -40,4 +40,5 @@ export const mainNav: NavItem[] = [
   { label: "What it does", href: "/#features" },
   { label: "Donor management", href: "/#donors" },
   { label: "Ambassadors", href: "/#ambassadors" },
+  ...((import.meta.env.XP_RESOURCE_CENTER_PUBLIC === 'true' || process.env.XP_RESOURCE_CENTER_PUBLIC === 'true') ? [{ label: 'Resources', href: '/resources' }] : []),
 ];

@@ -1,0 +1,12 @@
+---
+export const prerender=false;
+import ManagedPreview from '@/components/school/ManagedPreview.astro';
+import {resolveSalesPreview} from '@/data/schoolManagementStore';
+import {getSchoolDraftById,getSiteSettings} from '@/data/schoolsSource';
+Astro.response.headers.set('Cache-Control','private, no-store');Astro.response.headers.set('X-Robots-Tag','noindex, nofollow');Astro.response.headers.set('Referrer-Policy','no-referrer');
+const key=Astro.params.token??'';
+let school,settings;
+try{const preview=await resolveSalesPreview(key);if(!preview)return new Response('This preview has expired or been replaced. Ask your XtraPoint contact for a new link.',{status:404});[school,settings]=await Promise.all([getSchoolDraftById(preview.partnerId),getSiteSettings()]);}catch{return new Response('This preview is temporarily unavailable.',{status:503});}
+if(!school)return new Response('School preview not found.',{status:404});
+---
+<ManagedPreview school={school} settings={settings!} base={`/preview/partner/${key}`} view={Astro.url.searchParams.get('view')??'donor'}/>

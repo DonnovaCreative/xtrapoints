@@ -19,12 +19,10 @@ const clerk = clerkMiddleware();
 // because they authorize by Clerk session: without middleware `locals.auth`
 // doesn't exist at all, and calling it THROWS — the route 500s rather than
 // returning a clean 401, which is a confusing way to find out you forgot.
-// **Adding a portal API means adding it here.**
-//
-// /api/portal-access is deliberately NOT in scope: it's called by the Studio and
-// gated by the shared secret instead.
+// Every /api/portal-* and /api/admin-* endpoint uses authenticated application
+// permissions. New endpoints inherit Clerk rather than needing an allowlist edit.
 const SCOPE =
-  /^\/(portal|sign-in|sign-up)(\/|$)|^\/api\/portal-(brand|template)\/?$/;
+  /^\/(admin|portal|sign-in|sign-up|resources)(\/|$)|^\/api\/(admin-|portal-)/;
 
 export const onRequest = defineMiddleware((context, next) => {
   if (!SCOPE.test(context.url.pathname)) return next();

@@ -1,0 +1,14 @@
+---
+export const prerender=false;
+import {gatePortal} from '@/lib/portalRoute';
+import {findPortalPartner} from '@/lib/portalAuth';
+import ManagedPreview from '@/components/school/ManagedPreview.astro';
+import {getSchoolDraftById,getSiteSettings} from '@/data/schoolsSource';
+const gate=await gatePortal(Astro,{sessionOnly:true});if(!gate.ok)return gate.response;
+const partner=await findPortalPartner({school:gate.school.slug,partnerId:gate.partnerId});
+if(!partner)return new Response('School not found.',{status:404});
+const [school,settings]=await Promise.all([getSchoolDraftById(partner._id),getSiteSettings()]);
+if(!school)return new Response('School not found.',{status:404});
+Astro.response.headers.set('Cache-Control','private, no-store');
+---
+<ManagedPreview school={school} settings={settings} base={`${gate.base}/preview`} view={Astro.url.searchParams.get('view')??'donor'}/>

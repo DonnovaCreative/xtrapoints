@@ -1,0 +1,17 @@
+---
+import { toolkit as bundledToolkit, toolkitBase } from '@/data/toolkit';
+import ResourceSearch from './ResourceSearch';
+import ArticleVisual from './ArticleVisual.astro';
+import LaunchChecklist from './LaunchChecklist';
+const { center = false, publication: toolkit = bundledToolkit } = Astro.props;
+const icons = { guide: 'M5 4h11a3 3 0 0 1 3 3v14H8a3 3 0 0 1-3-3V4Zm0 13h14M9 8h6M9 11h5', catalog: 'M12 3v4m-7 5H1m22 0h-4M4 4l3 3m10 10 3 3M20 4l-3 3M7 17l-3 3M12 17v4M8 12a4 4 0 1 0 8 0 4 4 0 0 0-8 0', builder: 'M4 4h16v16H4V4Zm0 5h16M9 9v11M14 9v11M4 14h16', communications: 'M3 5h18v14H3V5Zm0 0 9 8 9-8', kickoff: 'M3 4h18v13H3V4Zm9 13v4m-5 0 5-4 5 4M10 8l5 3-5 3V8Z', rules: 'M5 3h14v18H5V3Zm4 5h6m-6 4h6m-6 4h4' };
+---
+<section class="rc-overview-intro">
+  <div><h1>{center ? 'Resources for your ambassador program' : 'Build a program your community can get behind.'}</h1><p class="rc-lede">The Ambassador Toolkit brings your program decisions, launch guidance and ready-to-adapt materials into one place.</p><div class="rc-action-row"><a class="rc-button" href={`${toolkitBase}/guide/start`}>Start with the launch guide</a><a class="rc-text-link" href="#six-resources">Browse the six resources</a></div></div>
+  <div class="rc-start-note"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 31 17 20l-6-6m6 6L29 8m-8 0h8v8" /><circle cx="10" cy="31" r="4"/><path d="m28 27 7 7m0-7-7 7" /></svg><strong>Your program. A clear plan.</strong><p>Choose what fits your organization. Agree on the budget, rules and responsibilities before inviting enrollment.</p><span>Partner planning edition · Version {toolkit.release.version}</span></div>
+</section>
+<section class="rc-library-search" aria-label="Search all resources"><ResourceSearch client:load /></section>
+<section id="six-resources" class="rc-resource-section"><div class="rc-section-heading"><h2>Everything you need to prepare</h2><p>Use the resources together, or go straight to your next task.</p></div><div class="rc-resource-grid">{toolkit.resources.map(resource => <article class="rc-resource-card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={icons[resource.id as keyof typeof icons]} /></svg><h3><a href={resource.href}>{resource.title}</a></h3><p>{resource.description}</p><div class="rc-resource-card-bottom"><a href={resource.href}>{resource.action}</a><span>{resource.format} included</span></div></article>)}</div></section>
+<LaunchChecklist client:load stages={toolkit.stages} />
+<section class="rc-foundations"><div><h2>A shared standard.<br />Your organization’s decisions.</h2><p>Keep the qualification standard consistent across your rules, invitations, kickoff and rewards.</p><a class="rc-text-link" href={`${toolkitBase}/rules/start-here`}>Work through your program decisions</a></div><ArticleVisual type="qualification" visuals={toolkit.visuals} /></section>
+<section class="rc-next-tasks"><h2>Find your next task</h2><div><a href={`${toolkitBase}/communications/M01`}><span>Recruit ambassadors</span><strong>Customize an interest invitation</strong></a><a href={`${toolkitBase}/builder/builder`}><span>Plan your budget</span><strong>Get started with the Program Builder</strong></a><a href={`${toolkitBase}/rules/participant-rules`}><span>Prepare participant terms</span><strong>Complete and export your rules</strong></a></div></section>

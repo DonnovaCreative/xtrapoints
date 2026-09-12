@@ -15,6 +15,6 @@ export const GET: APIRoute = () =>
   new Response(
     shouldNoindex
       ? `User-agent: *\nDisallow: /\n`
-      : `User-agent: *\nAllow: /\nDisallow: /portal/\n\nSitemap: ${brand.url}/sitemap-index.xml\n`,
+      : `User-agent: *\nAllow: /\nDisallow: /portal/\nDisallow: /admin/\nDisallow: /preview/\n\nSitemap: ${brand.url}/sitemap-index.xml\nSitemap: ${brand.url}/sitemap-schools.xml\n`,
     { headers: { "Content-Type": "text/plain" } },
   );

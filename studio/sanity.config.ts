@@ -11,6 +11,7 @@ import {
 } from "./previewAction";
 import { collegeAutofillAction } from "./collegeAutofillAction";
 import { promoteTool } from "./promoteTool";
+import { legacySchoolAction, manageSchoolAction } from "./managedSchoolActions";
 
 export default defineConfig({
   name: "default",
@@ -32,6 +33,14 @@ export default defineConfig({
           .items([
             S.documentTypeListItem("school").title("Schools"),
             S.documentTypeListItem("resourceTemplate").title("Marketing Resources"),
+            S.listItem()
+              .title("Ambassador Toolkit")
+              .id("ambassador-toolkit")
+              .child(S.list().title("Ambassador Toolkit").items([
+                S.documentTypeListItem("xpToolkitResource").title("Six resources"),
+                S.documentTypeListItem("xpToolkitArticle").title("Articles and templates"),
+                S.documentTypeListItem("xpToolkitRelease").title("Synchronized releases"),
+              ])),
             S.divider(),
             S.listItem()
               .title("Legal & Compliance")
@@ -78,11 +87,14 @@ export default defineConfig({
     actions: (prev, { schemaType }) =>
       schemaType === "school"
         ? [
+            manageSchoolAction,
+            ...[
             ...prev,
             collegeAutofillAction,
             schoolDonorPreview,
             schoolAmbassadorPreview,
             schoolOnePagerPreview,
+            ].map(legacySchoolAction),
           ]
         : schemaType === "legalPage"
           ? [...prev, legalPreview]

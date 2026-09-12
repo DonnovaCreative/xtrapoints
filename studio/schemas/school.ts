@@ -31,6 +31,7 @@ export default defineType({
   name: "school",
   title: "School",
   type: "document",
+  readOnly: ({ document }) => Number(document?.managementVersion ?? 0) >= 2,
   groups: [
     { name: "details", title: "Details", default: true },
     { name: "publishing", title: "Publishing" },
@@ -42,6 +43,7 @@ export default defineType({
     { name: "theme", title: "Brand colors" },
   ],
   fields: [
+    defineField({ name: "managementVersion", title: "Management version", type: "number", hidden: true, readOnly: true }),
     defineField({
       name: "name",
       title: "Full name",

@@ -27,7 +27,7 @@ const {
 // Keeping it off preview/local also stops our own QA traffic polluting HubSpot
 // analytics. See src/config/site-env.ts for how production is identified.
 const hubspotPortalId = import.meta.env.PUBLIC_HUBSPOT_PORTAL_ID;
-const loadHubSpot = isProduction && Boolean(hubspotPortalId);
+const loadHubSpot = isProduction && !noindex && Boolean(hubspotPortalId);
 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImageUrl = new URL(ogImage, Astro.site).href;

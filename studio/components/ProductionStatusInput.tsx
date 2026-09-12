@@ -29,6 +29,7 @@ export function ProductionStatusInput(props: StringInputProps) {
   const status = props.value;
   const approvedAt = useFormValue(["approvedAt"]) as string | undefined;
   const updatedAt = useFormValue(["_updatedAt"]) as string | undefined;
+  const managed = Number(useFormValue(["managementVersion"]) ?? 0) >= 2;
 
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
@@ -42,7 +43,7 @@ export function ProductionStatusInput(props: StringInputProps) {
   }, [status, approvedAt, updatedAt]);
 
   const approve = useCallback(async () => {
-    if (!slug || !docId) return;
+    if (managed || props.readOnly || !slug || !docId) return;
     setBusy(true);
     setError(null);
     setNote(null);
@@ -79,10 +80,10 @@ export function ProductionStatusInput(props: StringInputProps) {
     } finally {
       setBusy(false);
     }
-  }, [client, docId, slug]);
+  }, [client, docId, slug, managed, props.readOnly]);
 
   const takeDown = useCallback(async () => {
-    if (!docId) return;
+    if (managed || props.readOnly || !docId) return;
     setBusy(true);
     setError(null);
     setNote(null);
@@ -97,7 +98,9 @@ export function ProductionStatusInput(props: StringInputProps) {
     } finally {
       setBusy(false);
     }
-  }, [client, docId]);
+  }, [client, docId, managed, props.readOnly]);
+
+  if (managed) return <Card padding={4} radius={2} border><Stack space={3}><Text size={1} weight="semibold">Managed in School administration</Text><Text size={1} muted>This school’s content, drafts, publication and team access are managed in the application. The published page remains on its approved release until an authorized administrator publishes a new one.</Text><Button as="a" href={`${ORIGIN}/admin/schools/${encodeURIComponent(docId ?? "")}`} target="_blank" rel="noreferrer" text="Open School administration" tone="primary"/></Stack></Card>;
 
   return (
     <Stack space={4}>
@@ -146,7 +149,7 @@ export function ProductionStatusInput(props: StringInputProps) {
             <Button
               text={status === "live" ? "Approve changes" : "Approve for production"}
               tone="primary"
-              disabled={busy || !slug || !SECRET}
+              disabled={Boolean(props.readOnly) || busy || !slug || !SECRET}
               onClick={() => void approve()}
             />
             {status === "live" && (
@@ -154,7 +157,7 @@ export function ProductionStatusInput(props: StringInputProps) {
                 text="Take off production"
                 mode="ghost"
                 tone="critical"
-                disabled={busy}
+                disabled={Boolean(props.readOnly) || busy}
                 onClick={() => void takeDown()}
               />
             )}

@@ -4,14 +4,12 @@
 // (shared with the secret-gated draft preview); this file just supplies published
 // data + points the download button at the published PDF route.
 import OnePagerView from "@/components/school/OnePagerView.astro";
-import { getSchools } from "@/data/schoolsSource";
-
-export async function getStaticPaths() {
-  const schools = await getSchools();
-  return schools.map((school) => ({ params: { school: school.slug }, props: { school } }));
-}
-
-const { school } = Astro.props;
+import { getSchool } from "@/data/schoolsSource";
+export const prerender = false;
+const school = await getSchool(Astro.params.school!);
+if (!school) return new Response('Page not found', {status:404});
+Astro.response.headers.set('Cache-Control','public, max-age=0, must-revalidate');
+Astro.response.headers.set('CDN-Cache-Control','public, max-age=30');
 ---
 
 <OnePagerView school={school} pdfHref={`/schools/${school.slug}/one-pager.pdf`} />

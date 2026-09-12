@@ -10,6 +10,7 @@ Deeper docs live in [`docs/`](docs):
 
 | Doc | What it covers |
 | --- | --- |
+| [docs/SCHOOL-PLATFORM.md](docs/SCHOOL-PLATFORM.md) | School administration, partner handoff, publication and toolkit release workflow |
 | [docs/HANDOFF.md](docs/HANDOFF.md) | **Start here** — current state, git/deploy flow, gotchas |
 | [docs/COMMANDS.md](docs/COMMANDS.md) | Everyday terminal commands (dev, commit, deploy, Sanity) |
 | [docs/ADDING-A-SCHOOL.md](docs/ADDING-A-SCHOOL.md) | Adding co-branded school pages + editing legal pages |

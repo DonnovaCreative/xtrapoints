@@ -21,7 +21,8 @@ export const prerender = false;
 
 import type { APIRoute, APIContext } from "astro";
 import { writeClient } from "@/config/sanityWrite";
-import { getPortalIdentity } from "@/lib/portalAuth";
+import { resolvePortalPartner } from "@/lib/portalAuth";
+import { portalJson as json, requireSameOrigin, isRecord } from "@/lib/portalPermissions";
 import { overrideId, shapeOverrides } from "@/data/templateOverrides";
 import {
   ALLOWED_IMAGE_TYPES,
@@ -31,40 +32,18 @@ import {
 } from "@/lib/templateFields";
 import { HEX } from "@/lib/portalEdit";
 
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { "content-type": "application/json; charset=utf-8" },
-  });
-
 async function authorize(ctx: APIContext, slug?: string, templateId?: string) {
-  if (!slug) return { error: json({ error: "missing_school" }, 400) };
   const spec = getTemplateSpec(templateId);
   if (!spec) return { error: json({ error: "no_such_template" }, 404) };
-
-  const identity = await getPortalIdentity(ctx);
-  if (!identity) return { error: json({ error: "unauthorized" }, 401) };
-  if (!identity.isStaff && identity.schoolSlug !== slug) {
-    return { error: json({ error: "forbidden" }, 403) };
-  }
-
-  let client: ReturnType<typeof writeClient>;
+  const resolved = await resolvePortalPartner(ctx, { school: slug }, ctx.request.method === "GET" ? "read" : "edit");
+  if ("error" in resolved) return resolved;
   try {
-    client = writeClient();
-  } catch {
-    console.error("portal-template: SANITY_WRITE_TOKEN is not configured");
-    return {
-      error: json(
-        {
-          error: "not_configured",
-          message: "Customising isn't available right now. We've been told about it.",
-        },
-        503,
-      ),
-    };
+    const client = writeClient();
+    return { client, spec, id: overrideId(resolved.partner.slug, spec.id), slug: resolved.partner.slug };
+  } catch (err) {
+    console.error("portal-template client configuration failed:", err);
+    return { error: json({ error: "not_configured", message: "Customising isn't available right now." }, 503) };
   }
-
-  return { client, spec, id: overrideId(slug, spec.id), slug };
 }
 
 const PROJECTION = `{
@@ -92,32 +71,29 @@ async function ensureDoc(
   });
 }
 
-const touch = (client: ReturnType<typeof writeClient>, id: string) =>
-  client.patch(id).set({ updatedAt: new Date().toISOString() }).commit();
+interface EntryWrite {
+  arrayName: "fields" | "lists" | "images";
+  key: string;
+  entry: Record<string, unknown> | null;
+}
 
-/**
- * Upsert one entry in a keyed array. Sanity has no "set by key" primitive, so
- * this drops any existing entry for the key and appends the new one — which also
- * self-heals a document that somehow ended up with duplicates.
- */
-async function upsertByKey(
-  client: ReturnType<typeof writeClient>,
-  id: string,
-  arrayName: "fields" | "lists" | "images",
-  key: string,
-  entry: Record<string, unknown> | null,
-) {
-  await client
-    .patch(id)
-    .setIfMissing({ [arrayName]: [] })
-    .unset([`${arrayName}[key == "${key}"]`])
-    .commit();
-  if (entry) {
-    await client
-      .patch(id)
-      .append(arrayName, [{ _key: `${key}-${Date.now().toString(36)}`, key, ...entry }])
-      .commit();
+/** Removal, insertion and version change commit together, including multi-field saves. */
+async function applyEntries(client: ReturnType<typeof writeClient>, id: string, writes: EntryWrite[]) {
+  const updatedAt = new Date().toISOString();
+  let transaction = client.transaction().patch(id, (p) =>
+    p.setIfMissing({ fields: [], lists: [], images: [] }).set({ updatedAt }),
+  );
+  for (const { arrayName, key, entry } of writes) {
+    // Keys have already been checked against the code-owned template manifest.
+    transaction = transaction.patch(id, (p) => p.unset([`${arrayName}[key == "${key}"]`]));
+    if (entry) {
+      transaction = transaction.patch(id, (p) =>
+        p.append(arrayName, [{ _key: `${key}-${Date.now().toString(36)}`, key, ...entry }]),
+      );
+    }
   }
+  await transaction.commit();
+  return updatedAt;
 }
 
 export const GET: APIRoute = async (ctx) => {
@@ -134,11 +110,13 @@ export const GET: APIRoute = async (ctx) => {
     });
   } catch (err) {
     console.error("portal-template GET failed:", err);
-    return json({ error: "read_failed", message: (err as Error).message }, 502);
+    return json({ error: "read_failed", message: "The request could not be completed. Please try again." }, 502);
   }
 };
 
 export const POST: APIRoute = async (ctx) => {
+  const originError = requireSameOrigin(ctx.request, ctx.url);
+  if (originError) return originError;
   const contentType = ctx.request.headers.get("content-type") ?? "";
 
   // ── Image upload (multipart) ───────────────────────────────────────────────
@@ -173,14 +151,13 @@ export const POST: APIRoute = async (ctx) => {
         filename: file.name,
         contentType: file.type,
       });
-      await upsertByKey(auth.client, auth.id, "images", key, {
+      await applyEntries(auth.client, auth.id, [{ arrayName: "images", key, entry: {
         asset: { _type: "image", asset: { _type: "reference", _ref: asset._id } },
-      });
-      await touch(auth.client, auth.id);
+      } }]);
       return json({ ok: true, key, url: asset.url });
     } catch (err) {
       console.error("portal-template upload failed:", err);
-      return json({ error: "upload_failed", message: (err as Error).message }, 502);
+      return json({ error: "upload_failed", message: "The request could not be completed. Please try again." }, 502);
     }
   }
 
@@ -194,7 +171,16 @@ export const POST: APIRoute = async (ctx) => {
     reset?: boolean;
   };
   try {
-    body = await ctx.request.json();
+    const parsed = await ctx.request.json();
+    if (!isRecord(parsed) || (parsed.school !== undefined && typeof parsed.school !== "string") ||
+      (parsed.template !== undefined && typeof parsed.template !== "string") ||
+      (parsed.values !== undefined && !isRecord(parsed.values)) ||
+      (parsed.lists !== undefined && !isRecord(parsed.lists)) ||
+      (parsed.clear !== undefined && typeof parsed.clear !== "string") ||
+      (parsed.reset !== undefined && typeof parsed.reset !== "boolean")) {
+      return json({ error: "bad_json" }, 400);
+    }
+    body = parsed;
   } catch {
     return json({ error: "bad_json" }, 400);
   }
@@ -213,8 +199,8 @@ export const POST: APIRoute = async (ctx) => {
       if (!field) return json({ error: "field_not_editable" }, 400);
       const arrayName =
         field.control === "image" ? "images" : field.control === "list" ? "lists" : "fields";
-      await upsertByKey(auth.client, auth.id, arrayName, body.clear, null);
-      await touch(auth.client, auth.id);
+      await ensureDoc(auth.client, auth.id, auth.slug, auth.spec.id);
+      await applyEntries(auth.client, auth.id, [{ arrayName, key: body.clear, entry: null }]);
       return json({ ok: true });
     }
 
@@ -275,17 +261,14 @@ export const POST: APIRoute = async (ctx) => {
     if (!scalars.length && !listWrites.length) return json({ ok: true, noop: true });
 
     await ensureDoc(auth.client, auth.id, auth.slug, auth.spec.id);
-    for (const { key, value } of scalars) {
-      await upsertByKey(auth.client, auth.id, "fields", key, value ? { value } : null);
-    }
-    for (const { key, items } of listWrites) {
-      await upsertByKey(auth.client, auth.id, "lists", key, items.length ? { items } : null);
-    }
-    const updatedAt = new Date().toISOString();
-    await auth.client.patch(auth.id).set({ updatedAt }).commit();
+    const writes: EntryWrite[] = [
+      ...scalars.map(({ key, value }) => ({ arrayName: "fields" as const, key, entry: value ? { value } : null })),
+      ...listWrites.map(({ key, items }) => ({ arrayName: "lists" as const, key, entry: items.length ? { items } : null })),
+    ];
+    const updatedAt = await applyEntries(auth.client, auth.id, writes);
     return json({ ok: true, updatedAt });
   } catch (err) {
     console.error("portal-template POST failed:", err);
-    return json({ error: "write_failed", message: (err as Error).message }, 502);
+    return json({ error: "write_failed", message: "The request could not be completed. Please try again." }, 502);
   }
 };

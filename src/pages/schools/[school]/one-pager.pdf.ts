@@ -22,10 +22,9 @@ export const GET: APIRoute = async ({ params, url }) => {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="${filename}"`,
-        // A rebrand triggers a fresh deployment (new function), so a long cache
-        // is safe — mirrors the OG endpoint.
-        "Cache-Control": "public, max-age=3600",
-        "CDN-Cache-Control": "public, max-age=86400",
+        // Short cache follows school publication without a site rebuild.
+        "Cache-Control": "public, max-age=30, must-revalidate",
+        "CDN-Cache-Control": "public, max-age=30",
       },
     });
   } catch (err) {
