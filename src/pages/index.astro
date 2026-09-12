@@ -2,33 +2,17 @@
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
-import Hero from "@/components/home/Hero.astro";
-import AudienceMarquee from "@/components/home/AudienceMarquee.astro";
-import HowItWorks from "@/components/home/HowItWorks.astro";
-import WhatItDoes from "@/components/home/WhatItDoes.astro";
-import DonorManagement from "@/components/home/DonorManagement.astro";
-import MarketingSupport from "@/components/home/MarketingSupport.astro";
-import Ambassadors from "@/components/home/Ambassadors.astro";
-import WhyItWorks from "@/components/home/WhyItWorks.astro";
-import FinalCTA from "@/components/home/FinalCTA.astro";
+import HomePage from "@/components/marketing/HomePage.astro";
+import "@/styles/home-refresh.css";
 import { brand } from "@/config/brand";
 ---
 
 <Layout
-  title={`${brand.nameSpaced} | Every purchase, a small act of support for your team.`}
-  description="Partner with us and help shape the future of business relationships."
+  marketing
+  title={`${brand.nameSpaced} | For the team behind the team`}
+  description="Turn everyday spending into ongoing support with XtraPoint. Round-up giving, recurring donations, and tools that help schools, teams, and communities grow."
 >
   <Header />
-  <main>
-    <Hero />
-    <AudienceMarquee />
-    <HowItWorks />
-    <WhatItDoes />
-    <DonorManagement />
-    <MarketingSupport />
-    <Ambassadors />
-    <WhyItWorks />
-    <FinalCTA />
-  </main>
+  <HomePage />
   <Footer />
 </Layout>

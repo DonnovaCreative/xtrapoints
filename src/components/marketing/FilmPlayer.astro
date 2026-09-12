@@ -1,0 +1,194 @@
+---
+export interface Props {
+  id: string;
+  src: string;
+  poster: string;
+  title: string;
+  label?: string;
+  captions?: string;
+}
+const {
+  id,
+  src,
+  poster,
+  title,
+  label = "Watch the film",
+  captions = src.replace(/\.mp4$/, ".en.vtt"),
+} = Astro.props;
+---
+
+<div class="xp-film" data-film>
+  <button
+    class="film-trigger"
+    type="button"
+    data-film-open
+    aria-haspopup="dialog"
+    aria-controls={id}
+  >
+    <span class="film-play">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="m9 5 11 7-11 7V5Z" />
+      </svg>
+    </span>
+    <span>
+      {label}
+      <small>{title}</small>
+    </span>
+  </button>
+  <dialog id={id} class="film-dialog" aria-label={title} data-film-dialog>
+    <div class="film-dialog-top">
+      <p>{title}</p>
+      <button type="button" data-film-close aria-label="Close video">
+        Close <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <video
+      controls
+      playsinline
+      preload="none"
+      poster={poster}
+      data-video-src={src}
+      aria-label={title}
+    >
+      <track
+        kind="captions"
+        src={captions}
+        srclang="en"
+        label="English"
+        default
+      />
+    </video>
+    <p class="film-dialog-caption">
+      XtraPoint brings together round-up giving, recurring support, and tools
+      that help your community take part.
+    </p>
+  </dialog>
+  <noscript>
+    <a class="xp-text-link" href={src}>
+      Watch {title}
+    </a>
+  </noscript>
+</div>
+<script>
+  document.querySelectorAll<HTMLElement>("[data-film]").forEach((root) => {
+    const dialog = root.querySelector<HTMLDialogElement>("dialog");
+    const video = root.querySelector<HTMLVideoElement>("video");
+    const trigger = root.querySelector<HTMLButtonElement>("[data-film-open]");
+    if (!dialog || !video || !trigger) return;
+    let priorOverflow = "";
+    trigger.addEventListener("click", () => {
+      priorOverflow = document.documentElement.style.overflow;
+      if (!video.getAttribute("src")) video.src = video.dataset.videoSrc!;
+      dialog.showModal();
+      document.documentElement.style.overflow = "hidden";
+      void video.play().catch(() => {});
+    });
+    root
+      .querySelector("[data-film-close]")
+      ?.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) {
+        const rect = dialog.getBoundingClientRect();
+        if (
+          event.clientX < rect.left ||
+          event.clientX > rect.right ||
+          event.clientY < rect.top ||
+          event.clientY > rect.bottom
+        )
+          dialog.close();
+      }
+    });
+    dialog.addEventListener("close", () => {
+      video.pause();
+      document.documentElement.style.overflow = priorOverflow;
+      trigger.focus();
+    });
+  });
+</script>
+<style>
+  .film-trigger {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-align: left;
+    color: inherit;
+    padding: 8px 0;
+  }
+  .film-trigger > span:last-child {
+    font-size: 14px;
+    font-weight: 650;
+  }
+  .film-trigger small {
+    display: block;
+    font-size: 11px;
+    font-weight: 400;
+    opacity: 0.65;
+    margin-top: 4px;
+  }
+  .film-play {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border: 1px solid #ffffff65;
+    border-radius: 50%;
+    transition: background 0.2s;
+  }
+  .film-play svg {
+    width: 21px;
+    height: 21px;
+    margin-left: -2px;
+  }
+  .film-trigger:hover .film-play {
+    background: var(--xp-lime);
+    color: var(--xp-navy);
+    border-color: var(--xp-lime);
+  }
+  .film-dialog {
+    width: min(1100px, calc(100% - 32px));
+    max-height: 90dvh;
+    padding: 0;
+    border: 1px solid #ffffff30;
+    border-radius: 10px;
+    background: var(--xp-navy);
+    color: white;
+    margin: auto;
+    overflow: auto;
+  }
+  .film-dialog::backdrop {
+    background: #00051bda;
+    backdrop-filter: blur(10px);
+  }
+  .film-dialog-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 18px 22px;
+    font-size: 14px;
+  }
+  .film-dialog-top button {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 40px;
+    padding: 0 10px;
+    border: 1px solid #ffffff40;
+    border-radius: 4px;
+  }
+  .film-dialog-top button span {
+    font-size: 24px;
+  }
+  .film-dialog video {
+    width: 100%;
+    max-height: 68dvh;
+    display: block;
+    background: black;
+  }
+  .film-dialog-caption {
+    font-size: 12px;
+    line-height: 1.6;
+    color: #c9d5e8;
+    padding: 14px 22px;
+  }
+</style>

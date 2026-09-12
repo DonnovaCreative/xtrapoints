@@ -1,5 +1,6 @@
 ---
 import "@/styles/globals.css";
+import "@/styles/marketing.css";
 import { brand } from "@/config/brand";
 import { isProduction, shouldNoindex } from "@/config/site-env";
 import { SIDEBAR_PREFERENCES_BOOTSTRAP } from "@/lib/sidebarPreferences";
@@ -13,14 +14,17 @@ export interface Props {
   noindex?: boolean;
   /** Restore workspace navigation before the first paint, including static exports. */
   workspace?: boolean;
+  /** Refreshed public marketing typography and palette. */
+  marketing?: boolean;
 }
 
 const {
   title,
   description,
-  ogImage = "/assets/og-image-xp.jpg",
+  ogImage = Astro.props.marketing ? "/assets/og-brand-refresh.png" : "/assets/og-image-xp.jpg",
   noindex = false,
   workspace = false,
+  marketing = false,
 } = Astro.props;
 
 // HubSpot tracking — PRODUCTION ONLY, and that is a consent decision, not a
@@ -76,13 +80,22 @@ const ogImageUrl = new URL(ogImage, Astro.site).href;
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
 
-    <!-- Fonts: display=swap so text paints immediately on the brand stack -->
+    {marketing && <link rel="preload" href="/fonts/Archivo-Latin.woff2" as="font" type="font/woff2" crossorigin />}
+    {marketing && <link rel="preload" href="/fonts/Archivo-Italic-Latin.woff2" as="font" type="font/woff2" crossorigin />}
+    {marketing && <noscript><style is:inline>
+      .site-header { position: relative !important; }
+      .nav-toggle, .roundup-choices, .audience-select, .film-trigger, .contact-form-body form { display: none !important; }
+      .nav-panel { position: static !important; visibility: visible !important; opacity: 1 !important; transform: none !important; }
+    </style></noscript>}
+    <!-- Legacy partner-page fonts are retained for existing school identities. -->
+    {!marketing && <>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Anton&family=Permanent+Marker&family=Space+Mono:wght@400;700&display=swap"
     />
+    </>}
 
     {/* HubSpot tracking + cookie banner. Loads the banner too, so consent is
         handled by HubSpot rather than a second banner of our own. */}
@@ -96,7 +109,8 @@ const ogImageUrl = new URL(ogImage, Astro.site).href;
       />
     )}
   </head>
-  <body>
+  <body class:list={{ "xp-marketing": marketing }}>
+    {marketing && <a class="xp-skip" href="#main-content">Skip to content</a>}
     <slot />
 
     <!-- Scroll-reveal: add .is-visible to reveal/stagger elements as they enter. -->

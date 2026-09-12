@@ -1,95 +1,228 @@
 ---
-import CtaButton from "@/components/CtaButton.astro";
 import { brand } from "@/config/brand";
-
-// Jump links to real on-page sections (this is a two-page site — no fake pages).
-const explore = [
-  { label: "How it works", href: "/#how-it-works" },
-  { label: "What it does", href: "/#features" },
-  { label: "Donor management", href: "/#donors" },
-  { label: "Marketing support", href: "/#marketing" },
-  { label: "Student ambassadors", href: "/#ambassadors" },
-];
-
+const preview =
+  import.meta.env.DEV ||
+  ["preview", "staging"].includes(process.env.VERCEL_ENV ?? "");
 const year = new Date().getFullYear();
-
-const headClass =
-  "font-mono text-[0.6875rem] uppercase tracking-[0.12em] text-white/40";
-const linkClass =
-  "text-sm text-white/70 transition-colors hover:text-lime w-fit";
 ---
 
-<footer class="relative overflow-hidden bg-ink-bg text-white">
-  <div class="dot-grid opacity-60"></div>
-
-  <div class="relative z-10 mx-auto max-w-7xl px-6 py-16 lg:px-10 lg:py-20">
-    <div class="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr]">
-      <!-- brand + CTA -->
-      <div class="flex flex-col gap-6">
-        <img
-          src={brand.logo.white}
-          alt={brand.name}
-          width={brand.logo.width}
-          height={brand.logo.height}
-          class="h-7 w-auto self-start"
-        />
-        <p class="max-w-sm text-sm leading-relaxed text-white/65">
-          Turn everyday spending into recurring donor revenue — with the
-          marketing tools to grow it. {brand.tagline}.
-        </p>
-        <CtaButton href="/contact" variant="lime" class="!px-5 !py-2.5 !text-sm"
-          >Get Started</CtaButton
-        >
+<footer class="brand-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="/" aria-label={`${brand.name} home`}>
+          <img
+            src={brand.logo.white}
+            alt={brand.name}
+            width={brand.logo.width}
+            height={brand.logo.height}
+          />
+        </a>
+        <p>For the team behind the team.</p>
+        <span>Everyday giving. Ongoing support.</span>
       </div>
-
-      <!-- explore (section jumps) -->
-      <nav class="flex flex-col gap-3" aria-label="Explore">
-        <span class={headClass}>Explore</span>
-        {explore.map((l) => <a href={l.href} class={linkClass}>{l.label}</a>)}
-      </nav>
-
-      <!-- get started / contact -->
-      <div class="flex flex-col gap-6">
-        <nav class="flex flex-col gap-3" aria-label="Get started">
-          <span class={headClass}>Get started</span>
-          <a href="/contact" class={linkClass}>Request a walkthrough</a>
-          <a href={`mailto:${brand.salesEmail}`} class={linkClass}>
-            {brand.salesEmail}
+      <nav aria-label="Explore">
+        <h2>Explore</h2>
+        <a href="/#how-it-works">How it works</a>
+        <a href="/#community">Who it’s for</a>
+        <a href="/#features">The platform</a>
+        <a href="/#ambassadors">Ambassadors</a>
+        {preview && (
+          <a href="/about">
+            About XtraPoint <small>Preview</small>
           </a>
-        </nav>
-        <div class="flex flex-col gap-3">
-          <span class={headClass}>Headquarters</span>
-          <span class="text-sm leading-relaxed text-white/70">
-            900 Wilmeth Rd<br />McKinney, TX 75069
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <!-- bottom bar -->
-    <div
-      class="mt-14 flex flex-col gap-4 border-t border-white/10 pt-8 text-sm text-white/50 sm:flex-row sm:items-center sm:justify-between"
-    >
-      <p>
-        © {year} LaCore Payments Technologies, Inc. ·
-        <span class="text-white/40">{brand.name} is a DBA of LaCore Payments Technologies.</span>
-      </p>
-      <div class="flex items-center gap-6">
-        <a href="/support" class={linkClass}>Support</a>
-        <a href="/refund-policy" class={linkClass}>Refund</a>
-        <a href="/terms" class={linkClass}>Terms</a>
-        <a href="/privacy-policy" class={linkClass}>Privacy</a>
-        <a href="/cookie-policy" class={linkClass}>Cookies</a>
+        )}
+      </nav>
+      <nav aria-label="Connect">
+        <h2>Let’s connect</h2>
+        <a href="/contact">Get started</a>
+        <a href="/portal">Partner login</a>
+        <a href={`mailto:${brand.salesEmail}`}>{brand.salesEmail}</a>
+        <a href="/support">Support</a>
+      </nav>
+      <div class="footer-location">
+        <h2>Made for community.</h2>
+        <p>
+          900 Wilmeth Road
+          <br />
+          McKinney, Texas 75069
+        </p>
         <a
           href="https://www.linkedin.com/company/lpt-io/"
-          class="text-white/60 transition-colors hover:text-lime"
-          aria-label="LinkedIn"
+          aria-label="LaCore Payments Technologies on LinkedIn"
         >
-          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM10 9h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.4c0-1.3 0-2.96-1.8-2.96-1.8 0-2.08 1.4-2.08 2.86V21h-4z" />
-          </svg>
+          Find us on LinkedIn <span aria-hidden="true">↗</span>
         </a>
       </div>
     </div>
+    <div class="footer-bottom">
+      <p>
+        © {year} LaCore Payments Technologies, Inc.
+        <br />
+        <span>{brand.name} is a DBA of LaCore Payments Technologies.</span>
+      </p>
+      <nav aria-label="Legal">
+        <a href="/terms">Terms</a>
+        <a href="/privacy-policy">Privacy</a>
+        <a href="/cookie-policy">Cookies</a>
+        <a href="/refund-policy">Refunds</a>
+      </nav>
+    </div>
   </div>
 </footer>
+<style>
+  .brand-footer {
+    background: var(--xp-navy);
+    color: white;
+    font-family: var(--xp-body);
+    padding-block: 68px 30px;
+  }
+  .footer-inner {
+    width: min(100% - 112px, 1328px);
+    margin: auto;
+  }
+  .footer-top {
+    display: grid;
+    grid-template-columns: 1.65fr 1fr 1fr 1.1fr;
+    gap: 40px;
+  }
+  .footer-brand img {
+    width: 188px;
+    height: auto;
+  }
+  .footer-brand > p {
+    font-size: 15px;
+    letter-spacing: -0.02em;
+    margin-top: 24px;
+  }
+  .footer-brand > span {
+    display: block;
+    color: #94a4ba;
+    font-size: 11px;
+    margin-top: 9px;
+  }
+  .footer-top h2 {
+    font-size: 11px;
+    color: #91a3ba;
+    font-weight: 400;
+    margin-bottom: 21px;
+  }
+  .footer-top nav {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .footer-top nav h2 {
+    margin-bottom: 5px;
+  }
+  .footer-top nav a,
+  .footer-location > a {
+    font-size: 12px;
+    color: #d8e2ee;
+    line-height: 1.5;
+  }
+  .footer-top nav a:hover,
+  .footer-location > a:hover,
+  .footer-bottom a:hover {
+    color: var(--xp-lime);
+  }
+  .footer-top nav small {
+    margin-left: 5px;
+    font-size: 8px;
+    color: var(--xp-lime);
+    border: 1px solid #87f20045;
+    padding: 3px 4px;
+    border-radius: 2px;
+  }
+  .footer-location p {
+    font-size: 12px;
+    line-height: 1.7;
+    color: #d8e2ee;
+    margin-bottom: 18px;
+  }
+  .footer-location > a span {
+    margin-left: 8px;
+  }
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+    border-top: 1px solid #ffffff18;
+    margin-top: 56px;
+    padding-top: 27px;
+    font-size: 10px;
+    line-height: 1.8;
+    color: #8b9db4;
+  }
+  .footer-bottom p > span {
+    font-size: 9px;
+    color: #7f91a9;
+  }
+  .footer-bottom nav {
+    display: flex;
+    gap: 24px;
+  }
+  .brand-footer a:focus-visible {
+    outline: 3px solid var(--xp-blue);
+    outline-offset: 5px;
+  }
+  .footer-bottom a {
+    padding-block: 9px;
+  }
+  @media (max-width: 1100px) {
+    .footer-inner {
+      width: calc(100% - 64px);
+    }
+    .footer-top {
+      gap: 25px;
+      grid-template-columns: 1.5fr 1fr 1fr;
+    }
+    .footer-location {
+      display: none;
+    }
+    .footer-brand img {
+      width: 170px;
+    }
+  }
+  @media (max-width: 700px) {
+    .brand-footer {
+      padding-block: 49px 26px;
+    }
+    .footer-inner {
+      width: calc(100% - 40px);
+    }
+    .footer-top {
+      grid-template-columns: 1fr 1fr;
+      gap: 35px 25px;
+    }
+    .footer-brand {
+      grid-column: 1/-1;
+    }
+    .footer-brand > p {
+      margin-top: 20px;
+    }
+    .footer-top nav h2 {
+      margin-bottom: 7px;
+    }
+    .footer-top nav {
+      gap: 15px;
+    }
+    .footer-top nav a {
+      font-size: 12px;
+    }
+    .footer-bottom {
+      display: block;
+      margin-top: 37px;
+      padding-top: 24px;
+    }
+    .footer-bottom nav {
+      margin-top: 16px;
+      gap: 25px;
+    }
+    .footer-bottom p {
+      font-size: 10px;
+    }
+  }
+</style>

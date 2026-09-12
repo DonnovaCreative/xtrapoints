@@ -1,0 +1,542 @@
+---
+import RoundUpDemo from "./RoundUpDemo";
+import AudienceGallery from "./AudienceGallery";
+import FilmPlayer from "./FilmPlayer.astro";
+const arrow = "M4 12h16m-6-6 6 6-6 6";
+const faqs = [
+  {
+    question: "How does round-up giving work?",
+    answer:
+      "Supporters link an eligible account and choose the program they want to support. Everyday purchases are rounded up to the next dollar, and the difference accumulates toward a donation. A $4.65 purchase, for example, creates a $0.35 round-up.",
+  },
+  {
+    question: "Can supporters give in other ways?",
+    answer:
+      "Yes. Alongside round-ups, XtraPoint supports one-time gifts and recurring donations, so supporters can choose a way to give that works for them.",
+  },
+  {
+    question: "What does it take to get started?",
+    answer:
+      "Start with a conversation about your program. Our team walks you through the platform, confirms the right setup, and helps prepare your branded experience and launch. There is no implementation cost.",
+  },
+  {
+    question: "Is this only for college athletics?",
+    answer:
+      "XtraPoint works with athletic departments, booster clubs, alumni associations, schools, youth sports, and community organizations. Tell us about your community and we’ll explore the right fit together.",
+  },
+  {
+    question: "What marketing support is available?",
+    answer:
+      "Launch resources can include campaign materials, social and email content, and ambassador tools. We’ll walk you through the resources and services available for your program during your introduction.",
+  },
+];
+---
+
+<main id="main-content">
+  <section class="home-hero" aria-labelledby="hero-heading">
+    <div class="hero-image">
+      <img
+        src="/images/brand-refresh/otto-volleyball-team.webp"
+        srcset="/images/brand-refresh/otto-volleyball-team-720.webp 720w, /images/brand-refresh/otto-volleyball-team.webp 1536w"
+        sizes="(max-width:700px) 100vw, 80vw"
+        width="1536"
+        height="1024"
+        alt="Otto the Otter with a volleyball team, gathered together on their home court."
+        fetchpriority="high"
+      />
+    </div>
+    <div class="hero-shade" aria-hidden="true"></div>
+    <div class="xp-wrap hero-content">
+      <p class="hero-intro">
+        <span aria-hidden="true"></span> A little change can change the game.
+      </p>
+      <h1 id="hero-heading">
+        <span>For the team</span>
+        <span class="hero-brush">behind</span>
+        <span>the team.</span>
+      </h1>
+      <p class="hero-description">
+        Turn everyday spending into ongoing support. Round-up giving, powerful
+        fundraising tools, and a team that helps yours grow.
+      </p>
+      <div class="hero-actions">
+        <a class="xp-btn" href="/contact">
+          Get started{" "}
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            aria-hidden="true"
+          >
+            <path d={arrow} />
+          </svg>
+        </a>
+        <a class="hero-secondary" href="#how-it-works">
+          See how it works
+        </a>
+      </div>
+      <p class="hero-reassurance">
+        No implementation cost. Built around your community.
+      </p>
+    </div>
+    <div class="hero-gift" aria-label="Example: 35 cents of round-up support">
+      <span class="gift-symbol" aria-hidden="true">
+        +
+      </span>
+      <span>
+        <small>Small change. Real possibility.</small>
+        <strong>
+          $0.35 <span>for your team</span>
+        </strong>
+        <em>Illustrative round-up</em>
+      </span>
+    </div>
+    <div class="hero-bottom xp-wrap">
+      <FilmPlayer
+        id="brand-film"
+        src="/videos/brand-refresh/xtrapoint-brand-film.mp4"
+        poster="/images/brand-refresh/stadium-film-poster.webp"
+        title="For the team behind the team"
+        label="Meet XtraPoint"
+      />
+      <a
+        class="hero-scroll"
+        href="#how-it-works"
+        aria-label="Explore how XtraPoint works"
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.4"
+          aria-hidden="true"
+        >
+          <path d="M12 4v16m-6-6 6 6 6-6" />
+        </svg>{" "}
+        Keep the good going
+      </a>
+    </div>
+  </section>
+  <div class="value-strip">
+    <div class="xp-wrap">
+      <p>
+        <strong>Everyday giving.</strong> Season-long possibility.
+      </p>
+      <div>
+        <span>Round-ups</span>
+        <span>Recurring gifts</span>
+        <span>One-time donations</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="xp-section giving-section" id="how-it-works">
+    <div class="xp-wrap giving-layout">
+      <div class="giving-copy">
+        <p class="section-note">How it works</p>
+        <h2 class="xp-heading">
+          It starts with
+          <br />
+          the everyday.
+        </h2>
+        <p class="xp-body">
+          A coffee on the way to work. Groceries for the week. Lunch before the
+          game. The purchases your supporters already make can do a little more.
+        </p>
+        <ol class="giving-steps">
+          <li>
+            <span>1</span>
+            <div>
+              <h3>Choose your team.</h3>
+              <p>Supporters connect with the program they care about.</p>
+            </div>
+          </li>
+          <li>
+            <span>2</span>
+            <div>
+              <h3>Link an account.</h3>
+              <p>Connect an eligible account and turn on round-ups.</p>
+            </div>
+          </li>
+          <li>
+            <span>3</span>
+            <div>
+              <h3>Let the little things add up.</h3>
+              <p>Spare change accumulates into ongoing support.</p>
+            </div>
+          </li>
+        </ol>
+        <a class="xp-text-link" href="/contact">
+          Explore it with our team <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+      <div class="giving-demo">
+        <RoundUpDemo client:visible />
+        <div class="supporter-film">
+          <img
+            src="/images/brand-refresh/otto-supporter-poster-960.webp"
+            width="1280"
+            height="720"
+            alt="Otto shows a supporter the XtraPoint app."
+            loading="lazy"
+          />
+          <FilmPlayer
+            id="supporter-film"
+            src="/videos/brand-refresh/otto-supporter-film.mp4"
+            poster="/images/brand-refresh/otto-supporter-poster.webp"
+            title="A small act of support"
+            label="Meet Otto"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="community-section xp-section" id="community">
+    <div class="xp-wrap">
+      <div class="section-heading-row">
+        <h2 class="xp-heading">
+          Different teams.
+          <br />
+          Same heart.
+        </h2>
+        <p class="xp-body">
+          For everyone who shows up. And every community with something worth
+          supporting.
+        </p>
+      </div>
+      <AudienceGallery client:visible />
+    </div>
+  </section>
+
+  <section class="platform-section xp-section" id="features">
+    <div class="xp-wrap">
+      <div class="platform-intro">
+        <p class="section-note">The tools behind the support</p>
+        <h2 class="xp-heading">
+          Your mission.
+          <br />
+          More momentum.
+        </h2>
+        <p class="xp-body">
+          Bring giving, your supporters, and your campaigns together. Less time
+          connecting the dots. More time moving your program forward.
+        </p>
+      </div>
+      <div class="platform-layout" id="donors">
+        <div class="platform-copy">
+          <span class="platform-icon" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <path d="M3 4h18v16H3V4Zm0 5h18M9 9v11" />
+            </svg>
+          </span>
+          <h3>
+            See the people
+            <br />
+            behind every gift.
+          </h3>
+          <p>
+            One place to follow donor activity, manage recurring giving, and
+            understand the support behind your program.
+          </p>
+          <ul>
+            <li>Donors and giving history</li>
+            <li>Recurring plans and transactions</li>
+            <li>Campaigns and supporter activity</li>
+          </ul>
+          <a href="/contact" class="xp-text-link">
+            Take a closer look <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <div
+          class="product-window"
+          aria-label="Illustrative donor dashboard with sample data"
+        >
+          <div class="product-titlebar">
+            <img
+              src="/assets/xtrapoint-logo-navy.svg"
+              width="125"
+              height="23"
+              alt="XtraPoint"
+            />
+            <span>Your program</span>
+            <span class="sample-label">Product illustration</span>
+          </div>
+          <div class="product-main">
+            <div class="product-sidebar" aria-hidden="true">
+              <i></i>
+              <i></i>
+              <i></i>
+              <i></i>
+            </div>
+            <div class="product-content">
+              <div class="product-welcome">
+                <div>
+                  <small>Your community, connected</small>
+                  <h4>Every gift has a story.</h4>
+                </div>
+                <div class="product-avatar" aria-hidden="true">
+                  XP
+                </div>
+              </div>
+              <div class="product-metrics">
+                <div>
+                  <span>Round-up giving</span>
+                  <strong>Small acts.</strong>
+                  <small>Everyday participation</small>
+                </div>
+                <div>
+                  <span>Recurring support</span>
+                  <strong>Lasting impact.</strong>
+                  <small>A rhythm that keeps going</small>
+                </div>
+              </div>
+              <div class="product-chart">
+                <div>
+                  <strong>Support over time</strong>
+                  <span>Illustrative activity</span>
+                </div>
+                <svg viewBox="0 0 560 145" fill="none" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1">
+                      <stop stop-color="#3997ff" stop-opacity=".28" />
+                      <stop offset="1" stop-color="#3997ff" stop-opacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <path
+                    d="M0 122C30 122 40 95 70 100S120 115 155 85S205 95 242 62S292 83 330 49S375 72 410 37S456 51 488 21S520 32 560 6V145H0Z"
+                    fill="url(#chart-fill)"
+                  />
+                  <path
+                    d="M0 122C30 122 40 95 70 100S120 115 155 85S205 95 242 62S292 83 330 49S375 72 410 37S456 51 488 21S520 32 560 6"
+                    stroke="#3997ff"
+                    stroke-width="3"
+                  />
+                </svg>
+              </div>
+              <div class="product-activity">
+                <strong>Recent giving</strong>
+                <div>
+                  <span class="activity-avatar">JS</span>
+                  <span>
+                    Jordan S.<small>Recurring gift</small>
+                  </span>
+                  <b>$25.00</b>
+                </div>
+                <div>
+                  <span class="activity-avatar blue">AT</span>
+                  <span>
+                    Alex T.<small>Accumulated round-ups</small>
+                  </span>
+                  <b>$10.35</b>
+                </div>
+                <p>Sample data shown for illustration.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="growth-section xp-section" id="marketing">
+    <div class="xp-wrap">
+      <div class="section-heading-row">
+        <h2 class="xp-heading">
+          A platform.
+          <br />
+          And a partner.
+        </h2>
+        <p class="xp-body">
+          The technology is only part of it. We help you put it to work with
+          resources, ideas, and people who care about your launch.
+        </p>
+      </div>
+      <div class="growth-layout">
+        <article class="marketing-feature">
+          <div
+            class="campaign-art"
+            aria-label="Illustrative XtraPoint campaign materials"
+          >
+            <div class="campaign-poster">
+              <img
+                src="/images/brand-refresh/otto-basketball-team-720.webp"
+                width="720"
+                height="480"
+                alt="Otto in a basketball team huddle on an example campaign poster."
+                loading="lazy"
+              />
+              <div>
+                <span>XtraPoint</span>
+                <strong>
+                  GOOD TEAMS.
+                  <br />
+                  GREAT SUPPORT.
+                </strong>
+                <small>Everyday giving starts with you.</small>
+              </div>
+            </div>
+            <div class="campaign-message">
+              <span class="message-dot" aria-hidden="true"></span>
+              <span>
+                Ready to rally your community?
+                <small>Social. Email. On campus.</small>
+              </span>
+            </div>
+            <span class="campaign-sticker" aria-hidden="true">
+              All in.
+            </span>
+          </div>
+          <div class="growth-copy">
+            <p class="section-note">Marketing support</p>
+            <h3>
+              Give your launch
+              <br />a head start.
+            </h3>
+            <p>
+              Campaign materials, social content, and practical resources to
+              help your community find its way in.
+            </p>
+            <a class="xp-text-link" href="/contact">
+              Plan your launch <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </article>
+        <article class="ambassador-feature" id="ambassadors">
+          <div class="ambassador-image">
+            <img
+              src="/images/brand-refresh/otto-campus-community.webp"
+              srcset="/images/brand-refresh/otto-campus-community-720.webp 720w, /images/brand-refresh/otto-campus-community.webp 1536w"
+              sizes="(max-width:700px) 100vw, 45vw"
+              width="1536"
+              height="1024"
+              alt="Otto and a group of students walking together on campus."
+              loading="lazy"
+            />
+            <span class="ambassador-tag">
+              Made for people who bring people together.
+            </span>
+          </div>
+          <div class="growth-copy">
+            <p class="section-note">Ambassador programs</p>
+            <h3>
+              Community grows
+              <br />
+              from the inside.
+            </h3>
+            <p>
+              Give your advocates the tools, resources, and encouragement to
+              turn their connections into participation.
+            </p>
+            <a class="xp-text-link" href="/contact">
+              Explore the ambassador program <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="film-feature">
+    <img
+      src="/images/brand-refresh/stadium-film-poster.webp"
+      width="1920"
+      height="1080"
+      alt="A stadium lit up for game day."
+      loading="lazy"
+    />
+    <div class="film-feature-shade" aria-hidden="true"></div>
+    <div class="xp-wrap">
+      <div>
+        <p class="section-note">This is what we're here for.</p>
+        <h2 class="xp-heading">
+          The big moments.
+          <br />
+          The little things.
+          <br />
+          All of it.
+        </h2>
+        <p>
+          Every team has people behind it.
+          <br />
+          We help them keep showing up.
+        </p>
+        <FilmPlayer
+          id="story-film"
+          src="/videos/brand-refresh/xtrapoint-brand-film.mp4"
+          poster="/images/brand-refresh/stadium-film-poster.webp"
+          title="For the team behind the team"
+        />
+      </div>
+    </div>
+  </section>
+
+  <section class="faq-section xp-section">
+    <div class="xp-wrap faq-layout">
+      <div>
+        <p class="section-note">A few good questions</p>
+        <h2 class="xp-heading">
+          Let's clear
+          <br />
+          things up.
+        </h2>
+        <a href="/contact" class="xp-text-link">
+          Talk with our team <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+      <div class="faq-list">
+        {faqs.map((faq) => (
+          <details>
+            <summary>
+              {faq.question}
+              <span aria-hidden="true">+</span>
+            </summary>
+            <p>{faq.answer}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+  <section class="home-final">
+    <div class="xp-wrap">
+      <div>
+        <p class="section-note">Your next chapter starts here.</p>
+        <h2 class="xp-heading">
+          Let's build
+          <br />
+          something good.
+        </h2>
+      </div>
+      <div>
+        <p>
+          More people taking part.
+          <br />
+          More support for what matters.
+        </p>
+        <a class="xp-btn" href="/contact">
+          Get started{" "}
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            aria-hidden="true"
+          >
+            <path d={arrow} />
+          </svg>
+        </a>
+        <span class="final-note">
+          A conversation. A plan. A team behind you.
+        </span>
+      </div>
+    </div>
+  </section>
+</main>

@@ -1,0 +1,42 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import AboutPage from "@/components/marketing/AboutPage.astro";
+import { canShowAboutPreview } from "@/lib/aboutPreview";
+
+// This page is a reviewable design structure, not public company content.
+// Keep it dynamic so production gets an actual HTTP 404, not an indexed shell.
+export const prerender = false;
+
+if (
+  !canShowAboutPreview({
+    environment: process.env.VERCEL_ENV,
+    hostname: Astro.url.hostname,
+    development: import.meta.env.DEV,
+  })
+) {
+  return new Response("Not found", {
+    status: 404,
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      "X-Robots-Tag": "noindex, nofollow",
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
+Astro.response.headers.set("X-Robots-Tag", "noindex, nofollow");
+Astro.response.headers.set("Cache-Control", "no-store");
+---
+
+<Layout
+  title="About XtraPoint | Design preview"
+  description="For the team behind the team. Meet the purpose, people, and capabilities behind XtraPoint."
+  noindex
+  marketing
+>
+  <Header />
+  <AboutPage />
+  <Footer />
+</Layout>

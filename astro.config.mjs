@@ -52,7 +52,8 @@ export default defineConfig({
         !page.includes("/qr-code") &&
         !page.includes("/preview/") &&
         !page.includes("/admin/") &&
-        !page.includes("/portal/"),
+        !page.includes("/portal/") &&
+        !new URL(page).pathname.replace(/\/$/, "").endsWith("/about"),
     }),
   ],
   // maxDuration covers the one-pager PDF route's Chromium cold-start + render

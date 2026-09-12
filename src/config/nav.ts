@@ -37,8 +37,8 @@ export interface NavItem {
 
 export const mainNav: NavItem[] = [
   { label: "How it works", href: "/#how-it-works" },
-  { label: "What it does", href: "/#features" },
-  { label: "Donor management", href: "/#donors" },
-  { label: "Ambassadors", href: "/#ambassadors" },
+  { label: "Who it’s for", href: "/#community" },
+  { label: "The platform", href: "/#features" },
+  ...((import.meta.env.DEV || ["preview", "staging"].includes(process.env.VERCEL_ENV ?? "")) ? [{ label: "About", href: "/about" }] : []),
   ...((import.meta.env.XP_RESOURCE_CENTER_PUBLIC === 'true' || process.env.XP_RESOURCE_CENTER_PUBLIC === 'true') ? [{ label: 'Resources', href: '/resources' }] : []),
 ];

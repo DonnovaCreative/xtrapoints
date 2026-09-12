@@ -3,79 +3,515 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import ContactForm from "@/components/islands/ContactForm.tsx";
-import PlaybookMark from "@/components/PlaybookMark.astro";
 import { brand } from "@/config/brand";
 
-const points = [
-  "No implementation cost. Live in days.",
-  "One unified dashboard for every supporter.",
-  "Done-for-you marketing campaigns included.",
-  "SOC 2 Type II · PCI DSS certified.",
+const nextSteps = [
+  {
+    title: "Start with your goals.",
+    description:
+      "Tell us about your community, what you’re funding, and where you want to go.",
+  },
+  {
+    title: "See how it comes together.",
+    description:
+      "Explore giving, donor management, and marketing in a walkthrough with our team.",
+  },
+  {
+    title: "Make a plan to launch.",
+    description:
+      "We’ll talk through setup and the resources to help you bring your supporters along.",
+  },
 ];
 ---
 
 <Layout
+  marketing
   title={`Get Started with ${brand.nameSpaced}`}
-  description={`Bring ${brand.nameSpaced} to your athletic department, booster club, or alumni association. Get started with ${brand.nameSpaced} — no implementation cost, live in days.`}
+  description={`A little change can make a big difference. Explore how ${brand.nameSpaced} can help your organization turn everyday giving into lasting support. Request a walkthrough.`}
 >
-  <Header />
-  <main>
-    <section class="relative overflow-hidden bg-ink">
-      <div class="dot-grid"></div>
-      <div
-        class="glow"
-        style="width:420px;height:420px;top:-10%;right:-4%;background:radial-gradient(circle,rgba(170,241,10,0.2) 0%,transparent 65%);opacity:0.6;animation:xpDrift2 16s ease-in-out infinite;"
-        aria-hidden="true"
-      >
-      </div>
-      <PlaybookMark mark="x" class="bottom-10 left-6 hidden h-20 w-20 lg:block" rotate={-8} opacity={0.5} />
-      <div class="relative z-10 mx-auto max-w-7xl px-6 pb-16 pt-[calc(var(--header-h)+3.5rem)] lg:px-10 lg:pb-24 lg:pt-[calc(var(--header-h)+5rem)]">
-        <div class="grid gap-12 lg:grid-cols-[1fr_1fr] lg:gap-16">
-          <!-- value prop -->
-          <div class="reveal-left lg:pt-6">
-            <p class="font-mono text-xs uppercase tracking-[0.06em] text-lime">
-              Get started
-            </p>
-            <h1
-              class="font-display mt-4 text-[clamp(2.5rem,5.5vw,4.25rem)] uppercase leading-[0.95] tracking-tight text-white"
+  <Header variant="light" />
+  <main id="main-content" class="xp-marketing contact-page">
+    <div class="contact-layout">
+      <div class="contact-story">
+        <div class="contact-intro">
+          <a class="contact-back" href="/">
+            <svg
+              width="17"
+              height="17"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
             >
-              Bring {brand.nameSpaced} to your <span class="ed">Program.</span>
-            </h1>
-            <p class="mt-5 max-w-md text-lg leading-relaxed text-white/75">
-              Tell us a little about your athletic department, booster club, or
-              alumni association and our team will reach out to get you live —
-              usually within one business day.
-            </p>
-
-            <ul class="mt-9 flex flex-col gap-4">
-              {points.map((p) => (
-                <li class="flex items-center gap-3 text-white/85">
-                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-lime-soft text-lime">
-                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                      <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                  </span>
-                  {p}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <!-- form card -->
-          <div class="reveal-right rounded-3xl bg-white p-6 shadow-2xl sm:p-8 lg:p-10">
-            <h2 class="text-2xl font-bold tracking-tight text-gray-900">
-              Request a walkthrough
-            </h2>
-            <p class="mt-2 text-gray-600">
-              No commitment — just a conversation about your program.
-            </p>
-            <div class="mt-7">
-              <ContactForm client:load />
-            </div>
-          </div>
+              <path
+                d="m10 5-7 7 7 7M3 12h18"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            The XtraPoint way
+          </a>
+          <h1>
+            A little change.
+            <br />A big start.
+          </h1>
+          <p class="contact-intro-copy">
+            You’re here for your community. We’re here to help you grow its
+            support. Let’s see what {brand.nameSpaced} can do for your
+            organization.
+          </p>
         </div>
+
+        <figure class="contact-scene">
+          <img
+            src="/images/brand-refresh/otto-community-fundraiser.webp"
+            srcset="/images/brand-refresh/otto-community-fundraiser-720.webp 720w, /images/brand-refresh/otto-community-fundraiser.webp 1536w"
+            sizes="(min-width: 960px) 44vw, (min-width: 640px) 85vw, 100vw"
+            width="1536"
+            height="1024"
+            alt="Otto the Otter with a group of community volunteers at an outdoor fundraiser."
+            loading="lazy"
+            decoding="async"
+          />
+          <figcaption>Good things start with people who care.</figcaption>
+        </figure>
+
+        <section class="contact-next" aria-labelledby="contact-next-heading">
+          <h2 id="contact-next-heading">A clear next step.</h2>
+          <ol>
+            {nextSteps.map((step, index) => (
+              <li>
+                <span class="contact-step-number" aria-hidden="true">
+                  {index + 1}
+                </span>
+                <div>
+                  <h3>{step.title}</h3>
+                  <p>{step.description}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
       </div>
-    </section>
+
+      <section
+        id="request-walkthrough"
+        class="contact-form-panel"
+        aria-labelledby="contact-form-heading"
+      >
+        <div class="contact-form-heading">
+          <span class="contact-form-label">Request a walkthrough</span>
+          <h2 id="contact-form-heading">Let’s meet your team.</h2>
+          <p>
+            A few details to start a conversation.
+            <br class="contact-desktop-break" /> No commitment required.
+          </p>
+        </div>
+        <div class="contact-form-body">
+          <ContactForm client:load />
+          <noscript>
+            <p class="contact-noscript">
+              To request a walkthrough, email{" "}
+              <a href={`mailto:${brand.salesEmail}`}>{brand.salesEmail}</a>.
+              This form needs JavaScript to send your inquiry.
+            </p>
+          </noscript>
+        </div>
+        <div class="contact-partner">
+          <span>Already part of the team?</span>
+          <a href="/portal">Open your partner workspace</a>
+        </div>
+      </section>
+    </div>
   </main>
   <Footer />
 </Layout>
+
+<style>
+  .contact-page {
+    padding: calc(var(--header-h) + clamp(40px, 5vw, 76px)) 0
+      clamp(64px, 7vw, 112px);
+    background: var(--xp-pale);
+    color: var(--xp-navy);
+  }
+  .contact-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.02fr);
+    align-items: start;
+    gap: clamp(40px, 6vw, 92px);
+    width: min(1280px, calc(100% - 80px));
+    margin-inline: auto;
+  }
+  .contact-story {
+    position: sticky;
+    top: min(calc(var(--header-h) + 28px), calc(100dvh - 1010px));
+  }
+  .contact-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 26px;
+    color: var(--xp-navy);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .contact-back:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .contact-back:focus-visible,
+  .contact-partner a:focus-visible,
+  .contact-noscript a:focus-visible {
+    outline: 2px solid var(--xp-blue);
+    outline-offset: 5px;
+  }
+  .contact-intro h1 {
+    margin: 0;
+    font-family: "Archivo", sans-serif;
+    font-size: clamp(56px, 5.8vw, 84px);
+    font-weight: 800;
+    font-style: italic;
+    letter-spacing: -0.067em;
+    line-height: 0.99;
+  }
+  .contact-intro-copy {
+    max-width: 43ch;
+    margin-top: 26px;
+    color: var(--xp-muted);
+    font-size: 17px;
+    line-height: 1.65;
+    letter-spacing: -0.02em;
+  }
+  .contact-scene {
+    margin: 34px 0 0;
+    overflow: hidden;
+    border-radius: 18px;
+    background: var(--xp-navy);
+  }
+  .contact-scene img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1.8;
+    object-fit: cover;
+    object-position: center 39%;
+  }
+  .contact-scene figcaption {
+    padding: 17px 22px 18px;
+    color: white;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .contact-next {
+    margin-top: 34px;
+  }
+  .contact-next h2 {
+    margin: 0 0 22px;
+    font-family: "Archivo", sans-serif;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.045em;
+  }
+  .contact-next ol {
+    display: grid;
+    gap: 20px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .contact-next li {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 14px;
+  }
+  .contact-step-number {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--xp-line);
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .contact-next h3 {
+    margin: 2px 0 4px;
+    font-size: 14px;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+  }
+  .contact-next li p {
+    max-width: 48ch;
+    margin: 0;
+    color: var(--xp-muted);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .contact-form-panel {
+    overflow: hidden;
+    border: 1px solid var(--xp-line);
+    border-radius: 24px;
+    background: white;
+    box-shadow: 0 16px 56px -36px
+      color-mix(in srgb, var(--xp-navy) 28%, transparent);
+    scroll-margin-top: calc(var(--header-h) + 24px);
+  }
+  .contact-form-heading {
+    padding: 38px 38px 0;
+  }
+  .contact-form-label {
+    display: block;
+    margin-bottom: 15px;
+    color: var(--xp-muted);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .contact-form-heading h2 {
+    margin: 0;
+    color: var(--xp-navy);
+    font-family: "Archivo", sans-serif;
+    font-size: clamp(27px, 2.7vw, 36px);
+    font-style: normal;
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.055em;
+  }
+  .contact-form-heading p {
+    margin-top: 15px;
+    color: var(--xp-muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .contact-form-body {
+    padding: 30px 38px 32px;
+  }
+  .contact-form-body :global(form) {
+    gap: 22px;
+  }
+  .contact-form-body :global([data-slot="label"]) {
+    color: var(--xp-navy);
+    font-size: 13px;
+    font-weight: 550;
+  }
+  .contact-form-body :global([data-slot="input"]),
+  .contact-form-body :global([data-slot="textarea"]),
+  .contact-form-body :global([data-slot="select-trigger"]) {
+    min-height: 48px;
+    border: 1px solid var(--xp-line);
+    border-radius: 9px;
+    background: white;
+    padding-inline: 14px;
+    color: var(--xp-navy);
+    font-family: inherit;
+    font-size: 15px;
+    box-shadow: none;
+  }
+  .contact-form-body :global([data-slot="textarea"]) {
+    min-height: 110px;
+    padding-block: 13px;
+  }
+  .contact-form-body :global([data-slot="input"]::placeholder),
+  .contact-form-body :global([data-slot="textarea"]::placeholder),
+  .contact-form-body :global([data-slot="select-trigger"][data-placeholder]) {
+    color: var(--xp-muted);
+    opacity: 1;
+  }
+  .contact-form-body :global([data-slot="input"]:focus-visible),
+  .contact-form-body :global([data-slot="textarea"]:focus-visible),
+  .contact-form-body :global([data-slot="select-trigger"]:focus-visible) {
+    border-color: var(--xp-blue);
+    outline: 3px solid color-mix(in srgb, var(--xp-blue) 18%, transparent);
+    outline-offset: 1px;
+  }
+  .contact-form-body :global([aria-invalid="true"]) {
+    border-color: var(--color-error-600);
+  }
+  .contact-form-body :global(input[type="checkbox"]) {
+    accent-color: var(--xp-navy);
+  }
+  .contact-form-body :global(form > .rounded-2xl) {
+    border-color: var(--xp-line);
+    border-radius: 12px;
+    background: var(--xp-pale);
+    padding: 18px;
+  }
+  .contact-form-body :global(form > .rounded-2xl p),
+  .contact-form-body :global(form > .rounded-2xl label span) {
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .contact-form-body :global(form > .rounded-2xl p.text-xs) {
+    font-size: 11px;
+  }
+  .contact-form-body :global(form a) {
+    color: var(--xp-navy);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .contact-form-body :global(button[type="submit"]) {
+    min-height: 54px;
+    border-radius: 999px;
+    background: var(--xp-navy);
+    color: white;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    transition:
+      background-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+  .contact-form-body :global(button[type="submit"]:hover:not(:disabled)) {
+    background: var(--xp-lime);
+    color: var(--xp-navy);
+  }
+  .contact-form-body :global(button[type="submit"]:focus-visible) {
+    outline: 3px solid var(--xp-blue);
+    outline-offset: 4px;
+  }
+  .contact-form-body :global(form > p:last-child) {
+    line-height: 1.7;
+  }
+  .contact-noscript {
+    margin-top: 20px;
+    color: var(--xp-navy);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .contact-noscript a {
+    text-decoration: underline;
+  }
+  .contact-partner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px 8px;
+    padding: 21px 24px;
+    border-top: 1px solid var(--xp-line);
+    color: var(--xp-muted);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .contact-partner a {
+    color: var(--xp-navy);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  @media (max-width: 1100px) and (min-width: 960px) {
+    .contact-form-heading {
+      padding: 30px 26px 0;
+    }
+    .contact-form-body {
+      padding: 28px 26px;
+    }
+  }
+  @media (max-width: 959px) {
+    .contact-page {
+      padding-top: calc(var(--header-h) + 34px);
+    }
+    .contact-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      width: min(640px, calc(100% - 48px));
+    }
+    .contact-story {
+      display: contents;
+    }
+    .contact-intro {
+      order: 0;
+      width: 100%;
+    }
+    .contact-intro h1 {
+      font-size: clamp(55px, 8.8vw, 82px);
+    }
+    .contact-intro-copy {
+      max-width: 46ch;
+      margin-top: 22px;
+    }
+    .contact-back {
+      margin-bottom: 25px;
+    }
+    .contact-form-panel {
+      order: 1;
+      width: 100%;
+      margin-top: 32px;
+    }
+    .contact-scene {
+      order: 2;
+      width: 100%;
+      margin-top: 40px;
+    }
+    .contact-next {
+      order: 3;
+      width: 100%;
+      margin-top: 32px;
+    }
+  }
+  @media (max-width: 480px) {
+    .contact-layout {
+      width: calc(100% - 36px);
+    }
+    .contact-intro h1 {
+      font-size: clamp(40px, 12.9vw, 61px);
+    }
+    .contact-intro-copy {
+      font-size: 16px;
+    }
+    .contact-form-panel {
+      border-radius: 18px;
+    }
+    .contact-form-heading {
+      padding: 28px 22px 0;
+    }
+    .contact-form-body {
+      padding: 27px 22px 26px;
+    }
+    .contact-form-heading h2 {
+      font-size: clamp(25px, 7.8vw, 29px);
+    }
+    .contact-form-body :global(form) {
+      gap: 20px;
+    }
+    .contact-form-body :global([data-slot="input"]),
+    .contact-form-body :global([data-slot="textarea"]),
+    .contact-form-body :global([data-slot="select-trigger"]) {
+      font-size: 16px;
+    }
+    .contact-scene {
+      border-radius: 14px;
+    }
+    .contact-desktop-break {
+      display: none;
+    }
+  }
+  @media (max-width: 380px) {
+    .contact-form-heading {
+      padding-inline: 16px;
+    }
+    .contact-form-body {
+      padding-inline: 16px;
+    }
+  }
+  @media (max-width: 360px) {
+    /* Keep the provider's fixed-width checkbox widget inside narrow phones. */
+    .contact-form-body
+      :global(
+        iframe[title="Widget containing checkbox for hCaptcha security challenge"]
+      ) {
+      transform: scale(0.82);
+      transform-origin: left top;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .contact-form-body :global(button[type="submit"]) {
+      transition: none;
+    }
+  }
+</style>
