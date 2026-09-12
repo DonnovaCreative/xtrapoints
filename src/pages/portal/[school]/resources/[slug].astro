@@ -9,6 +9,8 @@ export const prerender = false;
 
 import PortalLayout from "@/layouts/PortalLayout.astro";
 import { gatePortal } from "@/lib/portalRoute";
+import { getPortalIdentity } from "@/lib/portalAuth";
+import { canEditPartnerContent } from "@/lib/portalPermissions";
 import { getResource, overviewHtml, formatSize } from "@/data/resourcesSource";
 import { getGeneratedTemplate } from "@/lib/generatedTemplates";
 import { getTemplateSpec } from "@/lib/templateFields";
@@ -82,7 +84,8 @@ const customisable = resource.formats
   .filter((f) => f.source === "generated")
   .map((f) => getTemplateSpec(f.templateId))
   .find(Boolean);
-const canCustomise = Boolean(customisable) && via === "session" && !staff;
+const identity = via === "session" ? await getPortalIdentity(Astro) : undefined;
+const canCustomise = Boolean(customisable && identity && canEditPartnerContent(identity));
 ---
 
 <PortalLayout

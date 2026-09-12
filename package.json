@@ -6,6 +6,9 @@
     "node": "22.x"
   },
   "scripts": {
+    "predev": "node --env-file-if-exists=.env scripts/prepare-toolkit-content.mjs",
+    "prebuild": "node --env-file-if-exists=.env scripts/prepare-toolkit-content.mjs",
+    "pretest": "node --env-file-if-exists=.env scripts/prepare-toolkit-content.mjs",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
     "dev": "astro dev",
     "build": "astro build",

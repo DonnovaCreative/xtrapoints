@@ -27,3 +27,11 @@ pnpm-debug.log*
 # local reference snapshot of the source Webflow page
 _reference/
 .env*.local
+.local-backups/
+
+# Private toolkit material is restored from authenticated Sanity build artifacts.
+# Only build-manifest.json (hashes, sizes and stable IDs) belongs in this repo.
+/src/data/toolkit/content.json
+/src/data/toolkit/masters/
+/src/data/toolkit/downloads/
+/src/data/toolkit/sanity-export.ndjson

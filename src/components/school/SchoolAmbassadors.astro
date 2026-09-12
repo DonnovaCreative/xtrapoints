@@ -22,11 +22,12 @@ import { brand } from "@/config/brand";
 export interface Props {
   school: School;
   settings: SiteSettings;
+  previewBase?: string;
 }
-const { school, settings } = Astro.props;
+const { school, settings, previewBase } = Astro.props;
 const t = school.theme;
 const themeStyle = schoolThemeVars(t);
-const donorUrl = `/schools/${school.slug}`;
+const donorUrl = previewBase ?? `/schools/${school.slug}`;
 // The donor page may not be live yet (CMS → Publishing → Pages on
 // xtrapoint.com). When it isn't, every link to it comes off rather than
 // pointing students at a 404.
@@ -119,11 +120,12 @@ const tierCountWord = COUNT_WORDS[tiers.length] ?? String(tiers.length);
       : `Become a ${school.programName} Ambassador: bring round-up giving to campus and earn swag, gift cards, and VIP perks. From ${brand.name}.`
   }
   ogImage={`/schools/${school.slug}/og.png`}
+  noindex={Boolean(previewBase)}
 >
   <div style={`${themeStyle}--header-h:${school.headerHeightPx ?? 68}px;`}>
     <SchoolHeader
       school={school}
-      home={donorLive ? undefined : `/schools/${school.slug}/ambassadors`}
+      home={previewBase ?? (donorLive ? undefined : `/schools/${school.slug}/ambassadors`)}
       nav={donorLive ? { label: "For donors", href: donorUrl } : undefined}
       cta={{ label: "How to enroll", href: "#enroll" }}
     />
@@ -268,9 +270,9 @@ const tierCountWord = COUNT_WORDS[tiers.length] ?? String(tiers.length);
                   Rewards worth <span class="ed">Showing Up</span> for.
                 </h2>
                 <p class="mt-5 text-lg leading-relaxed text-white/75">
-                  The program runs on {tierCountWord} tiers: the more donors you
-                  sign up and the more you do on campus, the further you climb —
-                  and the more you unlock.
+                  The program is being designed around {tierCountWord} reward
+                  levels. Your organization's approved terms explain the
+                  milestones and benefits before enrollment opens.
                 </p>
                 <p class="mt-4 text-lg leading-relaxed text-white/75">
                   We're finalising exactly what each tier includes with
@@ -282,14 +284,20 @@ const tierCountWord = COUNT_WORDS[tiers.length] ?? String(tiers.length);
             ) : (
               <Fragment>
                 <h2 class="font-display mt-4 text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-white">
-                  The three-tier <span class="ed">Structure</span>.
+                  Your reward <span class="ed">Levels</span>.
                 </h2>
                 <p class="mt-5 text-lg leading-relaxed text-white/75">
-                  Tiers reward you for sign-ups, active donors, and campus engagement.
-                  Exact thresholds are shared during onboarding.
+                  Your organization sets the reward thresholds and benefits.
+                  Review its approved program terms during onboarding.
                 </p>
               </Fragment>
             )}
+            <p class="mt-5 text-base leading-relaxed text-white/80">
+              A supporter qualifies after three completed monthly donations in
+              three consecutive months. Each distinct eligible supporter is
+              attributed and counted once. {school.approver} owns the program,
+              verifies eligibility, and selects, funds and fulfills its rewards.
+            </p>
           </div>
           {tba ? (
             <Fragment>
@@ -380,7 +388,10 @@ const tierCountWord = COUNT_WORDS[tiers.length] ?? String(tiers.length);
               </p>
             )}
             <div class="mx-auto mt-8 max-w-md">
-              <WaitlistForm client:only="react" school={school.name} source="Ambassador waitlist" buttonLabel="Join the waitlist" />
+              {previewBase && <p class="mb-4 text-sm text-gray-600">Preview only. Form submissions are disabled.</p>}
+              <fieldset disabled={Boolean(previewBase)}>
+                <WaitlistForm client:only="react" school={school.name} source="Ambassador waitlist" buttonLabel="Join the waitlist" />
+              </fieldset>
             </div>
             <p class="mt-5 text-sm text-gray-500">
               Questions? Email <a href={`mailto:${enrollEmail}`} class="font-semibold text-lime-dark hover:underline">{enrollEmail}</a>

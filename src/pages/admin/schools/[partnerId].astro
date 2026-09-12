@@ -1,0 +1,8 @@
+---
+export const prerender=false;
+import {gateAdmin} from '@/lib/adminGate';
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import SchoolEditor from '@/components/portal/SchoolEditor';
+const denied=await gateAdmin(Astro);if(denied)return denied;
+---
+<AdminLayout title="Manage school" description="Prepare the school's pages, review its changes, and invite its team when you're ready."><a href="/admin/schools" class="mt-6 inline-block text-sm font-semibold underline">All schools</a><SchoolEditor client:load admin partnerId={Astro.params.partnerId}/></AdminLayout>

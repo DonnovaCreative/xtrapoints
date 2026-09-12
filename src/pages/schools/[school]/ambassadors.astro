@@ -1,27 +1,11 @@
 ---
-// Static co-branded ambassador page. Body lives in SchoolAmbassadors.astro
-// (shared with the draft preview route); this file supplies published data.
+export const prerender = false;
 import SchoolAmbassadors from "@/components/school/SchoolAmbassadors.astro";
-import { getSchools, getSiteSettings } from "@/data/schoolsSource";
-
-export async function getStaticPaths() {
-  const [schools, settings] = await Promise.all([
-    getSchools(),
-    getSiteSettings(),
-  ]);
-  // A school can launch its donor page before its ambassador page (CMS →
-  // Publishing → Pages on xtrapoint.com), so a switched-off ambassador page isn't
-  // built at all on production and its URL 404s. Off production every school
-  // renders — see schoolsSource `resolveLivePages`.
-  return schools
-    .filter((school) => school.livePages.ambassador)
-    .map((school) => ({
-      params: { school: school.slug },
-      props: { school, settings },
-    }));
-}
-
-const { school, settings } = Astro.props;
+import { getSchool, getSiteSettings } from "@/data/schoolsSource";
+const [school, settings] = await Promise.all([getSchool(Astro.params.school!), getSiteSettings()]);
+if (!school || !school.livePages.ambassador) return new Response('Page not found', {status:404});
+Astro.response.headers.set('Cache-Control','public, max-age=0, must-revalidate');
+Astro.response.headers.set('CDN-Cache-Control','public, max-age=30');
 ---
 
 <SchoolAmbassadors school={school} settings={settings} />

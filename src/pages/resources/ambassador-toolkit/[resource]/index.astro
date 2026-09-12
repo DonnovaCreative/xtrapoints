@@ -1,0 +1,23 @@
+---
+export const prerender = false;
+import ResourceLayout from '@/layouts/ResourceLayout.astro';
+import ArticleCollection from '@/components/resources/ArticleCollection';
+import { toolkitBase } from '@/data/toolkit';
+import { getToolkitPublication, toolkitPublicationHelpers } from '@/data/toolkitCms';
+import { gateResourceCenter } from '@/data/toolkit/access';
+const denied = await gateResourceCenter(Astro); if (denied) return denied;
+const { toolkit } = await getToolkitPublication();
+const { resourceById, articlesFor } = toolkitPublicationHelpers(toolkit);
+const resource = resourceById(Astro.params.resource); if (!resource) return new Response('Resource not found.', { status: 404 });
+Astro.response.headers.set('Cache-Control', 'private, no-store');
+const articles = articlesFor(resource.id);
+const entries = articles.map(({ id, title, href, kind, category, readingMinutes, ...rest }) => ({ id, title, href, kind, category, readingMinutes, ...('cost' in rest ? { cost: rest.cost } : {}), ...('contexts' in rest ? { contexts: rest.contexts } : {}) }));
+---
+<ResourceLayout title={resource.title} description={resource.description} crumbs={[{ label: 'Ambassador Toolkit', href: toolkitBase }, { label: resource.title }]}>
+  <header class="rc-resource-intro"><div><h1>{resource.title}</h1><p class="rc-lede">{resource.description}</p><p class="rc-muted">{resource.id === 'catalog' ? '60 planning ideas. Confirm costs, availability and permissions before selecting rewards.' : resource.id === 'builder' ? 'The Excel workbook contains the working model. Read the guidance here, then complete your own copy.' : resource.id === 'kickoff' ? 'A 35-minute core session, with an optional ten-minute setup clinic. Adapt the slides and speaker notes before presenting.' : 'Read the guidance, then adapt the materials to the program your organization approves.'}</p></div><div class="rc-download-box"><a class="rc-button rc-button-secondary" href={resource.download.href}>Download {resource.format}</a><small>{resource.id === 'guide' ? 'Complete reference guide' : 'Standard editable template'}<br />Toolkit version {toolkit.release.version}</small></div></header>
+  {resource.id === 'rules' && <div class="rc-featured-action"><div><h2>Prepare one participant copy</h2><p>Combine the six specimen sections, fill your details, and export a draft for review.</p></div><a class="rc-button" href={`${resource.href}/participant-rules`}>Prepare participant rules</a></div>}
+  <ArticleCollection client:load entries={entries as any} resource={resource.id} />
+  {resource.id === 'guide' && <details class="rc-sources"><summary>Reference sources</summary>{toolkit.sources.map(source => <p><a href={source.url} target="_blank" rel="noreferrer">{source.title}</a><br /><span>{source.use}</span></p>)}</details>}
+  {resource.id === 'catalog' && <p class="rc-callout">Catalog values are planning information checked September 11, 2026. They are not commitments from XtraPoint or suppliers. Your organization selects, funds and fulfills its benefits.</p>}
+  {resource.id === 'catalog' && <details class="rc-sources"><summary>{toolkit.catalogMilestoneExample.title}</summary><div class="rc-prose"><p>{toolkit.catalogMilestoneExample.status}</p><p>{toolkit.catalogMilestoneExample.qualification}</p><p>{toolkit.catalogMilestoneExample.recognition}</p><p>{toolkit.catalogMilestoneExample.budget}</p><div class="rc-table-scroll" tabIndex="0" role="region" aria-label="Optional milestone shortlist"><table><thead><tr><th scope="col">Milestone</th><th scope="col">Qualified supporters</th><th scope="col">Suggested idea and alternatives</th><th scope="col">Partner decision</th></tr></thead><tbody>{toolkit.catalogMilestoneExample.milestones.map(milestone => <tr><td>{milestone.name}</td><td>{milestone.qualified_supporters}</td><td>{[milestone.catalog_id, ...milestone.alternative_ids].map((id, index) => <p><a href={`${resource.href}/${id}`}>{index === 0 ? 'Suggested: ' : 'Alternative: '}{articles.find(article => article.id === id)?.title || id}</a></p>)}</td><td>{milestone.decision}</td></tr>)}</tbody></table></div><p>{toolkit.catalogMilestoneExample.source}</p></div></details>}
+</ResourceLayout>

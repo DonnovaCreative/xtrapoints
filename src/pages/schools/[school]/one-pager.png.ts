@@ -29,8 +29,8 @@ export const GET: APIRoute = async ({ params, url }) => {
         // Inline, not a download — this one is for looking at. The PDF route is
         // the one that hands over a file.
         "Content-Disposition": "inline",
-        "Cache-Control": "public, max-age=3600",
-        "CDN-Cache-Control": "public, max-age=86400",
+        "Cache-Control": "public, max-age=30, must-revalidate",
+        "CDN-Cache-Control": "public, max-age=30",
       },
     });
   } catch (err) {

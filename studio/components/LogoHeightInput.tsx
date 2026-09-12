@@ -14,11 +14,12 @@ export function LogoHeightInput(props: NumberInputProps) {
     <Flex align="center" gap={3}>
       <input
         type="range"
+        disabled={props.readOnly}
         min={MIN}
         max={MAX}
         step={1}
         value={v}
-        onChange={(e) => onChange(set(Number(e.currentTarget.value)))}
+        onChange={(e) => { if (!props.readOnly) onChange(set(Number(e.currentTarget.value))); }}
         aria-label="Logo height in pixels"
         style={{ flex: 1, cursor: "pointer" }}
       />

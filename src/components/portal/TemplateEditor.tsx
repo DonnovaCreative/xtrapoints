@@ -391,7 +391,7 @@ export function TemplateEditor({
       <div className="min-w-0">
         {readOnly && (
           <p className="mb-4 rounded-card border border-gray-200 bg-white px-4 py-3 text-sm text-gray-600">
-            You're viewing this as XtraPoint staff — this is read-only here.
+            Your account has viewer access. A school editor or administrator can customize these materials.
           </p>
         )}
 

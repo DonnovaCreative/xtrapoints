@@ -32,12 +32,14 @@ export function LivePagesInput(props: ObjectInputProps) {
   const value = (props.value ?? {}) as LivePages;
   const status = useFormValue(["productionStatus"]) as string | undefined;
   const slug = useFormValue(["slug", "current"]) as string | undefined;
+  const managed = Number(useFormValue(["managementVersion"]) ?? 0) >= 2;
 
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const rebuild = useCallback(async () => {
+    if (managed || props.readOnly) return;
     setBusy(true);
     setError(null);
     setNote(null);
@@ -50,7 +52,7 @@ export function LivePagesInput(props: ObjectInputProps) {
     } finally {
       setBusy(false);
     }
-  }, []);
+  }, [managed, props.readOnly]);
 
   const rows: { label: string; path: string; live: boolean }[] = [
     { label: "Donor page", path: `/schools/${slug ?? "…"}`, live: on(value.donor) },
@@ -60,6 +62,8 @@ export function LivePagesInput(props: ObjectInputProps) {
       live: on(value.ambassador),
     },
   ];
+
+  if (managed) return <Card padding={4} radius={2} border><Text size={1} muted>Page visibility is managed with the school’s published release in School administration. Use the “Open School administration” action to review or update it.</Text></Card>;
 
   return (
     <Stack space={4}>
@@ -106,7 +110,7 @@ export function LivePagesInput(props: ObjectInputProps) {
                   text="Update xtrapoint.com"
                   tone="primary"
                   mode="ghost"
-                  disabled={busy || !HOOK_URL}
+                  disabled={Boolean(props.readOnly) || busy || !HOOK_URL}
                   onClick={() => void rebuild()}
                 />
               </Flex>
