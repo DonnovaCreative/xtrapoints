@@ -14,17 +14,21 @@ const standalone = import.meta.env.XP_TOOLKIT_STANDALONE === 'true';
 const marketingHref = standalone ? 'https://www.xtrapoint.com/portal' : '/portal';
 const nav = [
   { title: 'Overview', href: toolkitBase, icon: 'home' as PortalIcon },
-  ...publication.resources.map(resource => ({ title: resource.title, href: resource.href, icon: resource.id as PortalIcon })),
+  ...publication.resources.map(resource => ({ title: resource.title, href: resource.href, icon: resource.id as PortalIcon,
+    groups: [...new Set(publication.articles.filter(article => article.resource === resource.id).map(article => article.category))].map(category => ({
+      title: category,
+      topics: publication.articles.filter(article => article.resource === resource.id && article.category === category).map(article => ({ title: article.title, href: article.href })),
+    })),
+  })),
 ];
 const currentPath = Astro.url.pathname.replace(/\/$/, '');
 const activeHref = nav.find(item => item.href !== toolkitBase && (currentPath === item.href || currentPath.startsWith(item.href + '/')))?.href ?? toolkitBase;
 const shellCrumbs = crumbs.length ? crumbs : [{ label: 'Ambassador Toolkit' }];
 ---
-<Layout title={`${title} | ${brand.name}`} description={description} noindex={!isPublic}>
-  <PortalShell client:load product="toolkit" marketingHref={marketingHref} nav={nav} activeHref={activeHref} crumbs={shellCrumbs} brandLogo={brand.logo.navy} brandMark={brand.logo.mark} brandName={brand.nameSpaced} supportHref={`mailto:${brand.salesEmail}`} showAccount={!standalone && !isPublic} contextLabel="Shared partner guidance">
+<Layout title={`${title} | ${brand.name}`} description={description} noindex={!isPublic} workspace>
+  <a class="rc-skip" href="#resource-main" style="background:#aaf10a;color:#03116d">Skip to content</a>
+  <PortalShell client:load product="toolkit" marketingHref={marketingHref} nav={nav} activeHref={activeHref} currentHref={currentPath} crumbs={shellCrumbs} brandLogo={brand.logo.navy} brandMark={brand.logo.mark} brandName={brand.nameSpaced} supportHref={`mailto:${brand.salesEmail}`} showAccount={!standalone && !isPublic} contextLabel="Shared partner guidance">
     <div class="rc-site rc-workspace">
-      <a class="rc-skip" href="#resource-main">Skip to content</a>
-      {!isPublic && <div class="rc-preview-banner">{standalone ? 'Private toolkit review' : 'Private partner toolkit'} · Guidance, templates and downloads for authorized partners.</div>}
       <div class="rc-container">
         {search && <div class="rc-page-top"><ResourceSearch client:load compact /></div>}
         <div id="resource-main" tabindex="-1"><slot /></div>

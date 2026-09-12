@@ -42,8 +42,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarProvider,
-  SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import {
@@ -58,6 +56,8 @@ import { Separator } from "@/components/ui/separator";
 import type { PortalIcon } from "@/lib/portalNav";
 import { ProductSwitcher, type PortalProduct } from "./ProductSwitcher";
 import "./portal-shell.css";
+import ToolkitNavItem, { type TopicGroup } from "./ToolkitNavItem";
+import { SidebarWorkspace, SidebarResizeHandle } from "./SidebarWorkspace";
 
 const ICONS: Record<PortalIcon, LucideIcon> = {
   home: Home,
@@ -77,6 +77,7 @@ export interface ShellNavItem {
   title: string;
   href: string;
   icon: PortalIcon;
+  groups?: TopicGroup[];
 }
 
 export interface Crumb {
@@ -88,6 +89,7 @@ interface Props {
   nav: ShellNavItem[];
   /** href of the section currently open, so exactly one item reads as active. */
   activeHref: string;
+  currentHref?: string;
   crumbs: Crumb[];
   /** Legacy callers can supply school context; school artwork is never navigation branding. */
   school?: { short: string; name: string; logo?: string; badgeLogo: boolean };
@@ -115,6 +117,7 @@ interface Props {
 export function PortalShell({
   nav,
   activeHref,
+  currentHref,
   crumbs,
   school,
   brandMark,
@@ -129,7 +132,7 @@ export function PortalShell({
   children,
 }: Props) {
   return (
-    <SidebarProvider className="xp-product-shell">
+    <SidebarWorkspace className="xp-product-shell">
       <Sidebar collapsible="icon" variant="inset">
         <SidebarHeader className="flex-row items-center p-2">
           <div className="min-w-0 flex-1">
@@ -141,33 +144,17 @@ export function PortalShell({
               rememberSchool={rememberSchool}
             />
           </div>
-          <SidebarTrigger aria-label="Close navigation" className="shrink-0 text-[#172d45] hover:bg-[#e9eef3] md:hidden" />
+          <SidebarTrigger aria-label="Close navigation" className="shrink-0 text-white hover:bg-white/10 hover:text-white md:hidden" />
         </SidebarHeader>
 
         <SidebarContent role="navigation" aria-label={product === "marketing" ? "Marketing Portal" : "Ambassador Toolkit"}>
           <SidebarGroup>
-            <SidebarGroupLabel className="text-[#627184]">
+            <SidebarGroupLabel className="xp-workspace-label">
               {contextLabel ?? (product === "marketing" ? school?.short ?? "Your workspace" : "Program guides")}
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {nav.map((item) => {
-                  const Icon = ICONS[item.icon];
-                  return (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={item.href === activeHref}
-                        tooltip={item.title}
-                      >
-                        <a href={item.href} title={item.title} aria-current={item.href === activeHref ? "page" : undefined}>
-                          <Icon />
-                          <span>{item.title}</span>
-                        </a>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
+                {nav.map(item => <ToolkitNavItem key={item.href} title={item.title} href={item.href} Icon={ICONS[item.icon]} groups={item.groups} active={item.href === activeHref} currentHref={currentHref ?? activeHref} />)}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -203,7 +190,7 @@ export function PortalShell({
             )}
           </SidebarMenu>
         </SidebarFooter>
-        <SidebarRail />
+        <SidebarResizeHandle />
       </Sidebar>
 
       <SidebarInset className="min-w-0 bg-white">
@@ -233,7 +220,7 @@ export function PortalShell({
 
         <div className="min-w-0 flex-1">{children}</div>
       </SidebarInset>
-    </SidebarProvider>
+    </SidebarWorkspace>
   );
 }
 

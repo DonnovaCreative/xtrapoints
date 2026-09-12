@@ -26,14 +26,14 @@ const linkClass = dark
 ---
 
 <header data-site-header data-variant={variant} class="site-header fixed inset-x-0 top-0 z-50">
-  <div class="mx-auto flex h-[var(--header-h)] max-w-7xl items-center justify-between gap-6 px-6 lg:px-10">
-    <a href="/" class="flex shrink-0 items-center gap-3" aria-label={`${brand.name} home`}>
+  <div class="mx-auto flex h-[var(--header-h)] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 xl:gap-6 xl:px-10">
+    <a href="/" class="flex shrink-0 items-center gap-2 sm:gap-3" aria-label={`${brand.name} home`}>
       <img
         src={logo}
         alt={brand.name}
         width={brand.logo.width}
         height={brand.logo.height}
-        class="h-[26px] w-auto"
+        class="h-[22px] w-auto sm:h-[26px]"
       />
       <span
         class={`hidden border-l pl-3 font-mono text-[0.6875rem] uppercase tracking-[0.12em] xl:inline ${
@@ -45,7 +45,7 @@ const linkClass = dark
     </a>
 
     <!-- desktop nav (config-driven; children → CSS dropdown) -->
-    <nav class="hidden items-center gap-7 lg:flex" aria-label="Main">
+    <nav class="hidden items-center gap-4 lg:flex xl:gap-7" aria-label="Main">
       {mainNav.map((item) =>
         item.children ? (
           <div class="nav-drop relative">
@@ -92,8 +92,18 @@ const linkClass = dark
       )}
     </nav>
 
-    <div class="flex shrink-0 items-center gap-3">
-      <CtaButton href="/contact" variant="lime" glow={dark} class="!px-5 !py-2.5 !text-sm">
+    <div class="flex shrink-0 items-center gap-2 sm:gap-3">
+      <a
+        href="/portal"
+        class={`hidden items-center rounded-lg px-2 py-2.5 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 lg:inline-flex ${
+          dark
+            ? "text-white/90 hover:text-lime focus-visible:outline-lime"
+            : "text-ink hover:text-ink/75 focus-visible:outline-ink"
+        }`}
+      >
+        Partner login
+      </a>
+      <CtaButton href="/contact" variant="lime" glow={dark} class="!px-3 !py-2.5 !text-xs sm:!px-5 sm:!text-sm">
         Get Started
       </CtaButton>
 
@@ -156,6 +166,18 @@ const linkClass = dark
             )}
           </li>
         ))}
+        <li class={`mt-3 border-t pt-3 ${dark ? "border-white/15" : "border-gray-200"}`}>
+          <a
+            href="/portal"
+            class={`block rounded-lg py-3 text-base font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 ${
+              dark
+                ? "text-lime hover:text-white focus-visible:outline-lime"
+                : "text-ink hover:text-ink/75 focus-visible:outline-ink"
+            }`}
+          >
+            Partner login
+          </a>
+        </li>
       </ul>
     </nav>
   </div>
