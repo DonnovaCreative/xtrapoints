@@ -54,10 +54,9 @@ function PromoteTool() {
             </Text>
             <Card padding={3} radius={2} tone="primary">
               <Text size={1}>
-                <strong>Schools don't need this button.</strong> Open the school
-                and use <strong>Approve for production</strong> on its Publishing
-                tab — that's what decides whether a school is live and freezes the
-                content production serves. It rebuilds for you.
+                <strong>Schools are managed in School administration.</strong> Use
+                the application to edit, preview and publish a school’s approved
+                release. Managed school pages update without this rebuild button.
               </Text>
             </Card>
             <Text size={1} muted>

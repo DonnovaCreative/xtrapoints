@@ -18,12 +18,11 @@ export const GET: APIRoute = async ({ params }) => {
   return new Response(new Uint8Array(png), {
     headers: {
       "Content-Type": "image/png",
-      // Browser cache. `immutable` is safe because a rebrand changes the logo/
-      // colors and we bust with a versioned query if/when that happens.
-      "Cache-Control": "public, max-age=31536000, immutable",
+      // School publication updates this URL without rebuilding the website.
+      "Cache-Control": "public, max-age=30, must-revalidate",
       // Vercel strips s-maxage from plain Cache-Control, so set the CDN's copy
       // explicitly — this is what makes each card generate once, then cache.
-      "CDN-Cache-Control": "public, max-age=31536000, immutable",
+      "CDN-Cache-Control": "public, max-age=30, must-revalidate",
     },
   });
 };

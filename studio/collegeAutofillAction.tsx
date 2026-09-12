@@ -67,6 +67,7 @@ const Swatch = ({ hex }: { hex?: string }) =>
   ) : null;
 
 export const collegeAutofillAction: DocumentActionComponent = (props) => {
+  const managed = Number(props.draft?.managementVersion ?? props.published?.managementVersion ?? 0) >= 2;
   const client = useClient({ apiVersion: "2025-01-01" });
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -134,7 +135,7 @@ export const collegeAutofillAction: DocumentActionComponent = (props) => {
   }, []);
 
   const apply = useCallback(async () => {
-    if (view.status !== "match") return;
+    if (managed || view.status !== "match") return;
     setApplying(true);
     try {
       let logo: unknown;
@@ -177,7 +178,7 @@ export const collegeAutofillAction: DocumentActionComponent = (props) => {
       });
       setApplying(false);
     }
-  }, [view, client, props.id, close]);
+  }, [view, client, props.id, close, managed]);
 
   const candidates = view.status === "candidates"
     ? view.candidates.filter((team) =>
@@ -189,6 +190,7 @@ export const collegeAutofillAction: DocumentActionComponent = (props) => {
     label: "Auto-fill from ESPN",
     icon: DownloadIcon,
     onHandle: () => {
+      if (managed) { props.onComplete(); return; }
       request.current?.abort();
       const doc = (props.draft ?? props.published ?? {}) as {
         short?: string;

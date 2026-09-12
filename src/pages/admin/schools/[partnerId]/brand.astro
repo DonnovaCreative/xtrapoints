@@ -1,0 +1,23 @@
+---
+export const prerender = false;
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import BrandEditor from '@/components/portal/BrandEditor';
+import {gateAdmin} from '@/lib/adminGate';
+import {canonicalPartnerId} from '@/lib/schoolManagement';
+import {findPortalPartner} from '@/lib/portalAuth';
+import {getSchoolDraftById} from '@/data/schoolsSource';
+import {EDITABLE_IMAGES,EDITABLE_COLORS,CREDITABLE_IMAGES,ALLOWED_IMAGE_TYPES,imageTypeLabel} from '@/lib/portalEdit';
+const denied=await gateAdmin(Astro);if(denied)return denied;
+let partnerId;try{partnerId=canonicalPartnerId(Astro.params.partnerId);}catch{return new Response('School not found.',{status:404});}
+let school,partner;
+try{[school,partner]=await Promise.all([getSchoolDraftById(partnerId),findPortalPartner({partnerId})]);}
+catch{return new Response('The brand kit is temporarily unavailable. Please try again.',{status:503});}
+if(!school)return new Response('School not found.',{status:404});
+const base=`/admin/schools/${encodeURIComponent(partnerId)}`;
+const images=Object.entries(EDITABLE_IMAGES).map(([key,v])=>({key,label:v.label,note:v.note}));
+const colors=Object.entries(EDITABLE_COLORS).map(([key,v])=>({key,label:v.label,note:v.note}));
+---
+<AdminLayout title={`${school.short||school.name} brand kit`} description="Upload approved brand assets, save the draft and preview the complete school page before publication.">
+  <nav aria-label="School workspace" class="mt-6 flex flex-wrap gap-5 text-sm font-semibold"><a href={base} class="underline">School details and handoff</a><a href={`${base}/preview`} class="underline" target="_blank" rel="noreferrer">Preview draft</a></nav>
+  {partner ? <BrandEditor client:load partnerId={partnerId} creditable={CREDITABLE_IMAGES} images={images} colors={colors} accept={ALLOWED_IMAGE_TYPES.join(',')} acceptLabel={imageTypeLabel}/> : <div class="mt-8 rounded-xl border border-gray-200 bg-gray-50 p-6"><h2 class="text-lg font-bold">Prepare this school's workspace first</h2><p class="mt-2 max-w-2xl text-gray-600">The retained draft is available to preview. Use “Prepare partner workspace” in School administration before uploading assets or inviting its team. This keeps its public pages private.</p><a href={base} class="mt-5 inline-flex min-h-11 items-center rounded-lg bg-ink px-5 py-2.5 font-semibold text-white">Open School administration</a></div>}
+</AdminLayout>

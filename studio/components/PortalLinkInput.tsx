@@ -56,6 +56,7 @@ export function PortalLinkInput(props: StringInputProps) {
         <Button
           mode="ghost"
           text={value ? "Regenerate" : "Generate"}
+          disabled={props.readOnly}
           tone={value ? "caution" : "default"}
           title={
             value
@@ -63,6 +64,7 @@ export function PortalLinkInput(props: StringInputProps) {
               : "Create this school's private portal link"
           }
           onClick={() => {
+            if (props.readOnly) return;
             if (
               value &&
               !window.confirm(
@@ -86,8 +88,10 @@ export function PortalLinkInput(props: StringInputProps) {
             mode="bleed"
             tone="critical"
             text="Revoke"
+            disabled={props.readOnly}
             title="Clear the link entirely — no replacement is generated"
             onClick={() => {
+              if (props.readOnly) return;
               if (
                 window.confirm(
                   "Revoke this portal link?\n\nThe school will lose access once you publish. Generate a new link to restore it.",
@@ -108,7 +112,7 @@ export function PortalLinkInput(props: StringInputProps) {
       )}
 
       <Text size={1} muted>
-        Changes take effect when you publish this school.
+        {props.readOnly ? "Legacy shared links are retained. Manage this school’s account access in School administration." : "Changes take effect when you publish this school."}
       </Text>
     </Stack>
   );

@@ -22,11 +22,12 @@ import { brand } from "@/config/brand";
 export interface Props {
   school: School;
   settings: SiteSettings;
+  previewBase?: string;
 }
-const { school, settings } = Astro.props;
+const { school, settings, previewBase } = Astro.props;
 const t = school.theme;
 const themeStyle = schoolThemeVars(t);
-const ambassadorUrl = `/schools/${school.slug}/ambassadors`;
+const ambassadorUrl = previewBase ? `${previewBase}?view=ambassador` : `/schools/${school.slug}/ambassadors`;
 // The ambassador page may not be live yet (CMS → Publishing → Pages on
 // xtrapoint.com); when it isn't, the callout section and its links come off.
 // The section number that follows shifts up so the eyebrows don't skip one.
@@ -89,10 +90,12 @@ const whyGivePhotoCredit = whyGivePhotoKey
   title={`${school.short} × ${brand.name} — Round-Up Giving`}
   description={`Round-up giving for ${school.givingDest}: your everyday spare change supports ${school.beneficiary}. From ${brand.name} — launching soon.`}
   ogImage={`/schools/${school.slug}/og.png`}
+  noindex={Boolean(previewBase)}
 >
   <div style={`${themeStyle}--header-h:${school.headerHeightPx ?? 68}px;`}>
     <SchoolHeader
       school={school}
+      home={previewBase}
       nav={ambassadorLive ? { label: "Become an Ambassador", href: ambassadorUrl } : undefined}
       cta={{ label: "Get early access", href: "#start" }}
     />
@@ -332,7 +335,10 @@ const whyGivePhotoCredit = whyGivePhotoKey
             <div class="reveal-right rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-gray-200 sm:p-8 lg:p-10">
               <h3 class="text-2xl font-bold tracking-tight text-gray-900">Join the waitlist</h3>
               <p class="mt-2 text-gray-600">No spam — just a heads-up the day we launch.</p>
-              <div class="mt-7"><ContactForm client:only="react" school={school.name} variant="interest" /></div>
+              <div class="mt-7">
+                {previewBase && <p class="mb-4 text-sm text-gray-600">Preview only. Form submissions are disabled.</p>}
+                <fieldset disabled={Boolean(previewBase)}><ContactForm client:only="react" school={school.name} variant="interest" /></fieldset>
+              </div>
             </div>
           </div>
         </div>

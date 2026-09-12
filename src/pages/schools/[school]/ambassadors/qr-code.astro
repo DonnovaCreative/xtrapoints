@@ -17,20 +17,15 @@
 import QRCode from "qrcode";
 import Layout from "@/layouts/Layout.astro";
 import { brand } from "@/config/brand";
-import { getSchools } from "@/data/schoolsSource";
+import { getSchool } from "@/data/schoolsSource";
 import { flyerTheme } from "@/lib/flyerTheme";
 import { sizedImage } from "@/lib/sanityImage";
 
-export async function getStaticPaths() {
-  const schools = await getSchools();
-  // Gated exactly like the page it points at: a card whose QR leads to a 404 is
-  // worse than no card, and it would be handed to a student in person.
-  return schools
-    .filter((school) => school.livePages.ambassador)
-    .map((school) => ({ params: { school: school.slug }, props: { school } }));
-}
-
-const { school } = Astro.props;
+export const prerender = false;
+const school = await getSchool(Astro.params.school!);
+if (!school || !school.livePages.ambassador) return new Response('Page not found', {status:404});
+Astro.response.headers.set('Cache-Control','public, max-age=0, must-revalidate');
+Astro.response.headers.set('CDN-Cache-Control','public, max-age=30');
 
 // The flyer's contrast-aware roles, not the raw theme: a school's brand colors
 // arrive in every shape (UAlbany's gold can't carry white copy; their purple

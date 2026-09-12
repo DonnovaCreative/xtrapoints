@@ -15,7 +15,8 @@ import { brand } from "@/config/brand";
 
 const gate = await gatePortal(Astro, { allowDisabled: true });
 if (!gate.ok) return gate.response;
-const { school, base, enabled, via, staff } = gate;
+const { school, base, enabled, via, staff, live, livePages } = gate;
+const livePageCount = live ? Number(livePages.donor) + Number(livePages.ambassador) : 0;
 
 // Only used for the "N templates" count on the library card — a library outage
 // shouldn't take the dashboard down with it.
@@ -37,9 +38,10 @@ const sections = PORTAL_NAV.filter((i) => i.segment).map((item) => ({
         ? `${resourceCount} ${resourceCount === 1 ? "template" : "templates"}`
         : undefined
       : item.segment === "pages"
-        ? "2 live pages"
+        ? livePageCount ? `${livePageCount} live ${livePageCount === 1 ? "page" : "pages"}` : "Preview your pages"
         : undefined,
 }));
+sections.push({ segment: "toolkit", title: "Ambassador toolkit", icon: "library", href: "/resources/ambassador-toolkit", blurb: "Six practical resources to plan, launch, and run your own ambassador program.", meta: "Explore the toolkit" });
 
 const ICON_PATHS: Record<string, string> = {
   pages: "M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 9h18",
@@ -58,7 +60,7 @@ const ICON_PATHS: Record<string, string> = {
       via={via}
       staff={staff}
       heading={`Welcome, ${school.short}.`}
-      blurb={`Everything ${brand.name} has built for ${school.fund} — your live pages, your co-branded sell sheet, the template library, and your brand files. Bookmark this page; it stays up to date on its own as we add to your program.`}
+      blurb={`Manage ${school.fund}’s pages and brand, find marketing materials, and build your ambassador program with the shared toolkit.`}
     >
       <div class="mt-8 grid gap-4 sm:grid-cols-2">
         {sections.map((section) => (

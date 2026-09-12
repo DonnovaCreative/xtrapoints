@@ -1,27 +1,12 @@
 ---
-// Static co-branded donor landing page. The body lives in SchoolLanding.astro
-// (shared with the draft preview route); this file just supplies published data.
+// Published snapshots are read on demand so a school launch needs no site rebuild.
+export const prerender = false;
 import SchoolLanding from "@/components/school/SchoolLanding.astro";
-import { getSchools, getSiteSettings } from "@/data/schoolsSource";
-
-export async function getStaticPaths() {
-  const [schools, settings] = await Promise.all([
-    getSchools(),
-    getSiteSettings(),
-  ]);
-  // A school can launch its ambassador page before its donor page (CMS →
-  // Publishing → Pages on xtrapoint.com), so a switched-off donor page isn't
-  // built at all on production and its URL 404s. Off production every school
-  // renders — see schoolsSource `resolveLivePages`.
-  return schools
-    .filter((school) => school.livePages.donor)
-    .map((school) => ({
-      params: { school: school.slug },
-      props: { school, settings },
-    }));
-}
-
-const { school, settings } = Astro.props;
+import { getSchool, getSiteSettings } from "@/data/schoolsSource";
+const [school, settings] = await Promise.all([getSchool(Astro.params.school!), getSiteSettings()]);
+if (!school || !school.livePages.donor) return new Response('Page not found', {status:404});
+Astro.response.headers.set('Cache-Control','public, max-age=0, must-revalidate');
+Astro.response.headers.set('CDN-Cache-Control','public, max-age=30');
 ---
 
 <SchoolLanding school={school} settings={settings} />

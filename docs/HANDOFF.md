@@ -10,7 +10,11 @@ and say: _"Read docs/HANDOFF.md and docs/DECISIONS.md, then confirm the git stat
 > [deploys-and-indexing.md](deploys-and-indexing.md) (envs + SEO),
 > [DECISIONS.md](DECISIONS.md) (why). This file is **current state**.
 
-_Last updated: 2026-08-17._
+_Last updated: 2026-09-12._
+
+## September 12 partner platform update
+
+Read [SCHOOL-PLATFORM.md](SCHOOL-PLATFORM.md) and [SCHOOL-MIGRATION-RUNBOOK.md](SCHOOL-MIGRATION-RUNBOOK.md) first. The application now owns school administration, draft previews, partner handoff and publication. All 101 retained partners were adopted in place with verified preservation. Managed-school public pages render on demand from approved snapshots; the old Studio/global-build workflow below is historical for these records. The Resource Center shares the six-resource v1.2 toolkit with authenticated partners. Private content and backups stay out of the public GitHub repository. Check actual branches and deployment statuses; historical ahead/behind counts below are not current.
 
 ---
 

@@ -1,0 +1,10 @@
+---
+export const prerender=false;
+import {gateAdmin} from '@/lib/adminGate';
+import ManagedPreview from '@/components/school/ManagedPreview.astro';
+import {getSchoolDraftById,getSiteSettings} from '@/data/schoolsSource';
+const denied=await gateAdmin(Astro);if(denied)return denied;
+const [school,settings]=await Promise.all([getSchoolDraftById(Astro.params.partnerId!),getSiteSettings()]);
+if(!school)return new Response('School not found.',{status:404});
+---
+<ManagedPreview school={school} settings={settings} base={`/admin/schools/${encodeURIComponent(Astro.params.partnerId!)}/preview`} view={Astro.url.searchParams.get('view')??'donor'}/>

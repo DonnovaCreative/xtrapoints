@@ -1,0 +1,32 @@
+---
+export const prerender = false;
+import ResourceLayout from '@/layouts/ResourceLayout.astro';
+import ResourceOutline from '@/components/resources/ResourceOutline.astro';
+import ArticleVisual from '@/components/resources/ArticleVisual.astro';
+import BlockContent from '@/components/resources/BlockContent';
+import TemplateWorkbench from '@/components/resources/TemplateWorkbench';
+import { toolkitBase } from '@/data/toolkit';
+import { getToolkitPublication, toolkitPublicationHelpers } from '@/data/toolkitCms';
+import { gateResourceCenter } from '@/data/toolkit/access';
+const denied = await gateResourceCenter(Astro); if (denied) return denied;
+const { toolkit } = await getToolkitPublication();
+const { resourceById, articleById, articlesFor } = toolkitPublicationHelpers(toolkit);
+const resource = resourceById(Astro.params.resource);
+const article = resource && articleById(resource.id, Astro.params.article);
+if (!resource || !article) return new Response('Article not found.', { status: 404 });
+Astro.response.headers.set('Cache-Control', 'private, no-store');
+const isTemplate = ['template', 'rules-export'].includes(article.kind);
+const entries = articlesFor(resource.id), position = entries.findIndex(entry => entry.id === article.id);
+const previous = entries[position - 1], next = entries[position + 1];
+const visual = (resource.id === 'guide' && article.id === 'journey') || (resource.id === 'kickoff' && article.id === 's07') ? 'joining' : (resource.id === 'rules' && article.id === 'r05') || (resource.id === 'guide' && article.id === 'milestone-example') ? 'qualification' : undefined;
+---
+<ResourceLayout title={article.title} description={'lede' in article && article.lede ? article.lede : resource.description} crumbs={[{ label: 'Ambassador Toolkit', href: toolkitBase }, { label: resource.title, href: resource.href }, { label: article.title }]}>
+  <div class="rc-reading-layout"><ResourceOutline resource={resource} current={article.id} publication={toolkit} /><article class="rc-article"><header class="rc-article-header"><p class="rc-article-meta">{isTemplate ? 'Editable browser draft' : article.category} <span>·</span> {'minutes' in article ? `${article.minutes} min presentation` : `${article.readingMinutes} min read`}</p><h1>{article.title}</h1>{'lede' in article && article.lede && <p class="rc-lede">{article.lede}</p>}</header>
+    {visual && <ArticleVisual type={visual} visuals={toolkit.visuals} />}
+    {isTemplate ? <TemplateWorkbench client:load title={article.title} blocks={article.blocks as any} sharedFields={toolkit.sharedFields} rules={article.kind === 'rules-export'} /> : <BlockContent blocks={article.blocks as any} />}
+    {'context' in article && article.context?.length > 0 && <details class="rc-sources"><summary>Related guidance for your administrator</summary><BlockContent blocks={article.context as any} /></details>}
+    {isTemplate && <p class="rc-callout">Your organization approves and sends its communications and participant terms. Browser details personalize this draft. Standard Word, Excel and PowerPoint downloads remain unfilled reference templates.</p>}
+    <div class="rc-article-download"><div><strong>Keep the complete resource</strong><p>{resource.title} · Standard {resource.format} download</p></div><a class="rc-button rc-button-secondary" href={resource.download.href}>Download {resource.format}</a></div>
+    <nav class="rc-article-pagination" aria-label="More in this resource">{previous ? <a href={previous.href}><span>Previous topic</span><strong>{previous.title}</strong></a> : <span />}{next && <a href={next.href}><span>Next topic</span><strong>{next.title}</strong></a>}</nav>
+  </article></div>
+</ResourceLayout>

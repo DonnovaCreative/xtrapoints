@@ -4,7 +4,7 @@
 // A school opens this from the resource library and tweaks their copy of the
 // sheet: wording, the lists, the QR destination, the photo, the two colors that
 // carry the design. Their changes take effect immediately — this is their own
-// collateral, not a public page, so it doesn't go through the Studio review that
+// collateral, not a public page, so it doesn't go through the publication review that
 // brand edits do (see src/pages/api/portal-template.ts for why).
 //
 // What they may change lives in src/lib/templateFields.ts, which also renders
@@ -14,6 +14,8 @@ export const prerender = false;
 import PortalLayout from "@/layouts/PortalLayout.astro";
 import TemplateEditor from "@/components/portal/TemplateEditor";
 import { gatePortal } from "@/lib/portalRoute";
+import { getPortalIdentity } from "@/lib/portalAuth";
+import { canEditPartnerContent } from "@/lib/portalPermissions";
 import { getTemplateSpec } from "@/lib/templateFields";
 import { getTemplateDefaults } from "@/lib/templateDefaults";
 import { ALLOWED_IMAGE_TYPES, imageTypeLabel } from "@/lib/portalEdit";
@@ -34,9 +36,8 @@ const fields = spec.fields.map((f) => ({
   derivedItems: defaults.lists[f.key],
 }));
 
-// A token visitor has no account, so there's nobody to attribute changes to, and
-// staff edit on the school's behalf in the Studio. Same rule as the brand kit.
-const canEdit = via === "session" && !staff;
+const identity = via === "session" ? await getPortalIdentity(Astro) : undefined;
+const canEdit = Boolean(identity && canEditPartnerContent(identity));
 ---
 
 <PortalLayout
@@ -50,7 +51,7 @@ const canEdit = via === "session" && !staff;
   blurb="Change any of this and the flyer updates. Leave a box empty and we'll fill it in from your program."
 >
   {
-    canEdit || staff ? (
+    via === "session" ? (
       <TemplateEditor
         client:load
         school={school.slug}

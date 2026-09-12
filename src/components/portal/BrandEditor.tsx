@@ -1,10 +1,8 @@
 "use client";
 
 // The school's brand editor. Everything here writes to the Sanity DRAFT of their
-// school document (see src/pages/api/portal-brand.ts), so nothing they do is
-// live until XtraPoint reviews and publishes it. The UI says that plainly rather
-// than pretending changes are instant — a school that thinks their logo is live
-// when it isn't will email you about it.
+// school document (see src/pages/api/portal-brand.ts). Brand changes appear in
+// the current draft until an authorized administrator publishes the school.
 import * as React from "react";
 import { Check, Loader2, Trash2, Upload } from "lucide-react";
 
@@ -20,18 +18,21 @@ interface ColorField {
 }
 
 interface Props {
-  school: string;
+  school?: string;
+  /** Stable ID for staff managing a prepared school. */
+  partnerId?: string;
   /** Which image keys take a credit line (photos do, logos don't). */
   creditable: string[];
   images: ImageField[];
   colors: ColorField[];
   accept: string;
   acceptLabel: string;
-  /** Read-only for staff viewing someone else's portal. */
+  /** Read-only for a viewer account. */
   readOnly?: boolean;
 }
 
 interface State {
+  revision?: string;
   colors: Record<string, string>;
   images: Record<string, string | null>;
   credits?: Record<string, string | null>;
@@ -43,6 +44,7 @@ const api = "/api/portal-brand";
 
 export function BrandEditor({
   school,
+  partnerId,
   creditable,
   images,
   colors,
@@ -57,21 +59,26 @@ export function BrandEditor({
   const [error, setError] = React.useState<string | null>(null);
   const [saved, setSaved] = React.useState<string | null>(null);
 
+  const selector = partnerId ? { partnerId } : { school };
+
   const load = React.useCallback(async () => {
-    const res = await fetch(`${api}?school=${encodeURIComponent(school)}`);
-    if (!res.ok) {
+    try {
+      const query = partnerId ? new URLSearchParams({ partnerId }) : new URLSearchParams({ school: school ?? "" });
+      const res = await fetch(`${api}?${query}`);
+      if (!res.ok) throw new Error("load_failed");
+      const data = await res.json();
+      setError(null);
+      setState(data);
+      setDraft(
+        Object.fromEntries(colors.map((c) => [c.key, (data.colors?.[c.key] as string) ?? ""])),
+      );
+      setCredits(
+        Object.fromEntries(creditable.map((k) => [k, (data.credits?.[k] as string) ?? ""])),
+      );
+    } catch {
       setError("Couldn't load your brand settings. Refresh and try again.");
-      return;
     }
-    const data = await res.json();
-    setState(data);
-    setDraft(
-      Object.fromEntries(colors.map((c) => [c.key, (data.colors?.[c.key] as string) ?? ""])),
-    );
-    setCredits(
-      Object.fromEntries(creditable.map((k) => [k, (data.credits?.[k] as string) ?? ""])),
-    );
-  }, [school, colors, creditable]);
+  }, [school, partnerId, colors, creditable]);
 
   React.useEffect(() => {
     void load();
@@ -89,7 +96,7 @@ export function BrandEditor({
       const res = await fetch(api, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ school, colors: draft }),
+        body: JSON.stringify({ ...selector, revision: state?.revision, colors: draft }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message ?? "Couldn't save those colors");
@@ -107,7 +114,9 @@ export function BrandEditor({
     setError(null);
     try {
       const form = new FormData();
-      form.set("school", school);
+      if (partnerId) form.set("partnerId", partnerId);
+      else if (school) form.set("school", school);
+      if (state?.revision) form.set("revision", state.revision);
       form.set("image", field);
       form.set("file", file);
       const res = await fetch(api, { method: "POST", body: form });
@@ -137,7 +146,7 @@ export function BrandEditor({
       const res = await fetch(api, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ school, credits: { [field]: credits[field] ?? "" } }),
+        body: JSON.stringify({ ...selector, revision: state?.revision, credits: { [field]: credits[field] ?? "" } }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message ?? "Couldn't save that credit");
@@ -157,7 +166,7 @@ export function BrandEditor({
       const res = await fetch(api, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ school, clearImage: field }),
+        body: JSON.stringify({ ...selector, revision: state?.revision, clearImage: field }),
       });
       if (!res.ok) throw new Error("Couldn't remove that image");
       await load();
@@ -176,7 +185,7 @@ export function BrandEditor({
       const res = await fetch(api, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ school, submit: true }),
+        body: JSON.stringify({ ...selector, revision: state?.revision, submit: true }),
       });
       if (!res.ok) throw new Error("Couldn't submit for review");
       await load();
@@ -190,9 +199,8 @@ export function BrandEditor({
 
   if (!state) {
     return (
-      <div className="mt-8 flex items-center gap-2 text-sm text-gray-500">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        Loading your brand settings…
+      <div className="mt-8 text-sm text-gray-600">
+        {error ? <div role="alert"><p>{error}</p><button className="mt-3 font-semibold underline" onClick={() => void load()}>Try again</button></div> : <p className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Loading your brand settings…</p>}
       </div>
     );
   }
@@ -203,8 +211,7 @@ export function BrandEditor({
     <div className="mt-8 space-y-8">
       {readOnly && (
         <p className="rounded-card border border-gray-200 bg-white px-5 py-4 text-sm text-gray-600">
-          You're viewing this as XtraPoint staff, so editing is turned off here —
-          make changes in the Studio instead.
+          Your account can view this brand kit. A school editor or administrator can update it.
         </p>
       )}
 
@@ -219,9 +226,10 @@ export function BrandEditor({
               field={f}
               url={state.images?.[f.key] ?? null}
               busy={busy === f.key}
-              disabled={Boolean(busy) || readOnly}
+              disabled={Boolean(busy) || Boolean(readOnly)}
               accept={accept}
               dark
+              readOnly={readOnly}
               onUpload={upload}
               onClear={clearImage}
             />
@@ -293,7 +301,7 @@ export function BrandEditor({
               field={f}
               url={state.images?.[f.key] ?? null}
               busy={busy === f.key}
-              disabled={Boolean(busy) || readOnly}
+              disabled={Boolean(busy) || Boolean(readOnly)}
               accept={accept}
               onUpload={upload}
               onClear={clearImage}
@@ -311,16 +319,14 @@ export function BrandEditor({
       {/* ── Review ──────────────────────────────────────────────────────── */}
       {!readOnly && (
         <section className="rounded-card border border-gray-200 bg-white p-5">
-          <h2 className="text-sm font-bold text-gray-900">Ready for us to look?</h2>
+          <h2 className="text-sm font-bold text-gray-900">Ready for review?</h2>
           <p className="mt-1.5 text-sm leading-relaxed text-gray-600">
-            Your changes are saved as you go, but they don't reach your live pages
-            until the XtraPoint team has reviewed them. Send them over when you're
-            happy and we'll take it from there.
+            Uploaded files and saved colors are kept in the draft. Submit the saved draft when it is ready for publication review.
           </p>
           <button
             type="button"
             onClick={() => void submit()}
-            disabled={Boolean(busy) || state.submittedForReview}
+            disabled={Boolean(busy) || Boolean(state.submittedForReview) || !state.pending}
             className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {busy === "submit" && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -328,7 +334,7 @@ export function BrandEditor({
           </button>
           {state.submittedForReview && (
             <p className="mt-3 text-xs text-gray-500">
-              We've got it. You can keep editing — just send it again when you're done.
+              This draft is marked for review. Further changes return it to draft so the updated version can be reviewed.
             </p>
           )}
         </section>
@@ -409,7 +415,7 @@ function ImageCard({
       <h3 className="mt-3 text-sm font-bold text-gray-900">{field.label}</h3>
       <p className="mt-0.5 text-xs leading-relaxed text-gray-500">{field.note}</p>
 
-      <div className="mt-3 flex items-center gap-3">
+      {!readOnly && <div className="mt-3 flex items-center gap-3">
         <label
           htmlFor={inputId}
           className={`inline-flex items-center gap-1.5 text-sm font-semibold text-lime-dark ${
@@ -442,7 +448,7 @@ function ImageCard({
             Remove
           </button>
         )}
-      </div>
+      </div>}
 
       {/* Photo credit. Only rendered for photos, and only once there's a photo
           to credit — an empty box under an empty slot is just noise. */}

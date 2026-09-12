@@ -14,18 +14,20 @@ export function ColorInput(props: StringInputProps) {
 
   const setHex = useCallback(
     (raw: string) => {
+      if (props.readOnly) return;
       const v = raw.trim().toLowerCase();
       onChange(v ? set(v) : unset());
     },
-    [onChange],
+    [onChange, props.readOnly],
   );
 
   return (
     <Flex gap={2} align="center">
       <input
         type="color"
+        disabled={props.readOnly}
         value={swatch}
-        onChange={(e) => onChange(set(e.currentTarget.value.toLowerCase()))}
+        onChange={(e) => { if (!props.readOnly) onChange(set(e.currentTarget.value.toLowerCase())); }}
         aria-label="Color picker"
         style={{
           width: 42,
@@ -41,6 +43,7 @@ export function ColorInput(props: StringInputProps) {
       <TextInput
         {...elementProps}
         value={value ?? ""}
+        readOnly={props.readOnly}
         onChange={(e) => setHex(e.currentTarget.value)}
         placeholder="#aaf10a"
         style={{ flex: 1 }}
@@ -50,7 +53,8 @@ export function ColorInput(props: StringInputProps) {
           mode="ghost"
           text="Clear"
           fontSize={1}
-          onClick={() => onChange(unset())}
+          disabled={props.readOnly}
+          onClick={() => { if (!props.readOnly) onChange(unset()); }}
         />
       ) : null}
     </Flex>

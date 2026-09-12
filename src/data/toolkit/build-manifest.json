@@ -1,0 +1,305 @@
+{
+  "schemaVersion": 1,
+  "documentType": "xpToolkitBuildArtifact",
+  "perspective": "raw",
+  "projectId": "xjhhxbqk",
+  "dataset": "production",
+  "release": {
+    "version": "1.2",
+    "date": "2026-09-11",
+    "revision": "20260911-launch-6"
+  },
+  "counts": {
+    "resources": 6,
+    "articles": 145,
+    "standardDownloads": 6
+  },
+  "files": [
+    {
+      "path": "src/data/toolkit/content.json",
+      "bytes": 813948,
+      "sha256": "19678574d1ad9e12c8f0c321ae66da041e3f12d94daa1391ac3b98f18a5558bb",
+      "parts": [
+        {
+          "index": 0,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.ade29ef24daed57b.0",
+          "bytes": 524288,
+          "sha256": "ee3177243534f3b0ab1ff3f7861cb700f37abb4f8e90f150eac82a158159fba1"
+        },
+        {
+          "index": 1,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.ade29ef24daed57b.1",
+          "bytes": 289660,
+          "sha256": "7d14ed5d79bac749052cbfbe7d692fc555c5a892b851f71c0622f57c3c9eee87"
+        }
+      ]
+    },
+    {
+      "path": "src/data/toolkit/downloads/builder.json",
+      "bytes": 94117,
+      "sha256": "2d1e68b5d2a4744baa0f86d3cbd870fd772ebc45935652ea3a368524480009c1",
+      "parts": [
+        {
+          "index": 0,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.5ef5315f2ec5dd1d.0",
+          "bytes": 94117,
+          "sha256": "2d1e68b5d2a4744baa0f86d3cbd870fd772ebc45935652ea3a368524480009c1"
+        }
+      ]
+    },
+    {
+      "path": "src/data/toolkit/downloads/catalog.json",
+      "bytes": 48037,
+      "sha256": "75b7ac5f117a01708cdb28b82e894861b505713a97a37c8410a1c0fcba474a46",
+      "parts": [
+        {
+          "index": 0,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.951d2a7607f334f5.0",
+          "bytes": 48037,
+          "sha256": "75b7ac5f117a01708cdb28b82e894861b505713a97a37c8410a1c0fcba474a46"
+        }
+      ]
+    },
+    {
+      "path": "src/data/toolkit/downloads/communications.json",
+      "bytes": 3104800,
+      "sha256": "49ce82c51b9cb8999e3babcd3b9cbe5b21716175067e6abd55998001d5e34ca3",
+      "parts": [
+        {
+          "index": 0,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.8b98201a359e3e49.0",
+          "bytes": 524288,
+          "sha256": "2bd14196ca02e3b6f5380318377150d533b608680d98af538b14817fe72a2774"
+        },
+        {
+          "index": 1,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.8b98201a359e3e49.1",
+          "bytes": 524288,
+          "sha256": "cd45d04f7ee884dd4466e829e64a740e339e839540220b730999d536cdbad949"
+        },
+        {
+          "index": 2,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.8b98201a359e3e49.2",
+          "bytes": 524288,
+          "sha256": "6cbfcb2473cd5a7588732a2ac0581b13d0b7245a4c6b08f3c6b6b87d56932f3c"
+        },
+        {
+          "index": 3,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.8b98201a359e3e49.3",
+          "bytes": 524288,
+          "sha256": "51dc3f2149fcfa45708e5bb999c033036ebb86382ee8bea3bf50affc8b3bce6e"
+        },
+        {
+          "index": 4,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.8b98201a359e3e49.4",
+          "bytes": 524288,
+          "sha256": "7dc0181c1f5e3235ba4dfcfa49723c1e88d92403135823f3c0ba5b685f58e37e"
+        },
+        {
+          "index": 5,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.8b98201a359e3e49.5",
+          "bytes": 483360,
+          "sha256": "e4e77583d8326e05f3b0ce32117e31d4b1b4a39c2783b92d092f2eb7f84e3aaa"
+        }
+      ]
+    },
+    {
+      "path": "src/data/toolkit/downloads/guide.json",
+      "bytes": 572692,
+      "sha256": "61ce863c9bb5b09a038fb13849b5018bf6de2a3e1b84a985ce7121626017def3",
+      "parts": [
+        {
+          "index": 0,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.d3c340739eb7c00b.0",
+          "bytes": 524288,
+          "sha256": "464bb78ce2bac986e52a13f689d7877bfe39315dad9ea18f357f6bcc10ec5a2c"
+        },
+        {
+          "index": 1,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.d3c340739eb7c00b.1",
+          "bytes": 48404,
+          "sha256": "46add95f0695e5fc33634d4452ae8a67de137942a4df33f2828f9cb70ca1a994"
+        }
+      ]
+    },
+    {
+      "path": "src/data/toolkit/downloads/kickoff.json",
+      "bytes": 330756,
+      "sha256": "a016bf4a99994bf24bcc800ea0de68082cd6a2e41d260bb9137c88c44a4e9045",
+      "parts": [
+        {
+          "index": 0,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.7e1a50d501368098.0",
+          "bytes": 330756,
+          "sha256": "a016bf4a99994bf24bcc800ea0de68082cd6a2e41d260bb9137c88c44a4e9045"
+        }
+      ]
+    },
+    {
+      "path": "src/data/toolkit/downloads/rules.json",
+      "bytes": 3104348,
+      "sha256": "0bcbe53b182e2667778fdb4da91e1ad29cd2d7d217704e4c65263a80d88d540d",
+      "parts": [
+        {
+          "index": 0,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.a1d6cc13de94665a.0",
+          "bytes": 524288,
+          "sha256": "90226e4f09805f2ff40f2f9c5d7d18982bebd75298761f4d8a5cddfc9f084c70"
+        },
+        {
+          "index": 1,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.a1d6cc13de94665a.1",
+          "bytes": 524288,
+          "sha256": "c9b405768249621c5cf76cbfdae1469442333ede5fa404d0bbb38a132ea1fab0"
+        },
+        {
+          "index": 2,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.a1d6cc13de94665a.2",
+          "bytes": 524288,
+          "sha256": "b228a20549414ab2fb1ab2a20ebda557d060aab7eb81e61e1aacde7e88fb4899"
+        },
+        {
+          "index": 3,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.a1d6cc13de94665a.3",
+          "bytes": 524288,
+          "sha256": "6cd0085553f689eddee6b1a60ef5136bd0f8e90150e0e55a220a19f304b6f489"
+        },
+        {
+          "index": 4,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.a1d6cc13de94665a.4",
+          "bytes": 524288,
+          "sha256": "920404850111d79f8cdbfc6fa2f487327bee79c0f8b36a2cddbb46015512fac7"
+        },
+        {
+          "index": 5,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.a1d6cc13de94665a.5",
+          "bytes": 482908,
+          "sha256": "6e1c042914aa8ccac7ea1e07be6d874aa2617c0e96bc7a0d34e62e27b1730921"
+        }
+      ]
+    },
+    {
+      "path": "src/data/toolkit/masters/catalog/catalog.json",
+      "bytes": 74965,
+      "sha256": "14ec5b3f81c3ce249b1218a0de4ad9c94e7d14adfbf1d6da527273bd11230b46",
+      "parts": [
+        {
+          "index": 0,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.5a5fc7f6cc498312.0",
+          "bytes": 74965,
+          "sha256": "14ec5b3f81c3ce249b1218a0de4ad9c94e7d14adfbf1d6da527273bd11230b46"
+        }
+      ]
+    },
+    {
+      "path": "src/data/toolkit/masters/experience/content-map.json",
+      "bytes": 46591,
+      "sha256": "49cedcd6f5820b84f1b1123e2cf7710579af8f1be89200f5a40cc4be524c5878",
+      "parts": [
+        {
+          "index": 0,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.a165ce2d4d77cc12.0",
+          "bytes": 46591,
+          "sha256": "49cedcd6f5820b84f1b1123e2cf7710579af8f1be89200f5a40cc4be524c5878"
+        }
+      ]
+    },
+    {
+      "path": "src/data/toolkit/masters/experience/rules-guidance.json",
+      "bytes": 8055,
+      "sha256": "2b6fe57e2e2edd082c4535c64e7ae6bc2fa639504f9464b64be3e7fff1f476e4",
+      "parts": [
+        {
+          "index": 0,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.5fdb4d932936067e.0",
+          "bytes": 8055,
+          "sha256": "2b6fe57e2e2edd082c4535c64e7ae6bc2fa639504f9464b64be3e7fff1f476e4"
+        }
+      ]
+    },
+    {
+      "path": "src/data/toolkit/masters/guide/guide.json",
+      "bytes": 65369,
+      "sha256": "a064131fde0f379b238f98c9abce9c3b4327e35340c4ee7f9207a2d45cb29d2a",
+      "parts": [
+        {
+          "index": 0,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.8c5e5d502b4c4680.0",
+          "bytes": 65369,
+          "sha256": "a064131fde0f379b238f98c9abce9c3b4327e35340c4ee7f9207a2d45cb29d2a"
+        }
+      ]
+    },
+    {
+      "path": "src/data/toolkit/masters/operating/communications.json",
+      "bytes": 50184,
+      "sha256": "ab1bb3a85f70244967d9bf424d9023a63be666bbe39647cbf6bb217de0016d5d",
+      "parts": [
+        {
+          "index": 0,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.4a73335f56da1647.0",
+          "bytes": 50184,
+          "sha256": "ab1bb3a85f70244967d9bf424d9023a63be666bbe39647cbf6bb217de0016d5d"
+        }
+      ]
+    },
+    {
+      "path": "src/data/toolkit/masters/operating/kickoff.json",
+      "bytes": 22658,
+      "sha256": "9658725535dcc0f79594c9fe3d5cf493a5b25836799f14bc1281c4b05adb1496",
+      "parts": [
+        {
+          "index": 0,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.7bf7e7d71945140a.0",
+          "bytes": 22658,
+          "sha256": "9658725535dcc0f79594c9fe3d5cf493a5b25836799f14bc1281c4b05adb1496"
+        }
+      ]
+    },
+    {
+      "path": "src/data/toolkit/masters/operating/rules.json",
+      "bytes": 43512,
+      "sha256": "5f571eb8f9a15e2cb1074a7613b4afef743578ea91bb871fb920409cc8009c51",
+      "parts": [
+        {
+          "index": 0,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.191c0f4b73a23b87.0",
+          "bytes": 43512,
+          "sha256": "5f571eb8f9a15e2cb1074a7613b4afef743578ea91bb871fb920409cc8009c51"
+        }
+      ]
+    },
+    {
+      "path": "src/data/toolkit/masters/release-manifest.json",
+      "bytes": 3863,
+      "sha256": "ac6a10827eced68badd9e82b9fdf7857e39c531ad1a80c792ecf79ddecdbacb9",
+      "parts": [
+        {
+          "index": 0,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.720bcfbfe71c1fc5.0",
+          "bytes": 3863,
+          "sha256": "ac6a10827eced68badd9e82b9fdf7857e39c531ad1a80c792ecf79ddecdbacb9"
+        }
+      ]
+    },
+    {
+      "path": "src/data/toolkit/sanity-export.ndjson",
+      "bytes": 653219,
+      "sha256": "74f195fc53929f59fa370719c84ef3ee1a96a35e1b03d0542f8359b9437fa7e2",
+      "parts": [
+        {
+          "index": 0,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.68e4342f05def257.0",
+          "bytes": 524288,
+          "sha256": "0d08f33581e2cdc2543b20627cb8bc7223751c737af72b935fb74258b612df74"
+        },
+        {
+          "index": 1,
+          "documentId": "drafts.xp-toolkit.build.20260911-launch-6.68e4342f05def257.1",
+          "bytes": 128931,
+          "sha256": "ab5bf46831b18e10446264c7cac58b26961e54d7f1f0f68ed26387d69b99bab3"
+        }
+      ]
+    }
+  ]
+}

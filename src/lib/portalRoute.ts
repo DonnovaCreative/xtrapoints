@@ -21,10 +21,13 @@ import type { APIContext } from "astro";
 import type { School } from "@/data/schools";
 import { getSchoolByPortalToken, getSchoolPortalBySlug } from "@/data/schoolsSource";
 import { isWellFormedPortalToken } from "@/lib/portalToken";
-import { getPortalIdentity } from "@/lib/portalAuth";
+import { findPortalPartner, getPortalIdentity } from "@/lib/portalAuth";
+import { canAccessPartner } from "@/lib/portalPermissions";
 
 export interface PortalContext {
   school: School;
+  /** Immutable tenant selected by the authenticated organization, when signed in. */
+  partnerId?: string;
   /** URL prefix every in-portal link is built from: `/portal/<token-or-slug>`. */
   base: string;
   /** How this visitor got in — the sidebar shows account controls only to `session`. */
@@ -38,8 +41,8 @@ export interface PortalContext {
   staff: boolean;
   /**
    * Approved for production. False means their pages don't exist on
-   * xtrapoint.com yet, so the portal has to link them to staging instead of
-   * handing a school a 404 of their own landing page.
+   * xtrapoint.com yet. Authenticated draft previews remain available before
+   * launch without handing schools a public link that returns 404.
    */
   live: boolean;
   /**
@@ -57,8 +60,9 @@ export interface PortalContext {
 
 export type PortalGate = ({ ok: true } & PortalContext) | { ok: false; response: Response };
 
+const privateHeaders = { "Cache-Control": "private, no-store", "X-Robots-Tag": "noindex, nofollow", "Referrer-Policy": "no-referrer" };
 const text = (body: string, status: number) =>
-  new Response(body, { status, headers: { "content-type": "text/plain; charset=utf-8" } });
+  new Response(body, { status, headers: { ...privateHeaders, "content-type": "text/plain; charset=utf-8" } });
 
 const notFound = () =>
   text(
@@ -67,7 +71,7 @@ const notFound = () =>
   );
 
 const redirect = (location: string) =>
-  new Response(null, { status: 302, headers: { location } });
+  new Response(null, { status: 302, headers: { ...privateHeaders, location } });
 
 interface Options {
   /**
@@ -76,13 +80,16 @@ interface Options {
    * explanation, not six.
    */
   allowDisabled?: boolean;
+  /** Unpublished content requires a bound account; legacy bearer links cannot enter. */
+  sessionOnly?: boolean;
 }
 
 export async function gatePortal(
-  ctx: Pick<APIContext, "params" | "response" | "locals" | "url">,
+  ctx: Pick<APIContext, "params" | "locals" | "url"> & { response: { headers: Headers; status?: number } },
   options: Options = {},
 ): Promise<PortalGate> {
   ctx.response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  ctx.response.headers.set("Cache-Control", "private, no-store");
   // Without this the full portal URL (token included) rides along in the Referer
   // header on every outbound click — including to the Sanity CDN for asset
   // downloads. "no-referrer" keeps the token inside this tab.
@@ -93,8 +100,12 @@ export async function gatePortal(
 
   const base = `/portal/${key}`;
   const isToken = isWellFormedPortalToken(key);
+  if (isToken && options.sessionOnly) {
+    return { ok: false, response: text("Sign in with your school account to preview unpublished drafts.", 403) };
+  }
 
   let school: School | undefined;
+  let partnerId: string | undefined;
   let enabled = false;
   let staff = false;
   let live = false;
@@ -120,27 +131,30 @@ export async function gatePortal(
         return { ok: false, response: redirect(`/sign-in?redirect_url=${back}`) };
       }
 
-      // Staff may open any school's portal — that's the job. Everyone else gets
-      // exactly the one their organization is mapped to. A 404 would be a lie
-      // and a 403 invites probing for which slugs exist, so a mismatch goes to
-      // their own portal instead.
+      // Resolve the immutable organization mapping before loading any content.
+      // Read-only roles can view, while unknown roles and stale org bindings
+      // fail closed. A disabled school may still show its deactivation notice.
       staff = identity.isStaff && identity.schoolSlug !== key;
       if (!identity.isStaff && identity.schoolSlug !== key) {
         return { ok: false, response: redirect("/portal") };
       }
-
-      const portal = await getSchoolPortalBySlug(key);
+      const partner = await findPortalPartner({ school: key, partnerId: identity.isStaff ? undefined : identity.partnerId });
+      if (!partner || !canAccessPartner(identity, { ...partner, portalEnabled: true })) {
+        return { ok: false, response: text("Your current organization does not have access to this portal.", 403) };
+      }
+      partnerId = partner._id;
+      const portal = await getSchoolPortalBySlug(key, partner._id);
       school = portal?.school;
       // `portalEnabled` is the deactivation switch for the whole school and it
       // applies however you got here — an account holder of a switched-off
       // school sees the same notice a token visitor does. (Staff are the one
       // exception: they need to see a deactivated portal in order to help.)
-      enabled = Boolean(portal) && (staff || portal!.enabled);
+      enabled = Boolean(portal) && (identity.isStaff || portal!.enabled);
       live = portal?.live ?? false;
       if (portal) livePages = portal.livePages;
     }
   } catch (err) {
-    console.error("portal lookup failed:", err);
+    console.error("Portal lookup failed");
     return {
       ok: false,
       response: text("Something went wrong loading this portal. Please try again.", 500),
@@ -161,6 +175,7 @@ export async function gatePortal(
   return {
     ok: true,
     school,
+    partnerId,
     base,
     via: isToken ? "token" : "session",
     enabled,

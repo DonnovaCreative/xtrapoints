@@ -1,0 +1,11 @@
+---
+import SchoolLanding from '@/components/school/SchoolLanding.astro';
+import SchoolAmbassadors from '@/components/school/SchoolAmbassadors.astro';
+import type {School} from '@/data/schools';
+import type {SiteSettings} from '@/data/schoolsSource';
+interface Props {school:School;settings:SiteSettings;base:string;view:string}
+const {school,settings,base,view}=Astro.props;
+---
+{view==='ambassador'?<SchoolAmbassadors school={school} settings={settings} previewBase={base}/>:<SchoolLanding school={school} settings={settings} previewBase={base}/>}
+<aside aria-label="Private preview" class="managed-preview"><strong>Private draft preview</strong><span>{school.short}</span><a href={base}>Donor page</a><a href={`${base}?view=ambassador`}>Ambassador page</a><span>This preview does not publish your pages.</span></aside>
+<style>.managed-preview{position:fixed;bottom:16px;left:16px;right:16px;z-index:100;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;padding:12px 18px;background:var(--color-ink);color:white;border-radius:12px;font:14px/1.5 var(--font-sans);box-shadow:0 4px 30px #0003}.managed-preview a{color:var(--color-lime);text-decoration:underline}.managed-preview span:last-child{font-size:13px}@media(max-width:600px){.managed-preview{gap:8px;bottom:8px;left:8px;right:8px}.managed-preview span:last-child{display:none}}</style>

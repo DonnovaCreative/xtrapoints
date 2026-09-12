@@ -1,66 +1,88 @@
-// Which school a signed-in user is allowed to see.
-//
-// One Clerk **Organization** = one school. The link between them is the
-// organization's `publicMetadata.schoolSlug`, which matches the `slug` on the
-// Sanity school document.
-//
-// Why publicMetadata and not the organization's own slug (which would be free to
-// read off the session): organization slugs are editable by org admins, so a
-// school renaming theirs would silently lose access to their portal.
-// publicMetadata is writable only from the backend — i.e. only by us — which is
-// what you want from an authorization link. Sanity stays the source of truth for
-// content; Clerk only answers "who is this, and which school are they with".
-//
-// The cost is one Clerk API call per portal request. That's fine at this scale
-// (a handful of schools, low traffic). If it ever isn't, the fix is to surface
-// `org.public_metadata` in the session token via Clerk's session customization
-// and read it straight off `auth()` — no code here would need to change shape.
+// Clerk owns identity and organization membership. Immutable Sanity school IDs
+// link new organizations to partners; schoolSlug remains a migration fallback.
 import type { APIContext } from "astro";
+import { sanityClient } from "@/config/sanity";
+import { canAccessPartner, portalJson, type PartnerAction, type PortalPartner, type PermissionIdentity } from "./portalPermissions";
 
-export interface PortalIdentity {
+export interface PortalIdentity extends PermissionIdentity {
   userId: string;
-  /** Slug of the school whose portal this user may open, if any. */
+  orgId?: string;
+  partnerId?: string;
   schoolSlug?: string;
-  /** Their role in that organization, e.g. "org:admin". */
   role?: string;
-  /**
-   * XtraPoint staff: may open ANY school's portal, to help schools with theirs.
-   * Comes from `publicMetadata.staff` on the organization — backend-writable
-   * only, so it can't be self-granted by an org admin editing their own profile.
-   * Deliberately a property of the *organization*, not the user: staff access is
-   * a job, and it ends when someone is removed from the staff org.
-   */
   isStaff: boolean;
 }
 
-/**
- * Resolves the signed-in user's school. Returns undefined when nobody is signed
- * in — callers decide whether that's a redirect to sign-in or a fallback to a
- * legacy token link.
- */
-export async function getPortalIdentity(
+// A page, its gate and its layout share one request-local identity lookup.
+// Weak keys prevent identities from surviving the lifetime of request locals.
+const requestIdentities = new WeakMap<object, Promise<PortalIdentity | undefined>>();
+
+export function getPortalIdentity(
   ctx: Pick<APIContext, "locals">,
 ): Promise<PortalIdentity | undefined> {
-  const auth = ctx.locals.auth();
-  if (!auth?.userId) return undefined;
+  const existing = requestIdentities.get(ctx.locals);
+  if (existing) return existing;
+  const identity = resolveIdentity(ctx);
+  requestIdentities.set(ctx.locals, identity);
+  return identity;
+}
 
+async function resolveIdentity(ctx: Pick<APIContext, "locals">): Promise<PortalIdentity | undefined> {
+  const auth = ctx.locals.auth?.();
+  if (!auth?.userId) return undefined;
   const identity: PortalIdentity = { userId: auth.userId, isStaff: false };
   if (auth.orgRole) identity.role = auth.orgRole;
-  if (!auth.orgId) return identity; // Signed in, but no organization selected.
+  if (!auth.orgId) return identity;
+  identity.orgId = auth.orgId;
 
-  try {
-    const { clerkClient } = await import("@clerk/astro/server");
-    const org = await clerkClient(ctx as APIContext).organizations.getOrganization({
-      organizationId: auth.orgId,
-    });
-    const slug = org.publicMetadata?.schoolSlug;
-    if (typeof slug === "string" && slug) identity.schoolSlug = slug;
-    identity.isStaff = org.publicMetadata?.staff === true;
-  } catch (err) {
-    // A Clerk outage shouldn't read as "this user has no school" in a way that
-    // silently 404s them — log it and let the caller send them somewhere honest.
-    console.error("Clerk organization lookup failed:", err);
+  // Errors propagate to callers; unavailable identity data is not empty membership.
+  const { clerkClient } = await import("@clerk/astro/server");
+  const org = await clerkClient(ctx as APIContext).organizations.getOrganization({ organizationId: auth.orgId });
+  identity.isStaff = org.publicMetadata?.staff === true;
+  const partnerId = org.publicMetadata?.partnerId;
+  const slug = org.publicMetadata?.schoolSlug;
+  if (typeof partnerId === "string" && partnerId) {
+    identity.partnerId = partnerId;
+    // Existing page gates route by slug. Resolve from the ID to retain access
+    // after a rename without trusting stale slug metadata.
+    const current = await sanityClient.fetch<{ slug?: string } | null>(
+      `*[_type == "school" && _id == $id && !(_id in path("drafts.**")) && !(_id in path("versions.**"))][0]{"slug": slug.current}`,
+      { id: partnerId },
+    );
+    if (current?.slug) identity.schoolSlug = current.slug;
+  } else if (typeof slug === "string" && slug) {
+    identity.schoolSlug = slug;
   }
-
   return identity;
+}
+
+export async function findPortalPartner(selector: { school?: string; partnerId?: string }): Promise<PortalPartner | null> {
+  if (!selector.school && !selector.partnerId) return null;
+  return sanityClient.fetch<PortalPartner | null>(
+    `*[_type == "school" && !(_id in path("drafts.**")) && !(_id in path("versions.**")) &&
+      ($id == null || _id == $id) && ($slug == null || slug.current == $slug)][0]{
+        _id, _rev, name, "slug": slug.current, portalEnabled, clerkOrgId
+      }`,
+    { id: selector.partnerId ?? null, slug: selector.school ?? null },
+  );
+}
+
+export async function resolvePortalPartner(
+  ctx: Pick<APIContext, "locals">,
+  selector: { school?: string; partnerId?: string },
+  action: PartnerAction = "read",
+): Promise<{ identity: PortalIdentity; partner: PortalPartner } | { error: Response }> {
+  if (!selector.school && !selector.partnerId) return { error: portalJson({ error: "missing_school" }, 400) };
+  try {
+    const identity = await getPortalIdentity(ctx);
+    if (!identity) return { error: portalJson({ error: "unauthorized" }, 401) };
+    const partner = await findPortalPartner(selector);
+    if (!partner || !canAccessPartner(identity, partner, action)) {
+      return { error: portalJson({ error: "forbidden", message: "You don't have access to this partner or action." }, 403) };
+    }
+    return { identity, partner };
+  } catch (err) {
+    console.error("Portal authorization lookup failed:", err);
+    return { error: portalJson({ error: "authorization_unavailable", message: "Access couldn't be checked. Please try again." }, 503) };
+  }
 }
