@@ -1,48 +1,104 @@
-/* The application navigation belongs to XtraPoint. School theme variables stay
-   available to the page content, but never determine the application chrome.
-   The mobile sheet and product menu are portaled outside SidebarProvider. */
+/* Application chrome uses XtraPoint colors, independently of school branding.
+   The mobile sheet and product menu are portaled outside the provider. */
 .xp-product-shell,
 [data-slot="sidebar"][data-mobile="true"]:has(.xp-product-switcher) {
-  --sidebar: #f7f8fa;
-  --sidebar-foreground: #435369;
-  --sidebar-accent: #e9eef3;
-  --sidebar-accent-foreground: #172d45;
-  --sidebar-border: #dde3e9;
-  --sidebar-primary: #172d45;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-ring: #466b95;
+  --sidebar: #03116d;
+  --sidebar-foreground: #eef2ff;
+  --sidebar-accent: #ffffff18;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #ffffff29;
+  --sidebar-primary: #aaf10a;
+  --sidebar-primary-foreground: #03116d;
+  --sidebar-ring: #aaf10a;
 }
 
-.xp-product-shell {
-  background: #f7f8fa;
-  color: #172d45;
-}
+.xp-product-shell { background: #03116d; color: #03116d; }
+.xp-product-trigger { color: #ffffff; }
+.xp-workspace-label { color: #c4cffb; }
 
-.xp-product-trigger {
-  color: #172d45;
+:is(.xp-product-shell, [data-mobile="true"]:has(.xp-product-switcher)) [data-sidebar="menu-button"][data-active="true"] {
+  background: #aaf10a;
+  color: #03116d;
+  font-weight: 650;
 }
+.xp-nav-item > [data-sidebar="menu-button"] { height: auto; min-height: 2.25rem; }
+.xp-nav-item > [data-sidebar="menu-button"] > span:last-child { white-space: normal; line-height: 1.35; }
+.xp-nav-item > [data-active="true"] ~ .xp-resource-toggle { color: #03116d; }
+.xp-nav-item > [data-active="true"] ~ .xp-resource-toggle:hover { background: #03116d18; color: #03116d; }
+.xp-resource-toggle { top: .5rem; }
 
-.xp-product-shell [data-sidebar="menu-button"][data-active="true"],
-[data-slot="sidebar"][data-mobile="true"]:has(.xp-product-switcher)
-  [data-sidebar="menu-button"][data-active="true"] {
-  box-shadow: inset 3px 0 #c7ed62;
+.xp-topic-groups { margin: .375rem .5rem .625rem; padding: 0 0 0 .625rem; }
+.xp-topic-category {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: .375rem;
+  padding: .5rem .375rem;
+  border-radius: .375rem;
+  color: #c4cffb;
+  text-align: left;
+  font-size: .75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.xp-topic-category svg { flex-shrink: 0; margin-top: .1rem; }
+.xp-topic-category:hover { background: #ffffff18; color: #ffffff; }
+.xp-topic-category:focus-visible { outline: 2px solid #aaf10a; outline-offset: 1px; }
+.xp-topic-links { margin: .125rem 0 .5rem .375rem; padding: 0 0 0 .5rem; }
+.xp-topic-links [data-sidebar="menu-sub-button"] {
+  height: auto;
+  min-height: 2rem;
+  padding: .5rem;
+  font-size: .8125rem;
+  line-height: 1.4;
+  color: #eef2ff;
+  transform: none;
+}
+.xp-topic-links [data-sidebar="menu-sub-button"] > span:last-child { white-space: normal; overflow-wrap: anywhere; }
+.xp-topic-links [data-sidebar="menu-sub-button"][data-active="true"] {
+  color: #aaf10a;
+  background: #ffffff12;
+  box-shadow: inset 2px 0 #aaf10a;
 }
 
 .xp-product-menu {
-  --accent: #e9eef3;
-  --accent-foreground: #172d45;
+  --accent: #eef5dc;
+  --accent-foreground: #03116d;
   --muted-foreground: #627184;
-  color: #172d45;
+  color: #03116d;
   background: #ffffff;
   border-color: #dde3e9;
+}
+
+.xp-sidebar-resize-handle:hover > span,
+.xp-sidebar-resize-handle:focus-visible > span,
+[data-sidebar-resizing="true"] .xp-sidebar-resize-handle > span { background: #aaf10a; }
+[data-sidebar-resizing="true"] [data-slot="sidebar-gap"],
+[data-sidebar-resizing="true"] [data-slot="sidebar-container"],
+[data-sidebar-ready="false"] [data-slot="sidebar-gap"],
+[data-sidebar-ready="false"] [data-slot="sidebar-container"] { transition: none; }
+
+/* Static pages restore the visual preference before React hydrates. */
+@media (min-width: 768px) {
+  html[data-xp-sidebar-open="false"] .xp-product-shell[data-sidebar-ready="false"] {
+    & [data-slot="sidebar-gap"] { width: calc(var(--sidebar-width-icon) + 1rem); }
+    & [data-slot="sidebar-container"] { width: calc(var(--sidebar-width-icon) + 1rem + 2px); }
+    & [data-slot="sidebar-inset"] { margin-left: .5rem; }
+    & [data-sidebar="content"] { overflow: hidden; }
+    & [data-sidebar="menu-button"] { width: 2rem; height: 2rem; min-height: 2rem; padding: .5rem; }
+    & .xp-product-trigger { padding: 0; }
+    & [data-sidebar="menu-button"] > span,
+    & .xp-product-trigger > svg,
+    & [data-sidebar="menu-action"],
+    & .xp-topic-groups,
+    & .xp-workspace-label { display: none; }
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .xp-product-shell [data-slot="sidebar-gap"],
   .xp-product-shell [data-slot="sidebar-container"],
   .xp-product-shell [data-sidebar="menu-button"],
-  .xp-product-menu {
-    animation: none;
-    transition: none;
-  }
+  .xp-product-menu { animation: none; transition: none; }
 }

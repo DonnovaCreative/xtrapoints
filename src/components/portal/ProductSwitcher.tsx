@@ -83,10 +83,10 @@ export function ProductSwitcher({ product, marketingHref, brandMark, brandName, 
             >
               <img src={brandMark} alt="" className="size-8 shrink-0 rounded-lg" />
               <span className="grid min-w-0 flex-1 gap-0.5 text-left leading-tight group-data-[collapsible=icon]:hidden">
-                <span className="truncate text-xs font-medium text-[#627184]">{brandName}</span>
+                <span className="truncate text-xs font-medium text-[#c4cffb]">{brandName}</span>
                 <span className="truncate text-sm font-semibold">{current.name}</span>
               </span>
-              <ChevronsUpDown className="ml-auto text-[#627184] group-data-[collapsible=icon]:hidden" />
+              <ChevronsUpDown className="ml-auto text-[#c4cffb] group-data-[collapsible=icon]:hidden" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -106,13 +106,13 @@ export function ProductSwitcher({ product, marketingHref, brandMark, brandName, 
                 <DropdownMenuItem key={item.id} asChild className="gap-2.5 rounded-md p-2.5">
                   <a href={item.href} aria-current={selected ? "page" : undefined}>
                     <span className="flex size-8 shrink-0 items-center justify-center rounded-md border border-[#dde3e9] bg-white">
-                      <Icon className="size-4 text-[#172d45]" />
+                      <Icon className="size-4 text-[#03116d]" />
                     </span>
                     <span className="grid min-w-0 flex-1 gap-0.5">
                       <span className="text-sm font-medium">{item.name}</span>
                       <span className="text-xs leading-4 text-[#627184]">{item.description}</span>
                     </span>
-                    {selected && <Check className="size-4 text-[#172d45]" aria-hidden="true" />}
+                    {selected && <Check className="size-4 text-[#03116d]" aria-hidden="true" />}
                   </a>
                 </DropdownMenuItem>
               );

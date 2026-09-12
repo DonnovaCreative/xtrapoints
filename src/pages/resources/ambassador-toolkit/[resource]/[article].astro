@@ -1,7 +1,6 @@
 ---
 export const prerender = false;
 import ResourceLayout from '@/layouts/ResourceLayout.astro';
-import ResourceOutline from '@/components/resources/ResourceOutline.astro';
 import ArticleVisual from '@/components/resources/ArticleVisual.astro';
 import BlockContent from '@/components/resources/BlockContent';
 import TemplateWorkbench from '@/components/resources/TemplateWorkbench';
@@ -21,7 +20,7 @@ const previous = entries[position - 1], next = entries[position + 1];
 const visual = (resource.id === 'guide' && article.id === 'journey') || (resource.id === 'kickoff' && article.id === 's07') ? 'joining' : (resource.id === 'rules' && article.id === 'r05') || (resource.id === 'guide' && article.id === 'milestone-example') ? 'qualification' : undefined;
 ---
 <ResourceLayout publication={toolkit} title={article.title} description={'lede' in article && article.lede ? article.lede : resource.description} crumbs={[{ label: 'Ambassador Toolkit', href: toolkitBase }, { label: resource.title, href: resource.href }, { label: article.title }]}>
-  <div class="rc-reading-layout"><ResourceOutline resource={resource} current={article.id} publication={toolkit} /><article class="rc-article"><header class="rc-article-header"><p class="rc-article-meta">{isTemplate ? 'Editable browser draft' : article.category} <span>·</span> {'minutes' in article ? `${article.minutes} min presentation` : `${article.readingMinutes} min read`}</p><h1>{article.title}</h1>{'lede' in article && article.lede && <p class="rc-lede">{article.lede}</p>}</header>
+  <div class="rc-reading-layout"><article class="rc-article"><header class="rc-article-header"><p class="rc-article-meta">{isTemplate ? 'Editable browser draft' : article.category} <span>·</span> {'minutes' in article ? `${article.minutes} min presentation` : `${article.readingMinutes} min read`}</p><h1>{article.title}</h1>{'lede' in article && article.lede && <p class="rc-lede">{article.lede}</p>}</header>
     {visual && <ArticleVisual type={visual} visuals={toolkit.visuals} />}
     {isTemplate ? <TemplateWorkbench client:load title={article.title} blocks={article.blocks as any} sharedFields={toolkit.sharedFields} rules={article.kind === 'rules-export'} /> : <BlockContent blocks={article.blocks as any} />}
     {'context' in article && article.context?.length > 0 && <details class="rc-sources"><summary>Related guidance for your administrator</summary><BlockContent blocks={article.context as any} /></details>}
