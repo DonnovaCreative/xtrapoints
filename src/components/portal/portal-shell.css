@@ -1,0 +1,48 @@
+/* The application navigation belongs to XtraPoint. School theme variables stay
+   available to the page content, but never determine the application chrome.
+   The mobile sheet and product menu are portaled outside SidebarProvider. */
+.xp-product-shell,
+[data-slot="sidebar"][data-mobile="true"]:has(.xp-product-switcher) {
+  --sidebar: #f7f8fa;
+  --sidebar-foreground: #435369;
+  --sidebar-accent: #e9eef3;
+  --sidebar-accent-foreground: #172d45;
+  --sidebar-border: #dde3e9;
+  --sidebar-primary: #172d45;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-ring: #466b95;
+}
+
+.xp-product-shell {
+  background: #f7f8fa;
+  color: #172d45;
+}
+
+.xp-product-trigger {
+  color: #172d45;
+}
+
+.xp-product-shell [data-sidebar="menu-button"][data-active="true"],
+[data-slot="sidebar"][data-mobile="true"]:has(.xp-product-switcher)
+  [data-sidebar="menu-button"][data-active="true"] {
+  box-shadow: inset 3px 0 #c7ed62;
+}
+
+.xp-product-menu {
+  --accent: #e9eef3;
+  --accent-foreground: #172d45;
+  --muted-foreground: #627184;
+  color: #172d45;
+  background: #ffffff;
+  border-color: #dde3e9;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xp-product-shell [data-slot="sidebar-gap"],
+  .xp-product-shell [data-slot="sidebar-container"],
+  .xp-product-shell [data-sidebar="menu-button"],
+  .xp-product-menu {
+    animation: none;
+    transition: none;
+  }
+}

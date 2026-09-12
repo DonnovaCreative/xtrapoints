@@ -7,7 +7,7 @@
 // Icons travel as NAMES, not components: the sidebar is a React island and Astro
 // can only pass serializable props across that boundary, so PortalShell maps
 // these to lucide components on its side.
-export type PortalIcon = "home" | "pages" | "onePager" | "library" | "brand";
+export type PortalIcon = "home" | "pages" | "onePager" | "library" | "brand" | "guide" | "catalog" | "builder" | "communications" | "kickoff" | "rules";
 
 export interface PortalNavItem {
   /** Path segment under /portal/<token>; "" is the dashboard root. */
@@ -41,7 +41,7 @@ export const PORTAL_NAV: PortalNavItem[] = [
   },
   {
     segment: "resources",
-    title: "Resource library",
+    title: "Marketing materials",
     icon: "library",
     blurb: "Templates and materials built by the marketing team, in the tools you already use.",
   },
