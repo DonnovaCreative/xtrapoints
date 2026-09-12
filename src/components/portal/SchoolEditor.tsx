@@ -540,10 +540,10 @@ export default function SchoolEditor({
                   Create private sales preview
                 </button>
               )}
-              {data.published && (
+              {data.published && (data.livePages.donor || data.livePages.ambassador) && (
                 <a
                   className={button}
-                  href={`/schools/${data.slug}`}
+                  href={data.livePages.donor ? `/schools/${data.slug}` : `/schools/${data.slug}/ambassadors`}
                   target="_blank"
                   rel="noreferrer"
                 >
