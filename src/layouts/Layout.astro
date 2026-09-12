@@ -2,6 +2,7 @@
 import "@/styles/globals.css";
 import { brand } from "@/config/brand";
 import { isProduction, shouldNoindex } from "@/config/site-env";
+import { SIDEBAR_PREFERENCES_BOOTSTRAP } from "@/lib/sidebarPreferences";
 
 export interface Props {
   title: string;
@@ -10,6 +11,8 @@ export interface Props {
   ogImage?: string;
   /** Force noindex on this page regardless of environment (e.g. sales collateral). */
   noindex?: boolean;
+  /** Restore workspace navigation before the first paint, including static exports. */
+  workspace?: boolean;
 }
 
 const {
@@ -17,6 +20,7 @@ const {
   description,
   ogImage = "/assets/og-image-xp.jpg",
   noindex = false,
+  workspace = false,
 } = Astro.props;
 
 // HubSpot tracking — PRODUCTION ONLY, and that is a consent decision, not a
@@ -40,6 +44,7 @@ const ogImageUrl = new URL(ogImage, Astro.site).href;
     <script is:inline>
       document.documentElement.classList.add("js");
     </script>
+    {workspace && <script is:inline set:html={SIDEBAR_PREFERENCES_BOOTSTRAP} />}
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
