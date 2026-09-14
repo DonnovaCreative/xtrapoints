@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 const audiences = [
   {
     title: "Athletics",
@@ -36,28 +36,132 @@ const audiences = [
     alt: "Otto and volunteers gather at an outdoor community fundraiser.",
   },
 ];
+const INTERVAL = 6500;
 export default function AudienceGallery() {
+  const root = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState(0);
+  const [playing, setPlaying] = useState(true);
+  const [visible, setVisible] = useState(false);
+  const [pageVisible, setPageVisible] = useState(true);
+  const [reduced, setReduced] = useState(true);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const running =
+    playing && visible && pageVisible && !reduced && !hovered && !focused;
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updateMotion = () => setReduced(media.matches);
+    const updatePage = () => setPageVisible(!document.hidden);
+    updateMotion();
+    updatePage();
+    media.addEventListener("change", updateMotion);
+    document.addEventListener("visibilitychange", updatePage);
+    const observer = new IntersectionObserver(
+      ([entry]) =>
+        setVisible(entry.isIntersecting && entry.intersectionRatio >= 0.35),
+      { threshold: 0.35 },
+    );
+    if (root.current) observer.observe(root.current);
+    return () => {
+      observer.disconnect();
+      media.removeEventListener("change", updateMotion);
+      document.removeEventListener("visibilitychange", updatePage);
+    };
+  }, []);
+  useEffect(() => {
+    if (!running) return;
+    const timer = window.setTimeout(
+      () => setSelected((value) => (value + 1) % audiences.length),
+      INTERVAL,
+    );
+    return () => window.clearTimeout(timer);
+  }, [running, selected]);
+  useEffect(() => {
+    if (!visible) return;
+    const next = new Image();
+    next.src = `/images/brand-refresh/${audiences[(selected + 1) % audiences.length].image}${window.innerWidth <= 700 ? "-720" : ""}.webp`;
+  }, [visible, selected]);
   const audience = audiences[selected];
+  const choose = (index: number) => {
+    setSelected(index);
+    setPlaying(false);
+  };
   return (
-    <div className="audience-gallery">
-      <div
-        className="audience-select"
-        role="group"
-        aria-label="Explore your community"
-      >
-        {audiences.map((a, i) => (
+    <div
+      className="audience-gallery"
+      ref={root}
+      data-running={running}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocusCapture={() => setFocused(true)}
+      onBlurCapture={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node))
+          setFocused(false);
+      }}
+    >
+      <div className="audience-controls">
+        <div
+          className="audience-select"
+          role="group"
+          aria-label="Explore your community"
+        >
+          {audiences.map((a, i) => (
+            <button
+              type="button"
+              key={a.title}
+              aria-pressed={selected === i}
+              onClick={() => choose(i)}
+            >
+              {a.title}
+              {selected === i && playing && !reduced && (
+                <span
+                  key={`${selected}-${running}`}
+                  className="audience-timer"
+                  aria-hidden="true"
+                />
+              )}
+            </button>
+          ))}
+        </div>
+        {!reduced && (
           <button
             type="button"
-            key={a.title}
-            aria-pressed={selected === i}
-            onClick={() => setSelected(i)}
+            className="audience-playback"
+            onClick={() => {
+              if (!playing) {
+                setFocused(false);
+                setHovered(false);
+              }
+              setPlaying((p) => !p);
+            }}
+            aria-label={
+              playing
+                ? "Pause automatic community slideshow"
+                : "Play automatic community slideshow"
+            }
           >
-            {a.title}
+            <svg
+              viewBox="0 0 20 20"
+              width="13"
+              height="13"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              {playing ? (
+                <path d="M5 4h3v12H5zm7 0h3v12h-3z" />
+              ) : (
+                <path d="m6 3 11 7-11 7V3Z" />
+              )}
+            </svg>
+            {playing ? "Pause" : "Play"}
           </button>
-        ))}
+        )}
       </div>
-      <div className="audience-scene">
+      <div
+        className="audience-scene"
+        aria-roledescription="slideshow"
+        aria-label="Communities XtraPoint serves"
+      >
         <img
           key={audience.image}
           src={`/images/brand-refresh/${audience.image}.webp`}
@@ -68,7 +172,7 @@ export default function AudienceGallery() {
           alt={audience.alt}
           loading="lazy"
         />
-        <div className="audience-story" aria-live="polite">
+        <div className="audience-story" aria-live={playing ? "off" : "polite"}>
           <span className="xp-caption">Your community. Your impact.</span>
           <h3>{audience.headline}</h3>
           <p>{audience.copy}</p>

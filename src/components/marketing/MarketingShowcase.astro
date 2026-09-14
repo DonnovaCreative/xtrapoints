@@ -1,0 +1,1578 @@
+---
+import QRCode from "qrcode";
+import { brand } from "@/config/brand";
+
+// A public-safe composition of the real Marketing Portal structure and the
+// document layouts in OnePagerView/AmbassadorFlyerView. This is an illustration,
+// not a screenshot of a partner account. The sample QR opens the public site.
+const portalItems = [
+  { label: "Overview", icon: "M3 10 12 3l9 7v11h-6v-7H9v7H3V10Z" },
+  { label: "Your pages", icon: "M3 4h18v16H3V4Zm0 5h18M9 9v11" },
+  {
+    label: "Sales one-pager",
+    icon: "M6 3h8l4 4v14H6V3Zm8 0v5h5M9 12h6M9 16h6",
+  },
+  {
+    label: "Marketing materials",
+    icon: "M3 4h18v16H3V4Zm0 12 6-6 5 5 3-3 4 4M15 8h.01",
+  },
+  {
+    label: "Brand kit",
+    icon: "M12 3a9 9 0 1 0 0 18h1a2 2 0 0 0 1-3.7 1.5 1.5 0 0 1 1-2.7h2a4 4 0 0 0 4-4A8 8 0 0 0 12 3ZM7 10h.01M10 6h.01M15 7h.01",
+  },
+];
+const qr = await QRCode.toString(brand.url, {
+  type: "svg",
+  margin: 0,
+  errorCorrectionLevel: "M",
+  color: { dark: "#000628", light: "#ffffff" },
+});
+const arrow = "M5 12h14m-5-5 5 5-5 5";
+---
+
+<figure class="marketing-showcase">
+  <div
+    class="ms-stage"
+    role="img"
+    aria-label="The XtraPoint Marketing Portal, with its navy navigation and marketing resource library, surrounded by sample branded posters, a sales one-pager, social posts, an ambassador flyer, and event signage."
+  >
+    <div class="ms-composition" aria-hidden="true">
+      <div class="ms-surface"></div>
+
+      <div class="ms-portal">
+        <div class="ms-browser">
+          <span></span>
+          <span></span>
+          <span></span>
+          <p>Marketing Portal</p>
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M17 3h4v4M15 9l6-6M7 21H3v-4m6-2-6 6" />
+          </svg>
+        </div>
+        <div class="ms-portal-layout">
+          <div class="ms-sidebar">
+            <div class="ms-product">
+              <img src={brand.logo.mark} width="28" height="28" alt="" />
+              <span>
+                XtraPoint<strong>Marketing Portal</strong>
+              </span>
+              <svg viewBox="0 0 12 12" fill="none">
+                <path d="m4 4 2-2 2 2M4 8l2 2 2-2" />
+              </svg>
+            </div>
+            <p class="ms-workspace">Your program</p>
+            <div class="ms-nav">
+              {portalItems.map((item) => (
+                <div
+                  class:list={{
+                    "ms-nav-active": item.label === "Marketing materials",
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d={item.icon} />
+                  </svg>
+                  <span>{item.label}</span>
+                </div>
+              ))}
+            </div>
+            <div class="ms-sidebar-help">
+              <svg viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M9.5 9a2.5 2.5 0 1 1 4.3 1.7c-.8.6-1.8 1.2-1.8 2.8M12 17h.01" />
+              </svg>
+              Contact XtraPoint
+            </div>
+          </div>
+          <div class="ms-library">
+            <div class="ms-breadcrumb">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M4 4h16v16H4V4Zm5 0v16" />
+              </svg>
+              <span>Your program</span>
+              <b>›</b>
+              <strong>Marketing materials</strong>
+            </div>
+            <div class="ms-library-content">
+              <div class="ms-library-heading">
+                <strong>Marketing materials</strong>
+                <p>Built for your program. Ready for your community.</p>
+              </div>
+              <div class="ms-library-tools">
+                <span class="ms-edit-pill">Edit school pages</span>
+                <span>Preview current draft</span>
+              </div>
+              <p class="ms-category">Campaigns & outreach</p>
+              <div class="ms-resource-grid">
+                <div class="ms-resource">
+                  <div class="ms-resource-thumb ms-thumb-flyer">
+                    <img
+                      src="/images/brand-refresh/otto-campus-community-720.webp"
+                      width="720"
+                      height="480"
+                      loading="lazy"
+                      decoding="async"
+                      alt=""
+                    />
+                    <span>
+                      YOUR PEOPLE.
+                      <br />
+                      YOUR IMPACT.
+                    </span>
+                  </div>
+                  <div class="ms-resource-copy">
+                    <strong>Ambassador flyer</strong>
+                    <p>Introduce your program.</p>
+                    <span>PDF</span>
+                    <span>Customizable</span>
+                    <em>
+                      View details <b>↗</b>
+                    </em>
+                  </div>
+                </div>
+                <div class="ms-resource">
+                  <div class="ms-resource-thumb ms-thumb-sheet">
+                    <div>
+                      <span>YOUR PROGRAM</span>
+                      <strong>
+                        Everyday giving.
+                        <br />
+                        Lasting support.
+                      </strong>
+                    </div>
+                    <i></i>
+                    <i></i>
+                  </div>
+                  <div class="ms-resource-copy">
+                    <strong>Sales one-pager</strong>
+                    <p>Start the conversation.</p>
+                    <span>PDF</span>
+                    <em>
+                      View details <b>↗</b>
+                    </em>
+                  </div>
+                </div>
+                <div class="ms-resource">
+                  <div class="ms-resource-thumb ms-thumb-social">
+                    <img
+                      src="/images/brand-refresh/otto-volleyball-team-720.webp"
+                      width="720"
+                      height="480"
+                      loading="lazy"
+                      decoding="async"
+                      alt=""
+                    />
+                    <span>
+                      ALL IN.
+                      <br />
+                      ALL SEASON.
+                    </span>
+                  </div>
+                  <div class="ms-resource-copy">
+                    <strong>Social campaign</strong>
+                    <p>Give your community a start.</p>
+                    <span>Social</span>
+                    <em>
+                      View details <b>↗</b>
+                    </em>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ms-piece ms-poster">
+        <span class="ms-piece-label">Posters</span>
+        <div class="ms-poster-paper">
+          <img
+            class="ms-poster-photo"
+            src="/images/brand-refresh/otto-basketball-team-720.webp"
+            width="720"
+            height="480"
+            loading="lazy"
+            decoding="async"
+            alt=""
+          />
+          <div class="ms-poster-shade"></div>
+          <img
+            class="ms-poster-logo"
+            src={brand.logo.white}
+            width={brand.logo.width}
+            height={brand.logo.height}
+            alt=""
+          />
+          <div class="ms-poster-copy">
+            <span>Your program. Your people.</span>
+            <strong>
+              GOOD TEAMS.
+              <br />
+              GREAT
+              <br />
+              SUPPORT.
+            </strong>
+            <p>
+              Small change.
+              <br />
+              Something bigger.
+            </p>
+            <div>
+              <span>Give a little. Get behind it.</span>
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d={arrow} />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ms-piece ms-onepager">
+        <span class="ms-piece-label">One-pagers</span>
+        <div class="ms-onepager-paper">
+          <div class="ms-op-hero">
+            <img
+              src={brand.logo.white}
+              width={brand.logo.width}
+              height={brand.logo.height}
+              alt=""
+            />
+            <div class="ms-op-hero-content">
+              <strong>
+                Turn everyday
+                <br />
+                purchases into
+                <br />
+                recurring support.
+              </strong>
+              <div class="ms-op-phone">
+                <span>Your program</span>
+                <i></i>
+                <b>
+                  Small change.
+                  <br />
+                  Big possibility.
+                </b>
+                <em>Give your way</em>
+                <i></i>
+              </div>
+            </div>
+            <p>Giving. Donor management. Marketing support.</p>
+          </div>
+          <div class="ms-op-columns">
+            <div>
+              <strong>Everyday giving</strong>
+              <p>
+                Round-ups and recurring gifts bring more people into your
+                program.
+              </p>
+              <i></i>
+              <i></i>
+              <i></i>
+            </div>
+            <div>
+              <strong>A team behind you</strong>
+              <p>
+                Branded materials and practical resources to support your
+                launch.
+              </p>
+              <i></i>
+              <i></i>
+              <i></i>
+            </div>
+          </div>
+          <div class="ms-op-lower">
+            <strong>
+              Made for the people
+              <br />
+              behind your program.
+            </strong>
+            <div class="ms-mini-qr" set:html={qr} />
+          </div>
+          <div class="ms-op-footer">
+            YOUR PROGRAM <span>×</span> XTRAPOINT
+          </div>
+        </div>
+      </div>
+
+      <div class="ms-piece ms-flyer">
+        <span class="ms-piece-label">Flyers</span>
+        <div class="ms-flyer-paper">
+          <div class="ms-flyer-masthead">
+            <span>YOUR PROGRAM</span>
+            <img
+              src={brand.logo.white}
+              width={brand.logo.width}
+              height={brand.logo.height}
+              alt=""
+            />
+          </div>
+          <div class="ms-flyer-hero">
+            <img
+              src="/images/brand-refresh/otto-campus-community-720.webp"
+              width="720"
+              height="480"
+              loading="lazy"
+              decoding="async"
+              alt=""
+            />
+            <strong>
+              YOUR PEOPLE.
+              <br />
+              <span>YOUR IMPACT.</span>
+            </strong>
+          </div>
+          <div class="ms-flyer-body">
+            <strong>
+              Bring your community
+              <br />
+              into the game.
+            </strong>
+            <p>
+              A place for people who love to connect, share, and bring others
+              along.
+            </p>
+            <div>
+              <span>Share the story.</span>
+              <span>Rally your people.</span>
+              <span>Make it yours.</span>
+            </div>
+          </div>
+          <div class="ms-flyer-cta">
+            <span>
+              Be part of
+              <br />
+              <strong>something good.</strong>
+            </span>
+            <div class="ms-mini-qr" set:html={qr} />
+          </div>
+        </div>
+      </div>
+
+      <div class="ms-piece ms-social">
+        <span class="ms-piece-label">Social posts</span>
+        <div class="ms-social-frame">
+          <div class="ms-social-profile">
+            <img src={brand.logo.mark} width="24" height="24" alt="" />
+            <span>
+              Your program<small>Your community, connected</small>
+            </span>
+            <i>•••</i>
+          </div>
+          <div class="ms-social-art">
+            <img
+              src="/images/brand-refresh/otto-volleyball-team-720.webp"
+              width="720"
+              height="480"
+              loading="lazy"
+              decoding="async"
+              alt=""
+            />
+            <div>
+              <span>For the team behind the team.</span>
+              <strong>
+                ALL IN.
+                <br />
+                ALL SEASON.
+              </strong>
+            </div>
+          </div>
+          <div class="ms-social-bottom">
+            <div>
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M20 4a5 5 0 0 0-8 2 5 5 0 0 0-8-2c-4 4 0 8 8 15 8-7 12-11 8-15Z" />
+              </svg>
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M21 11a9 9 0 0 1-9 9H4l-3 2 1-7a9 9 0 1 1 19-4Z" />
+              </svg>
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="m3 3 19 7-8 4-4 8-7-19Zm0 0 11 11" />
+              </svg>
+            </div>
+            <p>A little change can change the game.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="ms-piece ms-event">
+        <span class="ms-piece-label">Signage & events</span>
+        <div class="ms-event-card">
+          <div>
+            <img
+              src={brand.logo.navy}
+              width={brand.logo.width}
+              height={brand.logo.height}
+              alt=""
+            />
+            <strong>
+              YOU’RE PART
+              <br />
+              OF THE TEAM.
+            </strong>
+            <span>Discover everyday giving.</span>
+          </div>
+          <div class="ms-event-qr" set:html={qr} />
+        </div>
+        <div class="ms-event-stand"></div>
+      </div>
+    </div>
+  </div>
+  <figcaption>
+    <span>One place to find it. So many ways to share it.</span>
+    <small>Illustrative materials</small>
+  </figcaption>
+</figure>
+
+<style>
+  .marketing-showcase {
+    --ms-ink: var(--xp-navy);
+    container-type: inline-size;
+    width: 100%;
+    margin: 0;
+    color: var(--xp-text);
+    font-family: var(--xp-body);
+  }
+  .ms-stage {
+    position: relative;
+    aspect-ratio: 1.51;
+    width: 100%;
+    isolation: isolate;
+  }
+  .ms-composition {
+    position: absolute;
+    inset: 0;
+  }
+  .ms-composition *,
+  .marketing-showcase figcaption {
+    box-sizing: border-box;
+  }
+  .ms-composition p,
+  .ms-composition strong,
+  .ms-composition span,
+  .ms-composition em {
+    margin: 0;
+  }
+  .ms-composition svg {
+    display: block;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .ms-surface {
+    position: absolute;
+    inset: 14% 0 1%;
+    border-radius: 50%;
+    background: radial-gradient(
+      ellipse at center,
+      #d4e3f080 0%,
+      #eef5fa60 40%,
+      transparent 69%
+    );
+  }
+  .ms-portal {
+    position: absolute;
+    z-index: 1;
+    top: 2%;
+    left: 8.8%;
+    width: 85%;
+    height: 68%;
+    border: 1px solid #b6c6d9;
+    border-radius: 1.25cqw;
+    background: white;
+    box-shadow:
+      0 2cqw 6cqw -2cqw #0006282a,
+      0 0.2cqw 0.4cqw #00062808;
+    overflow: hidden;
+    transform: perspective(1400px) rotateY(-3deg) rotateZ(-1.5deg);
+  }
+  .ms-browser {
+    display: flex;
+    gap: 0.5cqw;
+    align-items: center;
+    height: 3.5cqw;
+    padding: 0 1.4cqw;
+    border-bottom: 1px solid #e2e7ef;
+    background: #f6f8fc;
+  }
+  .ms-browser > span {
+    width: 0.65cqw;
+    height: 0.65cqw;
+    border-radius: 50%;
+    background: #c8d3e1;
+  }
+  .ms-browser > p {
+    flex: 1;
+    margin-right: 3cqw;
+    color: #637087;
+    text-align: center;
+    font-size: 1cqw;
+    font-weight: 500;
+  }
+  .ms-browser > svg {
+    width: 1.15cqw;
+    height: 1.15cqw;
+    color: #8290a4;
+  }
+  .ms-portal-layout {
+    display: grid;
+    grid-template-columns: 21% 79%;
+    height: calc(100% - 3.5cqw);
+  }
+  .ms-sidebar {
+    display: flex;
+    flex-direction: column;
+    padding: 1.6cqw 0.8cqw 2cqw;
+    color: white;
+    background: #03116d;
+  }
+  .ms-product {
+    display: flex;
+    align-items: center;
+    gap: 0.7cqw;
+    padding: 0 0.55cqw;
+  }
+  .ms-product > img {
+    width: 2.55cqw;
+    height: 2.55cqw;
+    flex-shrink: 0;
+    border-radius: 0.55cqw;
+  }
+  .ms-product > span {
+    font-size: 1cqw;
+    font-weight: 650;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+  .ms-product strong {
+    display: block;
+    color: #c8d3ff;
+    font-size: 0.69cqw;
+    font-weight: 400;
+  }
+  .ms-product > svg {
+    width: 0.85cqw;
+    height: 0.85cqw;
+    margin-left: auto;
+  }
+  .ms-workspace {
+    padding: 2.2cqw 0.7cqw 1cqw;
+    font-size: 0.84cqw;
+    color: #c4cffb;
+  }
+  .ms-nav {
+    display: grid;
+    gap: 0.45cqw;
+  }
+  .ms-nav > div {
+    display: flex;
+    align-items: center;
+    gap: 0.7cqw;
+    padding: 0.92cqw 0.65cqw;
+    border-radius: 0.55cqw;
+    font-size: 0.88cqw;
+    color: #e7ecff;
+    white-space: nowrap;
+  }
+  .ms-nav svg {
+    height: 1.25cqw;
+    width: 1.25cqw;
+    flex-shrink: 0;
+  }
+  .ms-nav > .ms-nav-active {
+    color: #03116d;
+    background: #aaf10a;
+    font-weight: 650;
+  }
+  .ms-sidebar-help {
+    display: flex;
+    align-items: center;
+    gap: 0.7cqw;
+    margin-top: auto;
+    padding-left: 0.7cqw;
+    font-size: 0.78cqw;
+    color: #dae2ff;
+  }
+  .ms-sidebar-help svg {
+    width: 1.1cqw;
+    height: 1.1cqw;
+  }
+  .ms-library {
+    overflow: hidden;
+    background: #fcfdff;
+  }
+  .ms-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 1cqw;
+    height: 3.9cqw;
+    padding: 0 2cqw;
+    border-bottom: 1px solid #e8edf4;
+    font-size: 0.85cqw;
+    color: #7d8797;
+  }
+  .ms-breadcrumb > svg {
+    width: 1.15cqw;
+    height: 1.15cqw;
+    margin-right: 0.4cqw;
+    color: #475572;
+  }
+  .ms-breadcrumb strong {
+    font-weight: 500;
+    color: #1c2943;
+  }
+  .ms-library-content {
+    padding: 2.2cqw 2.4cqw;
+  }
+  .ms-library-heading > strong {
+    display: block;
+    font-size: 2cqw;
+    font-weight: 750;
+    letter-spacing: -0.045em;
+    line-height: 1.2;
+  }
+  .ms-library-heading > p {
+    margin-top: 0.7cqw;
+    color: #647084;
+    font-size: 0.9cqw;
+    line-height: 1.5;
+  }
+  .ms-library-tools {
+    display: flex;
+    gap: 0.8cqw;
+    margin-top: 1.35cqw;
+  }
+  .ms-library-tools > span {
+    display: block;
+    padding: 0.62cqw 1cqw;
+    border-radius: 2cqw;
+    border: 1px solid #dce2ec;
+    font-size: 0.72cqw;
+  }
+  .ms-library-tools .ms-edit-pill {
+    background: #03116d;
+    color: white;
+    border-color: #03116d;
+  }
+  .ms-category {
+    margin-top: 2.1cqw !important;
+    color: #5b790b;
+    font-size: 0.8cqw;
+    font-weight: 550;
+  }
+  .ms-resource-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.1cqw;
+    margin-top: 1cqw;
+  }
+  .ms-resource {
+    overflow: hidden;
+    border: 1px solid #dce3ed;
+    border-radius: 1cqw;
+    background: white;
+  }
+  .ms-resource-thumb {
+    position: relative;
+    height: 9.3cqw;
+    overflow: hidden;
+    background: var(--xp-navy);
+  }
+  .ms-resource-thumb > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .ms-thumb-flyer > img {
+    opacity: 0.42;
+  }
+  .ms-thumb-flyer > span,
+  .ms-thumb-social > span {
+    position: absolute;
+    left: 1cqw;
+    bottom: 1.2cqw;
+    color: white;
+    font-size: 1.65cqw;
+    font-weight: 800;
+    font-style: italic;
+    font-stretch: 62%;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .ms-thumb-social > img {
+    height: 75%;
+  }
+  .ms-thumb-social > span {
+    font-size: 1.5cqw;
+    color: var(--xp-lime);
+  }
+  .ms-thumb-sheet {
+    padding: 0.8cqw 1.3cqw;
+    background: #eff4ec;
+  }
+  .ms-thumb-sheet > div {
+    height: 6cqw;
+    padding: 1cqw;
+    color: white;
+    background: #082f39;
+  }
+  .ms-thumb-sheet span {
+    font-size: 0.45cqw;
+  }
+  .ms-thumb-sheet strong {
+    display: block;
+    margin-top: 0.55cqw;
+    font-size: 1.13cqw;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+  .ms-thumb-sheet > i {
+    display: inline-block;
+    width: 42%;
+    height: 2.2cqw;
+    margin: 0.4cqw 2%;
+    background: white;
+  }
+  .ms-resource-copy {
+    padding: 1.15cqw;
+  }
+  .ms-resource-copy > strong {
+    display: block;
+    font-size: 1.04cqw;
+    font-weight: 650;
+  }
+  .ms-resource-copy > p {
+    margin-top: 0.5cqw;
+    color: #748095;
+    font-size: 0.72cqw;
+  }
+  .ms-resource-copy > span {
+    display: inline-block;
+    margin-top: 0.85cqw;
+    margin-right: 0.3cqw;
+    padding: 0.3cqw 0.55cqw;
+    border-radius: 1cqw;
+    background: #f0f3f7;
+    color: #627088;
+    font-size: 0.6cqw;
+  }
+  .ms-resource-copy > em {
+    display: block;
+    margin-top: 1.1cqw;
+    font-size: 0.75cqw;
+    font-weight: 600;
+    font-style: normal;
+  }
+  .ms-resource-copy > em b {
+    margin-left: 0.5cqw;
+  }
+  .ms-piece {
+    position: absolute;
+    z-index: 2;
+    transform-origin: 50% 80%;
+  }
+  .ms-piece-label {
+    display: block;
+    width: max-content;
+    margin-bottom: 0.8cqw !important;
+    padding: 0.48cqw 0.85cqw;
+    border: 1px solid #dce3ed;
+    border-radius: 2cqw;
+    background: #fffffff2;
+    box-shadow: 0 0.2cqw 0.6cqw #00062808;
+    color: #40506b;
+    font-size: clamp(8px, 0.86cqw, 10px);
+    font-weight: 550;
+    line-height: 1.3;
+  }
+  .ms-poster {
+    top: 27%;
+    left: 4%;
+    width: 24%;
+    transform: rotate(-7deg);
+  }
+  .ms-poster-paper {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 0.65;
+    background: var(--xp-navy);
+    border: 0.4cqw solid white;
+    border-radius: 0.35cqw;
+    box-shadow:
+      0 2.4cqw 4.5cqw -1.8cqw #00062865,
+      0 0.15cqw 0.4cqw #00062822;
+  }
+  .ms-poster-photo {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 63%;
+    object-fit: cover;
+    object-position: 59% center;
+  }
+  .ms-poster-shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      0deg,
+      var(--xp-navy) 0%,
+      var(--xp-navy) 30%,
+      #00062885 61%,
+      #00062820 100%
+    );
+  }
+  .ms-poster-logo {
+    position: absolute;
+    top: 1.5cqw;
+    left: 1.4cqw;
+    width: 8.3cqw;
+    height: auto;
+  }
+  .ms-poster-copy {
+    position: absolute;
+    inset: auto 1.55cqw 1.7cqw;
+    color: white;
+  }
+  .ms-poster-copy > span {
+    font-size: 0.69cqw;
+  }
+  .ms-poster-copy > strong {
+    display: block;
+    margin-top: 1.1cqw;
+    font-size: 3.95cqw;
+    font-style: italic;
+    font-stretch: 62%;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 0.98;
+  }
+  .ms-poster-copy > p {
+    margin-top: 1cqw;
+    font-size: 1cqw;
+    line-height: 1.35;
+    color: #e2e8f1;
+  }
+  .ms-poster-copy > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5cqw;
+    padding: 0.9cqw 1cqw;
+    background: var(--xp-lime);
+    color: var(--xp-navy);
+    font-size: 0.7cqw;
+    font-weight: 600;
+  }
+  .ms-poster-copy svg {
+    width: 1.4cqw;
+    height: 1.4cqw;
+  }
+  .ms-onepager {
+    z-index: 4;
+    top: 52%;
+    left: 27%;
+    width: 22%;
+    transform: rotate(4deg);
+  }
+  .ms-onepager-paper {
+    aspect-ratio: 612 / 792;
+    background: white;
+    box-shadow:
+      0 2cqw 4cqw -1.3cqw #00062855,
+      0 0.1cqw 0.6cqw #00062822;
+    overflow: hidden;
+  }
+  .ms-op-hero {
+    height: 39%;
+    padding: 1.25cqw;
+    color: white;
+    background: #103f38;
+  }
+  .ms-op-hero > img {
+    width: 7.5cqw;
+    height: auto;
+  }
+  .ms-op-hero-content {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    align-items: center;
+    gap: 0.7cqw;
+    margin-top: 1cqw;
+  }
+  .ms-op-hero-content > strong {
+    display: block;
+    font-size: 1.57cqw;
+    font-weight: 750;
+    letter-spacing: -0.045em;
+    line-height: 1.05;
+  }
+  .ms-op-phone {
+    height: 6.8cqw;
+    padding: 0.6cqw 0.5cqw;
+    border: 0.18cqw solid #e0ebdf;
+    border-radius: 0.65cqw;
+    background: #13282c;
+    box-shadow: 0 0.3cqw 0.4cqw #00151340;
+  }
+  .ms-op-phone > span {
+    display: block;
+    font-size: 0.35cqw;
+    color: #d5e9df;
+  }
+  .ms-op-phone > i {
+    display: block;
+    height: 0.25cqw;
+    width: 80%;
+    margin-top: 0.5cqw;
+    background: #c3d9b930;
+  }
+  .ms-op-phone > b {
+    display: block;
+    margin-top: 0.6cqw;
+    font-size: 0.65cqw;
+    line-height: 1.15;
+    font-weight: 600;
+  }
+  .ms-op-phone > em {
+    display: block;
+    margin-top: 0.5cqw;
+    padding: 0.3cqw;
+    color: #142828;
+    background: #c5ed87;
+    font-size: 0.4cqw;
+    font-style: normal;
+    text-align: center;
+  }
+  .ms-op-hero > p {
+    margin-top: 0.65cqw;
+    font-size: 0.4cqw;
+    line-height: 1.3;
+  }
+  .ms-op-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1cqw;
+    padding: 1.3cqw 1.2cqw;
+  }
+  .ms-op-columns strong {
+    display: block;
+    font-size: 0.78cqw;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+  .ms-op-columns p {
+    margin-top: 0.65cqw;
+    font-size: 0.59cqw;
+    line-height: 1.5;
+    color: #56665a;
+  }
+  .ms-op-columns i {
+    display: block;
+    width: 100%;
+    height: 0.23cqw;
+    margin-top: 0.65cqw;
+    background: #d6dfd4;
+  }
+  .ms-op-columns i:last-child {
+    width: 73%;
+  }
+  .ms-op-lower {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0.2cqw 1.2cqw 1cqw;
+    padding: 1.1cqw;
+    background: #e7f4d8;
+  }
+  .ms-op-lower > strong {
+    font-size: 1.04cqw;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+  }
+  .ms-mini-qr {
+    flex-shrink: 0;
+    padding: 0.25cqw;
+    background: white;
+    width: 3.4cqw;
+    height: 3.4cqw;
+  }
+  .ms-mini-qr :global(svg),
+  .ms-event-qr :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .ms-op-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.85cqw 1.3cqw;
+    color: #dce8d7;
+    background: #103f38;
+    font-size: 0.5cqw;
+    font-weight: 600;
+  }
+  .ms-op-footer > span {
+    color: #ceec91;
+  }
+  .ms-flyer {
+    z-index: 3;
+    top: 47%;
+    left: 51.5%;
+    width: 20.5%;
+    transform: rotate(-4deg);
+  }
+  .ms-flyer-paper {
+    overflow: hidden;
+    aspect-ratio: 8.5 / 11;
+    background: white;
+    box-shadow:
+      0 1.8cqw 3cqw -1.2cqw #0006284d,
+      0 0.1cqw 0.5cqw #00062820;
+  }
+  .ms-flyer-masthead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 2.65cqw;
+    padding: 0.7cqw 1cqw;
+    color: white;
+    background: var(--xp-navy);
+  }
+  .ms-flyer-masthead > span {
+    font-size: 0.46cqw;
+    font-weight: 600;
+  }
+  .ms-flyer-masthead > img {
+    width: 5.5cqw;
+    height: auto;
+  }
+  .ms-flyer-hero {
+    position: relative;
+    height: 8cqw;
+    overflow: hidden;
+    color: white;
+    background: var(--xp-navy);
+  }
+  .ms-flyer-hero > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.48;
+  }
+  .ms-flyer-hero > strong {
+    position: absolute;
+    left: 1.15cqw;
+    bottom: 1cqw;
+    font-size: 2.38cqw;
+    font-weight: 800;
+    font-style: italic;
+    font-stretch: 62%;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .ms-flyer-hero > strong > span {
+    color: var(--xp-lime);
+  }
+  .ms-flyer-body {
+    padding: 1.25cqw 1.2cqw 0.9cqw;
+  }
+  .ms-flyer-body > strong {
+    display: block;
+    font-size: 1.42cqw;
+    font-style: italic;
+    font-weight: 800;
+    font-stretch: 62%;
+    line-height: 1.03;
+    letter-spacing: -0.03em;
+  }
+  .ms-flyer-body > p {
+    margin-top: 0.7cqw;
+    font-size: 0.64cqw;
+    line-height: 1.45;
+    color: #687488;
+  }
+  .ms-flyer-body > div {
+    display: grid;
+    gap: 0.48cqw;
+    margin-top: 0.8cqw;
+  }
+  .ms-flyer-body > div > span {
+    display: block;
+    font-size: 0.62cqw;
+    font-weight: 500;
+  }
+  .ms-flyer-body > div > span:before {
+    content: "+";
+    display: inline-block;
+    margin-right: 0.5cqw;
+    color: #5b890d;
+    font-weight: 700;
+  }
+  .ms-flyer-cta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.9cqw 1.1cqw;
+    color: white;
+    background: var(--xp-navy);
+  }
+  .ms-flyer-cta > span {
+    font-size: 0.74cqw;
+    line-height: 1.4;
+  }
+  .ms-flyer-cta strong {
+    color: var(--xp-lime);
+    font-weight: 600;
+  }
+  .ms-flyer-cta .ms-mini-qr {
+    width: 3cqw;
+    height: 3cqw;
+  }
+  .ms-social {
+    z-index: 4;
+    top: 29%;
+    left: 72.5%;
+    width: 24%;
+    transform: rotate(7deg);
+  }
+  .ms-social-frame {
+    padding: 0.7cqw;
+    border: 1px solid #e0e6ee;
+    border-radius: 1.2cqw;
+    background: white;
+    box-shadow:
+      0 2cqw 4cqw -1.3cqw #00062850,
+      0 0.1cqw 0.3cqw #00062812;
+  }
+  .ms-social-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.7cqw;
+    padding: 0.5cqw 0.3cqw 1.1cqw;
+  }
+  .ms-social-profile > img {
+    width: 2.4cqw;
+    height: 2.4cqw;
+    border-radius: 50%;
+  }
+  .ms-social-profile > span {
+    font-size: 0.8cqw;
+    font-weight: 650;
+    line-height: 1.3;
+  }
+  .ms-social-profile small {
+    display: block;
+    font-size: 0.55cqw;
+    font-weight: 400;
+    color: #7e8999;
+    margin-top: 0.25cqw;
+  }
+  .ms-social-profile > i {
+    margin-left: auto;
+    margin-right: 0.4cqw;
+    font-size: 0.8cqw;
+    font-style: normal;
+    letter-spacing: 0.1em;
+  }
+  .ms-social-art {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: var(--xp-navy);
+  }
+  .ms-social-art > img {
+    width: 100%;
+    height: 73%;
+    object-fit: cover;
+    object-position: 64% center;
+  }
+  .ms-social-art > div {
+    position: absolute;
+    inset: 42% 0 0;
+    padding: 4.4cqw 1.2cqw 0.8cqw;
+    color: white;
+    background: linear-gradient(
+      0deg,
+      var(--xp-navy) 10%,
+      var(--xp-navy) 48%,
+      transparent
+    );
+  }
+  .ms-social-art span {
+    display: block;
+    font-size: 0.52cqw;
+    line-height: 1.3;
+  }
+  .ms-social-art strong {
+    display: block;
+    font-size: 3.15cqw;
+    font-style: italic;
+    font-weight: 800;
+    font-stretch: 62%;
+    letter-spacing: -0.03em;
+    line-height: 0.99;
+    color: var(--xp-lime);
+    margin-top: 0.5cqw;
+  }
+  .ms-social-bottom {
+    padding: 1.05cqw 0.3cqw 0.65cqw;
+  }
+  .ms-social-bottom > div {
+    display: flex;
+    gap: 0.75cqw;
+  }
+  .ms-social-bottom svg {
+    width: 1.35cqw;
+    height: 1.35cqw;
+  }
+  .ms-social-bottom p {
+    margin-top: 0.7cqw;
+    font-size: 0.65cqw;
+    color: #556076;
+    line-height: 1.4;
+  }
+  .ms-event {
+    z-index: 5;
+    top: 75%;
+    left: 67%;
+    width: 30%;
+    transform: rotate(-3deg);
+  }
+  .ms-event-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5cqw;
+    padding: 1.45cqw 1.7cqw;
+    background: var(--xp-pale-green);
+    border: 0.32cqw solid white;
+    border-radius: 0.28cqw;
+    box-shadow: 0 1.5cqw 3cqw -1cqw #00062836;
+  }
+  .ms-event-card > div > img {
+    width: 6.1cqw;
+    height: auto;
+  }
+  .ms-event-card > div > strong {
+    display: block;
+    font-size: 2.17cqw;
+    font-weight: 800;
+    font-style: italic;
+    font-stretch: 62%;
+    letter-spacing: -0.03em;
+    line-height: 0.97;
+    margin-top: 0.8cqw;
+  }
+  .ms-event-card > div > span {
+    display: block;
+    font-size: 0.65cqw;
+    margin-top: 0.7cqw;
+  }
+  .ms-event-qr {
+    flex-shrink: 0;
+    width: 6.5cqw;
+    height: 6.5cqw;
+    padding: 0.5cqw;
+    background: white;
+  }
+  .ms-event-stand {
+    position: relative;
+    z-index: -1;
+    height: 0.9cqw;
+    width: 91%;
+    margin: -0.2cqw auto 0;
+    background: #e0e8db;
+    clip-path: polygon(3% 0, 97% 0, 100% 100%, 0 100%);
+  }
+  .marketing-showcase figcaption {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 1.5cqw 1cqw 0;
+    color: var(--xp-muted);
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  .marketing-showcase figcaption > span {
+    color: #49556a;
+  }
+  .marketing-showcase figcaption > small {
+    font-size: 10px;
+    color: #7e8898;
+    white-space: nowrap;
+  }
+  @container (max-width: 600px) {
+    .ms-stage {
+      aspect-ratio: 1.1;
+    }
+    .ms-portal {
+      left: 1%;
+      top: 1%;
+      width: 98%;
+      height: 53%;
+      border-radius: 1.5cqw;
+      transform: rotate(-1deg);
+    }
+    .ms-portal-layout {
+      grid-template-columns: 24% 76%;
+    }
+    .ms-browser {
+      height: 4.6cqw;
+    }
+    .ms-browser > p {
+      font-size: 1.3cqw;
+    }
+    .ms-portal-layout {
+      height: calc(100% - 4.6cqw);
+    }
+    .ms-sidebar {
+      padding-top: 2cqw;
+    }
+    .ms-product > img {
+      width: 3.2cqw;
+      height: 3.2cqw;
+    }
+    .ms-product > span {
+      font-size: 1.3cqw;
+    }
+    .ms-product strong {
+      font-size: 0.91cqw;
+    }
+    .ms-workspace {
+      font-size: 1.2cqw;
+      margin-top: 0.5cqw !important;
+    }
+    .ms-nav {
+      gap: 0.6cqw;
+    }
+    .ms-nav > div {
+      font-size: 1.22cqw;
+      padding-block: 1.3cqw;
+    }
+    .ms-nav svg {
+      width: 1.7cqw;
+      height: 1.7cqw;
+    }
+    .ms-sidebar-help {
+      font-size: 1.1cqw;
+    }
+    .ms-library-content {
+      padding: 2.5cqw;
+    }
+    .ms-library-heading > strong {
+      font-size: 2.7cqw;
+    }
+    .ms-library-heading > p {
+      font-size: 1.25cqw;
+    }
+    .ms-breadcrumb {
+      font-size: 1.15cqw;
+      height: 5cqw;
+      gap: 1.1cqw;
+    }
+    .ms-breadcrumb > svg {
+      width: 1.5cqw;
+      height: 1.5cqw;
+    }
+    .ms-library-tools > span {
+      font-size: 1cqw;
+    }
+    .ms-category {
+      font-size: 1.2cqw;
+      margin-top: 2.5cqw !important;
+    }
+    .ms-resource-thumb {
+      height: 11cqw;
+    }
+    .ms-resource-copy > strong {
+      font-size: 1.25cqw;
+    }
+    .ms-resource-copy > p,
+    .ms-resource-copy > em {
+      font-size: 1cqw;
+    }
+    .ms-resource-copy > span {
+      font-size: 0.8cqw;
+    }
+    .ms-piece-label {
+      font-size: 8px;
+      padding: 2px 6px;
+      margin-bottom: 1.1cqw !important;
+    }
+    .ms-poster {
+      top: 39%;
+      left: 3.5%;
+      width: 30%;
+      transform: rotate(-6deg);
+    }
+    .ms-poster-copy {
+      inset: auto 1.9cqw 2cqw;
+    }
+    .ms-poster-copy > strong {
+      font-size: 5cqw;
+    }
+    .ms-poster-copy > span {
+      font-size: 0.9cqw;
+    }
+    .ms-poster-copy > p {
+      font-size: 1.3cqw;
+      margin-top: 1.4cqw;
+    }
+    .ms-poster-copy > div {
+      margin-top: 2cqw;
+      font-size: 0.9cqw;
+      padding: 1.2cqw;
+    }
+    .ms-poster-copy svg {
+      width: 1.7cqw;
+      height: 1.7cqw;
+    }
+    .ms-poster-logo {
+      width: 11cqw;
+      left: 1.8cqw;
+      top: 1.8cqw;
+    }
+    .ms-onepager {
+      top: 54%;
+      left: 32.5%;
+      width: 28%;
+      transform: rotate(3deg);
+    }
+    .ms-op-hero {
+      padding: 1.5cqw;
+    }
+    .ms-op-hero > img {
+      width: 9cqw;
+    }
+    .ms-op-hero-content > strong {
+      font-size: 2cqw;
+    }
+    .ms-op-phone {
+      height: 8.8cqw;
+      padding: 0.8cqw;
+    }
+    .ms-op-phone > b {
+      font-size: 0.88cqw;
+      margin-top: 1cqw;
+    }
+    .ms-op-phone > span,
+    .ms-op-phone > em {
+      font-size: 0.53cqw;
+    }
+    .ms-op-hero > p {
+      font-size: 0.52cqw;
+    }
+    .ms-op-columns {
+      padding: 1.6cqw;
+      gap: 1.3cqw;
+    }
+    .ms-op-columns strong {
+      font-size: 1cqw;
+    }
+    .ms-op-columns p {
+      font-size: 0.77cqw;
+    }
+    .ms-op-columns i {
+      height: 0.3cqw;
+      margin-top: 0.8cqw;
+    }
+    .ms-op-lower {
+      margin: 0.3cqw 1.5cqw 1cqw;
+      padding: 1.5cqw;
+    }
+    .ms-op-lower > strong {
+      font-size: 1.4cqw;
+    }
+    .ms-mini-qr {
+      width: 4.3cqw;
+      height: 4.3cqw;
+    }
+    .ms-op-footer {
+      padding: 1.1cqw 1.5cqw;
+      font-size: 0.65cqw;
+    }
+    .ms-flyer {
+      display: none;
+    }
+    .ms-social {
+      top: 37%;
+      left: 64%;
+      width: 32%;
+      transform: rotate(6deg);
+    }
+    .ms-social-frame {
+      padding: 1cqw;
+      border-radius: 1.6cqw;
+    }
+    .ms-social-profile {
+      padding: 0.7cqw 0.5cqw 1.3cqw;
+      gap: 0.9cqw;
+    }
+    .ms-social-profile > img {
+      width: 3.2cqw;
+      height: 3.2cqw;
+    }
+    .ms-social-profile > span {
+      font-size: 1.1cqw;
+    }
+    .ms-social-profile small {
+      font-size: 0.7cqw;
+    }
+    .ms-social-profile > i {
+      font-size: 1.2cqw;
+    }
+    .ms-social-art > div {
+      padding: 6cqw 1.6cqw 1cqw;
+    }
+    .ms-social-art span {
+      font-size: 0.75cqw;
+    }
+    .ms-social-art strong {
+      font-size: 4.2cqw;
+    }
+    .ms-social-bottom {
+      padding: 1.4cqw 0.4cqw 0.9cqw;
+    }
+    .ms-social-bottom svg {
+      width: 1.8cqw;
+      height: 1.8cqw;
+    }
+    .ms-social-bottom p {
+      font-size: 0.83cqw;
+      margin-top: 1cqw;
+    }
+    .ms-event {
+      top: 84%;
+      left: 65%;
+      width: 31%;
+    }
+    .ms-event-card {
+      padding: 1.5cqw;
+      gap: 1cqw;
+    }
+    .ms-event-card > div > strong {
+      font-size: 2.15cqw;
+    }
+    .ms-event-card > div > span {
+      font-size: 0.75cqw;
+    }
+    .ms-event-qr {
+      width: 7cqw;
+      height: 7cqw;
+    }
+    .marketing-showcase figcaption {
+      align-items: start;
+      padding-top: 7cqw;
+      font-size: 10px;
+      gap: 18px;
+    }
+    .marketing-showcase figcaption > span {
+      max-width: 190px;
+    }
+    .marketing-showcase figcaption > small {
+      font-size: 9px;
+      padding-top: 1px;
+    }
+  }
+</style>

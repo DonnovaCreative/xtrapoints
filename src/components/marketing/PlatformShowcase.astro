@@ -1,0 +1,656 @@
+---
+const activity = [
+  {
+    initials: "JS",
+    name: "Jordan S.",
+    type: "Recurring gift",
+    amount: "$25.00",
+    color: "green",
+  },
+  {
+    initials: "AT",
+    name: "Alex T.",
+    type: "Round-up giving",
+    amount: "$10.35",
+    color: "blue",
+  },
+  {
+    initials: "MK",
+    name: "Morgan K.",
+    type: "One-time donation",
+    amount: "$50.00",
+    color: "gray",
+  },
+];
+---
+
+<div class="reporting-showcase" id="donors">
+  <div
+    class="reporting-app"
+    aria-label="Illustrative donor dashboard with sample data"
+  >
+    <aside class="reporting-nav" aria-hidden="true">
+      <img
+        src="/assets/xtrapoint-logo-white.svg"
+        width="150"
+        height="27"
+        alt=""
+      />
+      <div class="reporting-program">
+        <span>Y</span>
+        <div>
+          Your program<small>Program workspace</small>
+        </div>
+      </div>
+      <span class="reporting-nav-item selected">
+        <i>▦</i>Overview
+      </span>
+      <span class="reporting-nav-item">
+        <i>♡</i>Supporters
+      </span>
+      <span class="reporting-nav-item">
+        <i>↻</i>Recurring giving
+      </span>
+      <span class="reporting-nav-item">
+        <i>⚑</i>Campaigns
+      </span>
+      <span class="reporting-nav-item">
+        <i>▥</i>Reports
+      </span>
+      <div class="reporting-nav-bottom">
+        <span>Everything in view.</span>
+        <small>Every supporter connected.</small>
+      </div>
+    </aside>
+    <div class="reporting-workspace">
+      <div class="reporting-topbar">
+        <span>
+          Your program <b>/</b> Overview
+        </span>
+        <span class="reporting-sample">Illustrative dashboard</span>
+      </div>
+      <div class="reporting-screen">
+        <div class="reporting-welcome">
+          <div>
+            <span>Your community, connected</span>
+            <h3>A clearer picture of your support.</h3>
+          </div>
+          <span class="reporting-period">
+            This month <span aria-hidden="true">⌄</span>
+          </span>
+        </div>
+        <div class="reporting-metrics">
+          <div>
+            <span>Total contributions</span>
+            <strong>
+              $8,240<span>.35</span>
+            </strong>
+            <small>One-time, recurring, and round-ups</small>
+          </div>
+          <div>
+            <span>Active supporters</span>
+            <strong>286</strong>
+            <small>People moving your program forward</small>
+          </div>
+          <div>
+            <span>Recurring plans</span>
+            <strong>124</strong>
+            <small>Support that keeps showing up</small>
+          </div>
+        </div>
+        <div class="reporting-details">
+          <div class="reporting-chart">
+            <div>
+              <strong>Giving over time</strong>
+              <span>
+                <i></i> Contributions
+              </span>
+            </div>
+            <svg
+              viewBox="0 0 620 190"
+              role="img"
+              aria-label="Illustrative line chart showing contributions over time"
+            >
+              <defs>
+                <linearGradient id="reporting-fill" x1="0" y1="0" x2="0" y2="1">
+                  <stop stop-color="#3997ff" stop-opacity=".25" />
+                  <stop offset="1" stop-color="#3997ff" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <path d="M0 35h620M0 95h620M0 155h620" stroke="#eaf0f6" />
+              <path
+                d="M0 153C25 152 32 166 58 144S94 146 122 120S159 132 193 92S231 100 265 73S303 103 334 62S377 88 410 47S448 74 480 33S510 44 538 26S573 35 620 9V190H0Z"
+                fill="url(#reporting-fill)"
+              />
+              <path
+                d="M0 153C25 152 32 166 58 144S94 146 122 120S159 132 193 92S231 100 265 73S303 103 334 62S377 88 410 47S448 74 480 33S510 44 538 26S573 35 620 9"
+                stroke="#3997ff"
+                stroke-width="3"
+                fill="none"
+              />
+            </svg>
+            <div class="chart-axis">
+              <span>Week 1</span>
+              <span>Week 2</span>
+              <span>Week 3</span>
+              <span>Week 4</span>
+            </div>
+          </div>
+          <div class="reporting-activity">
+            <strong>Recent giving</strong>
+            {activity.map((a) => (
+              <div>
+                <span class={`supporter-avatar ${a.color}`}>{a.initials}</span>
+                <span>
+                  {a.name}
+                  <small>{a.type}</small>
+                </span>
+                <b>{a.amount}</b>
+              </div>
+            ))}
+            <p>Every gift. One connected view.</p>
+          </div>
+        </div>
+        <div class="reporting-footer">
+          <span class="reporting-status">
+            <i></i> Round-ups, recurring plans, and one-time gifts
+          </span>
+          <span>Sample data for illustration.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="reporting-benefits">
+    <div>
+      <span aria-hidden="true">+</span>
+      <p>
+        <strong>Know your supporters.</strong> Follow the people and giving
+        history behind your program.
+      </p>
+    </div>
+    <div>
+      <span aria-hidden="true">+</span>
+      <p>
+        <strong>See the whole picture.</strong> Bring giving activity and
+        recurring plans into one view.
+      </p>
+    </div>
+    <div>
+      <span aria-hidden="true">+</span>
+      <p>
+        <strong>Plan what comes next.</strong> Understand the support behind
+        your campaigns and initiatives.
+      </p>
+    </div>
+  </div>
+</div>
+<style>
+  .reporting-showcase {
+    margin-top: 54px;
+    scroll-margin-top: 100px;
+  }
+  .reporting-app {
+    display: grid;
+    grid-template-columns: 195px 1fr;
+    background: white;
+    color: var(--xp-text);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 8px #ffffff05,
+      0 32px 90px #00031655;
+    border: 1px solid #ffffff30;
+  }
+  .reporting-nav {
+    background: #0a1331;
+    padding: 26px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-right: 1px solid #263149;
+  }
+  .reporting-nav > img {
+    width: 132px;
+    height: auto;
+    margin-bottom: 33px;
+  }
+  .reporting-program {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    margin-bottom: 26px;
+    font-size: 11px;
+  }
+  .reporting-program > span {
+    width: 31px;
+    height: 31px;
+    background: #ffffff14;
+    display: grid;
+    place-items: center;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+  .reporting-program small {
+    display: block;
+    margin-top: 5px;
+    font-size: 8px;
+    color: #92a2bd;
+  }
+  .reporting-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 11px;
+    font-size: 10px;
+    color: #aebbd0;
+    border-radius: 5px;
+  }
+  .reporting-nav-item i {
+    font-style: normal;
+    font-size: 16px;
+    width: 16px;
+    text-align: center;
+  }
+  .reporting-nav-item.selected {
+    background: var(--xp-lime);
+    color: var(--xp-navy);
+  }
+  .reporting-nav-bottom {
+    padding-top: 65px;
+    margin-top: auto;
+  }
+  .reporting-nav-bottom > span {
+    display: block;
+    color: #c9d5e7;
+    font-size: 11px;
+  }
+  .reporting-nav-bottom > small {
+    display: block;
+    color: #7c8ba5;
+    font-size: 9px;
+    margin-top: 6px;
+  }
+  .reporting-workspace {
+    min-width: 0;
+  }
+  .reporting-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--xp-line);
+    padding: 19px 29px;
+    font-size: 10px;
+    color: var(--xp-muted);
+  }
+  .reporting-topbar b {
+    margin-inline: 13px;
+    font-weight: 400;
+    color: #a2afbd;
+  }
+  .reporting-sample {
+    background: var(--xp-pale);
+    padding: 6px 9px;
+    border-radius: 3px;
+    font-size: 8px;
+  }
+  .reporting-screen {
+    padding: 29px;
+  }
+  .reporting-welcome {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+  }
+  .reporting-welcome > div > span {
+    font-size: 9px;
+    color: var(--xp-muted);
+  }
+  .reporting-welcome h3 {
+    font: 600 27px/1.2 var(--xp-body);
+    letter-spacing: -0.035em;
+    margin-top: 8px;
+  }
+  .reporting-period {
+    border: 1px solid var(--xp-line);
+    border-radius: 4px;
+    padding: 8px 10px;
+    font-size: 9px;
+    white-space: nowrap;
+  }
+  .reporting-period > span {
+    margin-left: 16px;
+  }
+  .reporting-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 26px;
+  }
+  .reporting-metrics > div {
+    border: 1px solid var(--xp-line);
+    padding: 19px 17px 18px;
+    border-radius: 5px;
+  }
+  .reporting-metrics > div > span {
+    display: block;
+    color: var(--xp-muted);
+    font-size: 10px;
+  }
+  .reporting-metrics strong {
+    display: block;
+    font-weight: 550;
+    font-size: clamp(27px, 2.7vw, 40px);
+    letter-spacing: -0.055em;
+    line-height: 1.3;
+    margin-top: 9px;
+  }
+  .reporting-metrics strong > span {
+    font-size: 0.7em;
+    color: #78849b;
+  }
+  .reporting-metrics small {
+    display: block;
+    font-size: 8px;
+    line-height: 1.6;
+    color: var(--xp-muted);
+    margin-top: 8px;
+  }
+  .reporting-details {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 22px;
+    margin-top: 29px;
+  }
+  .reporting-chart {
+    min-width: 0;
+  }
+  .reporting-chart > div:first-child {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 25px;
+  }
+  .reporting-chart strong,
+  .reporting-activity > strong {
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .reporting-chart > div > span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--xp-muted);
+    font-size: 8px;
+  }
+  .reporting-chart i {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--xp-blue);
+  }
+  .reporting-chart svg {
+    width: 100%;
+    height: 150px;
+  }
+  .chart-axis {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--xp-line);
+    padding-top: 12px;
+  }
+  .reporting-activity {
+    padding-left: 22px;
+    border-left: 1px solid var(--xp-line);
+  }
+  .reporting-activity > div {
+    display: flex;
+    gap: 9px;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #edf1f6;
+    font-size: 9px;
+  }
+  .supporter-avatar {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 8px;
+    background: var(--xp-pale-green);
+    color: #46681d;
+  }
+  .supporter-avatar.blue {
+    background: var(--xp-pale);
+    color: #2874bb;
+  }
+  .supporter-avatar.gray {
+    background: #f1f1f5;
+    color: #666581;
+  }
+  .reporting-activity small {
+    display: block;
+    font-size: 8px;
+    color: var(--xp-muted);
+    margin-top: 5px;
+  }
+  .reporting-activity b {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .reporting-activity p {
+    font-size: 8px;
+    color: var(--xp-muted);
+    margin-top: 16px;
+  }
+  .reporting-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid var(--xp-line);
+    font-size: 8px;
+    color: var(--xp-muted);
+  }
+  .reporting-status {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .reporting-status i {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--xp-green);
+  }
+  .reporting-benefits {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 36px;
+    padding: 39px 4px 0;
+  }
+  .reporting-benefits > div {
+    display: flex;
+    gap: 15px;
+  }
+  .reporting-benefits > div > span {
+    font-family: var(--xp-mono);
+    font-size: 10px;
+    color: var(--xp-lime);
+    padding-top: 3px;
+  }
+  .reporting-benefits p {
+    font-size: 13px;
+    line-height: 1.65;
+    color: #a8b9ce;
+  }
+  .reporting-benefits strong {
+    display: block;
+    color: white;
+    font-weight: 600;
+    margin-bottom: 7px;
+  }
+  @media (max-width: 1100px) {
+    .reporting-app {
+      grid-template-columns: 158px 1fr;
+    }
+    .reporting-nav {
+      padding: 23px 13px;
+    }
+    .reporting-nav > img {
+      width: 123px;
+    }
+    .reporting-screen {
+      padding: 23px;
+    }
+    .reporting-topbar {
+      padding-inline: 23px;
+    }
+    .reporting-metrics > div {
+      padding: 15px 12px;
+    }
+    .reporting-details {
+      gap: 16px;
+      grid-template-columns: 1.2fr 1fr;
+    }
+    .reporting-activity {
+      padding-left: 16px;
+    }
+    .reporting-welcome h3 {
+      font-size: 23px;
+    }
+    .reporting-benefits {
+      gap: 24px;
+    }
+    .reporting-benefits p {
+      font-size: 12px;
+    }
+  }
+  @media (max-width: 850px) {
+    .reporting-nav {
+      display: none;
+    }
+    .reporting-app {
+      grid-template-columns: 1fr;
+    }
+    .reporting-showcase {
+      margin-top: 38px;
+    }
+    .reporting-metrics strong {
+      font-size: 35px;
+    }
+    .reporting-benefits {
+      gap: 21px;
+    }
+    .reporting-benefits > div {
+      gap: 10px;
+    }
+    .reporting-welcome h3 {
+      font-size: 25px;
+    }
+  }
+  @media (max-width: 600px) {
+    .reporting-showcase {
+      margin-top: 32px;
+    }
+    .reporting-app {
+      border-radius: 6px;
+    }
+    .reporting-screen {
+      padding: 20px 15px;
+    }
+    .reporting-topbar {
+      padding: 14px 15px;
+      font-size: 8px;
+    }
+    .reporting-sample {
+      font-size: 7px;
+    }
+    .reporting-welcome {
+      gap: 5px;
+    }
+    .reporting-welcome h3 {
+      font-size: 20px;
+      max-width: 230px;
+    }
+    .reporting-welcome > div > span {
+      font-size: 8px;
+    }
+    .reporting-period {
+      display: none;
+    }
+    .reporting-metrics {
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 22px;
+    }
+    .reporting-metrics > div {
+      padding: 15px 12px;
+    }
+    .reporting-metrics > div:last-child {
+      display: none;
+    }
+    .reporting-metrics strong {
+      font-size: 30px;
+    }
+    .reporting-metrics small {
+      font-size: 8px;
+    }
+    .reporting-metrics > div > span {
+      font-size: 9px;
+    }
+    .reporting-details {
+      grid-template-columns: 1fr;
+      gap: 25px;
+      margin-top: 24px;
+    }
+    .reporting-chart > div:first-child {
+      margin-bottom: 12px;
+    }
+    .reporting-chart svg {
+      height: 118px;
+    }
+    .reporting-activity {
+      padding-left: 0;
+      border-left: 0;
+    }
+    .reporting-activity > div {
+      font-size: 10px;
+    }
+    .reporting-activity b {
+      font-size: 11px;
+    }
+    .reporting-activity p {
+      display: none;
+    }
+    .reporting-footer {
+      margin-top: 17px;
+      padding-top: 14px;
+      font-size: 8px;
+    }
+    .reporting-status {
+      display: none;
+    }
+    .reporting-benefits {
+      grid-template-columns: 1fr;
+      padding-top: 28px;
+      gap: 20px;
+    }
+    .reporting-benefits > div {
+      gap: 14px;
+    }
+    .reporting-benefits p {
+      font-size: 13px;
+    }
+    .reporting-benefits strong {
+      display: inline;
+      margin-right: 4px;
+    }
+  }
+</style>

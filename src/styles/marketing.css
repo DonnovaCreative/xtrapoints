@@ -34,6 +34,10 @@
   --xp-muted: #586174;
   --xp-line: #dce3ec;
   --xp-display: "Archivo", Arial, sans-serif;
+  --xp-heading-weight: 800;
+  --xp-heading-width: 62%;
+  --xp-heading-axes: "wght" 800, "wdth" 62;
+  --xp-heading-tracking: -0.03em;
   --xp-body: "Archivo", Arial, sans-serif;
   --xp-mono: "Space Mono Local", monospace;
   --xp-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -85,10 +89,11 @@
 .xp-heading {
   font-family: var(--xp-display);
   font-size: clamp(2.65rem, 5.3vw, 5.1rem);
-  font-weight: 850;
+  font-weight: var(--xp-heading-weight);
   font-style: italic;
-  font-stretch: 85%;
-  letter-spacing: -0.055em;
+  font-stretch: var(--xp-heading-width);
+  font-variation-settings: var(--xp-heading-axes);
+  letter-spacing: var(--xp-heading-tracking);
   line-height: 0.99;
   text-transform: uppercase;
   text-wrap: balance;
