@@ -1,5 +1,7 @@
 # Adding a co-branded school landing page
 
+> **Historical implementation reference.** Current school operations use [School administration](https://www.xtrapoint.com/admin/schools). Create a school, add **Logos & imagery**, complete **Details & program**, then preview and publish its saved version. The Studio-first/global-build instructions below describe the legacy workflow and do not apply to managed schools. See [the current school platform guide](SCHOOL-PLATFORM.md).
+
 Each school automatically gets **two pages**, fully re-skinned to that school:
 
 - `/schools/<slug>` — the **donor** landing page (waitlist)

@@ -36,8 +36,21 @@ export async function schoolPair(partnerId: string) {
 }
 export async function listManagedSchools(search = "", after = "", limit = 30) {
   // Cursor pagination has bounded work per request and includes legacy draft-only schools.
+  // An exact-ID draft lookup keeps canonical rows current even when the draft
+  // was on another page. Coalesce the document-shaped result before its URL:
+  // an existing draft with no images deliberately suppresses canonical artwork.
   const rows = await client().fetch<any[]>(
-    `*[_type=="school" && !(_id in path("versions.**")) && _id > $after && ($q=="" || name match $q || short match $q || slug.current match $q)] | order(_id asc)[0...$limit]{_id,_rev,name,short,"slug":slug.current,productionStatus,portalEnabled,managementVersion,reviewStatus,"logo":avatar.asset->url,"primary":theme.primary}`,
+    `*[_type=="school" && !(_id in path("versions.**")) && _id > $after && ($q=="" || name match $q || short match $q || slug.current match $q)] | order(_id asc)[0...$limit]{
+      _id,_rev,name,short,"slug":slug.current,productionStatus,portalEnabled,managementVersion,reviewStatus,
+      "logo": select(
+        _id in path("drafts.**") => coalesce(avatar.asset->url, logo.asset->url),
+        coalesce(
+          *[_type=="school" && _id=="drafts." + ^._id][0]{"url":coalesce(avatar.asset->url, logo.asset->url)},
+          {"url":coalesce(avatar.asset->url, logo.asset->url)}
+        ).url
+      ),
+      "primary":theme.primary
+    }`,
     {
       q: search ? `*${search.replace(/[\[\]*?]/g, "").slice(0, 100)}*` : "",
       after,

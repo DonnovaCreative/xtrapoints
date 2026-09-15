@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { before, after, beforeEach, test } from "node:test";
 import { resolve } from "node:path";
 import { createServer, type ViteDevServer } from "vite";
+import { MAX_IMAGE_BYTES } from "../src/lib/portalEdit.ts";
 
 type Doc = Record<string, any>;
 const initial: Doc = { _id: "school.example", _type: "school", _rev: "live-rev", name: "Example", theme: { primary: "#03116d" }, logo: { asset: { _ref: "retained-logo" } }, clerkOrgId: "org_example", portalEnabled: true, approvedVersion: "published-snapshot" };
@@ -9,8 +10,15 @@ let docs = new Map<string, Doc>();
 let config: Record<string, unknown> = {};
 let revision = 0;
 let beforeCommit: (() => void) | undefined;
+let uploads = 0;
 const clone = <T>(value: T): T => structuredClone(value);
 const db = {
+  assets: { async upload(kind: string, bytes: Buffer) {
+    assert.equal(kind, "image");
+    assert.ok(bytes.length > 0);
+    uploads++;
+    return { _id: `image-upload-${uploads}`, url: `https://cdn.example/image-${uploads}.png` };
+  } },
   withConfig(value: Record<string, unknown>) { config = value; return db; },
   async getDocument(id: string) { return clone(docs.get(id)); },
   async fetch(_query: string, { id }: { id: string }) {
@@ -79,7 +87,7 @@ before(async () => {
   route = await server.ssrLoadModule("/src/pages/api/portal-brand.ts");
 });
 after(async () => { delete globals.__xpBrandLifecycleDb; await server?.close(); });
-beforeEach(() => { docs = new Map([[initial._id, clone(initial)]]); config = {}; beforeCommit = undefined; });
+beforeEach(() => { docs = new Map([[initial._id, clone(initial)]]); config = {}; beforeCommit = undefined; uploads = 0; });
 function context(body?: Record<string, unknown>) {
   const url = new URL("https://portal.example/api/portal-brand?partnerId=school.example");
   const request = new Request(url, body ? { method: "POST", headers: { Origin: url.origin, "Content-Type": "application/json" }, body: JSON.stringify({ partnerId: "school.example", ...body }) } : {});
@@ -112,4 +120,43 @@ test("stale and concurrently changed brand revisions cannot partly update conten
   beforeCommit = () => { docs.get(initial._id)!._rev = "concurrent"; };
   assert.equal((await route.POST(context({ revision: "live-rev", colors: { primary: "#123456" } }))).status, 409);
   assert.deepEqual([...docs.values()], [{ ...initial, _rev: "concurrent" }]);
+});
+
+function imageContext(field: string, file: File, revision = "live-rev") {
+  const url = new URL("https://portal.example/api/portal-brand");
+  const form = new FormData();
+  form.set("partnerId", "school.example");
+  form.set("revision", revision);
+  form.set("image", field);
+  form.set("file", file);
+  return { url, request: new Request(url, { method: "POST", headers: { Origin: url.origin }, body: form }), locals: {} };
+}
+
+test("a prepared private school can upload both logo roles without enabling or publishing its pages", async () => {
+  docs.set(initial._id, { ...clone(initial), productionStatus: "draft", portalEnabled: false });
+  const file = new File([new Uint8Array([137, 80, 78, 71])], "school.png", { type: "image/png" });
+  assert.equal((await route.POST(imageContext("logo", file))).status, 200);
+  const draft = docs.get("drafts.school.example")!;
+  assert.equal(draft.logo.asset._ref, "image-upload-1");
+  assert.equal((await route.POST(imageContext("avatar", file, draft._rev))).status, 200);
+  const saved = docs.get("drafts.school.example")!;
+  assert.equal(saved.avatar.asset._ref, "image-upload-2");
+  assert.equal(saved.logo.asset._ref, "image-upload-1");
+  assert.equal(saved.name, initial.name);
+  assert.equal(saved.clerkOrgId, initial.clerkOrgId);
+  assert.equal(docs.get(initial._id)!.productionStatus, "draft");
+  assert.equal(docs.get(initial._id)!.portalEnabled, false);
+  assert.equal(docs.get(initial._id)!.approvedVersion, initial.approvedVersion);
+  assert.deepEqual(docs.get(initial._id)!.logo, initial.logo);
+});
+
+test("oversized and unsupported uploads are rejected before creating an asset or changing a school", async () => {
+  const oversized = new File([new Uint8Array(MAX_IMAGE_BYTES + 1)], "large.png", { type: "image/png" });
+  const largeResponse = await route.POST(imageContext("logo", oversized));
+  assert.equal(largeResponse.status, 400);
+  assert.equal((await largeResponse.json()).error, "too_large");
+  const unsupported = new File(["hello"], "wrong.txt", { type: "text/plain" });
+  assert.equal((await route.POST(imageContext("logo", unsupported))).status, 400);
+  assert.equal(uploads, 0);
+  assert.deepEqual([...docs.values()], [initial]);
 });

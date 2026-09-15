@@ -1,0 +1,19 @@
+---
+import { FilePenLine, Images, ExternalLink } from 'lucide-react';
+interface Props { partnerId: string; active: 'details' | 'brand' }
+const { partnerId, active } = Astro.props;
+const base = `/admin/schools/${encodeURIComponent(partnerId)}`;
+const items = [
+  { id: 'details', label: 'Details & program', href: base, Icon: FilePenLine },
+  { id: 'brand', label: 'Logos & imagery', href: `${base}/brand`, Icon: Images },
+];
+---
+<nav aria-label="School workspace" class="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 border-b border-gray-200">
+  {items.map(({ id, label, href, Icon }) => (
+    <a href={href} aria-current={active === id ? 'page' : undefined} class:list={[
+      'inline-flex min-h-12 items-center gap-2 border-b-2 px-1 pb-3 pt-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink',
+      active === id ? 'border-ink text-ink' : 'border-transparent text-gray-600 hover:border-gray-300 hover:text-ink',
+    ]}><Icon size={17} aria-hidden="true" />{label}</a>
+  ))}
+  <a href={`${base}/preview`} target="_blank" rel="noreferrer" class="mb-2 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-ink hover:underline sm:ml-auto"><ExternalLink size={16} aria-hidden="true" />Preview draft<span class="sr-only"> (opens in a new tab)</span></a>
+</nav>
