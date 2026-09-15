@@ -13,6 +13,7 @@
 // automatic value back. There's no separate "reset" concept to learn per field.
 import * as React from "react";
 import { Check, Download, Loader2, RotateCcw, Trash2, Upload } from "lucide-react";
+import { MAX_IMAGE_BYTES } from "@/lib/portalEdit";
 
 export interface EditorField {
   key: string;
@@ -161,6 +162,10 @@ export function TemplateEditor({
   };
 
   const upload = async (key: string, file: File) => {
+    if (file.size > MAX_IMAGE_BYTES) {
+      setError(`That file is too large. Use ${acceptLabel}.`);
+      return;
+    }
     setBusy(key);
     setError(null);
     try {
@@ -170,11 +175,11 @@ export function TemplateEditor({
       form.set("image", key);
       form.set("file", file);
       const res = await fetch(api, { method: "POST", body: form });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         throw new Error(
-          data.error === "too_large"
-            ? "That file is too large — 8 MB is the limit."
+          data.error === "too_large" || res.status === 413
+            ? `That file is too large. Use ${acceptLabel}.`
             : data.error === "bad_type"
               ? `That file type isn't accepted. Use ${acceptLabel}.`
               : (data.message ?? "Upload failed"),

@@ -309,7 +309,7 @@ export default function SchoolEditor({
             }
             className="font-semibold underline"
           >
-            Brand kit
+            {admin ? "Logos & imagery" : "Brand kit"}
           </a>
           . Your assets remain attached to this school.
         </p>

@@ -5,16 +5,13 @@
 // explicitly, so adding a sensitive field to the schema later can't accidentally
 // become editable by them.
 //
-// Emphatically NOT editable here, and worth stating so nobody adds them
-// casually: `productionStatus` and `approvedVersion` (a school could publish
-// itself to xtrapoint.com), `portalEnabled` and `portalToken` (access control),
-// `slug` (their public URL, and what their Clerk org is matched on), and all
-// page copy — copy is XtraPoint's until we deliberately open it up.
+// This asset endpoint does not change publication, access, addresses or page
+// copy. The school editor's separate APIs own those workflows and role checks.
 
 /** Image fields a school may replace, mapped to their path on the document. */
 export const EDITABLE_IMAGES = {
-  logo: { path: "logo", label: "Header logo", note: "White or single-color, for dark backgrounds" },
-  avatar: { path: "avatar", label: "App avatar", note: "Full-color square mark" },
+  logo: { path: "logo", label: "Header logo", note: "School-page header and co-branded materials. Use a version that contrasts with the selected header color." },
+  avatar: { path: "avatar", label: "Square logo", note: "Full-color mark for the school directory and app preview. A square image works best." },
   "photos.team": { path: "photos.team", label: "Team", note: "Donor page hero background" },
   "photos.celebrate": { path: "photos.celebrate", label: "Celebrate", note: "Donor page spirit band" },
   "photos.fans": { path: "photos.fans", label: "Fans", note: "Ambassador page callout" },
@@ -88,6 +85,8 @@ export const ALLOWED_IMAGE_TYPES = [
   "image/webp",
   "image/svg+xml",
 ] as const;
-export const MAX_IMAGE_BYTES = 8_000_000; // 8 MB — generous for a logo or a hero photo.
+// Uploads pass through a Vercel Function (4.5 MB request limit). Leave room for
+// multipart metadata rather than advertising files the host rejects first.
+export const MAX_IMAGE_BYTES = 4_000_000;
 
-export const imageTypeLabel = "PNG, JPG, WebP or SVG, up to 8 MB";
+export const imageTypeLabel = "PNG, JPG, WebP or SVG, up to 4 MB";
