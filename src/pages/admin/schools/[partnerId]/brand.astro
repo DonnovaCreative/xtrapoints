@@ -2,10 +2,13 @@
 export const prerender = false;
 import AdminLayout from '@/layouts/AdminLayout.astro';
 import BrandEditor from '@/components/portal/BrandEditor';
+import SchoolAdminNav from '@/components/portal/SchoolAdminNav.astro';
+import PrepareSchoolBrand from '@/components/portal/PrepareSchoolBrand';
 import {gateAdmin} from '@/lib/adminGate';
 import {canonicalPartnerId} from '@/lib/schoolManagement';
 import {findPortalPartner} from '@/lib/portalAuth';
 import {getSchoolDraftById} from '@/data/schoolsSource';
+import {schoolEditor} from '@/data/schoolManagementStore';
 import {EDITABLE_IMAGES,EDITABLE_COLORS,CREDITABLE_IMAGES,ALLOWED_IMAGE_TYPES,imageTypeLabel} from '@/lib/portalEdit';
 const denied=await gateAdmin(Astro);if(denied)return denied;
 let partnerId;try{partnerId=canonicalPartnerId(Astro.params.partnerId);}catch{return new Response('School not found.',{status:404});}
@@ -16,8 +19,16 @@ if(!school)return new Response('School not found.',{status:404});
 const base=`/admin/schools/${encodeURIComponent(partnerId)}`;
 const images=Object.entries(EDITABLE_IMAGES).map(([key,v])=>({key,label:v.label,note:v.note}));
 const colors=Object.entries(EDITABLE_COLORS).map(([key,v])=>({key,label:v.label,note:v.note}));
+let retainedRevision;
+if(!partner){
+  try{retainedRevision=(await schoolEditor(partnerId)).revision;}
+  catch{return new Response('The school is temporarily unavailable. Please try again.',{status:503});}
+}
+const justCreated=Astro.url.searchParams.get('created')==='1';
 ---
-<AdminLayout title={`${school.short||school.name} brand kit`} description="Upload approved brand assets, save the draft and preview the complete school page before publication.">
-  <nav aria-label="School workspace" class="mt-6 flex flex-wrap gap-5 text-sm font-semibold"><a href={base} class="underline">School details and handoff</a><a href={`${base}/preview`} class="underline" target="_blank" rel="noreferrer">Preview draft</a></nav>
-  {partner ? <BrandEditor client:load partnerId={partnerId} creditable={CREDITABLE_IMAGES} images={images} colors={colors} accept={ALLOWED_IMAGE_TYPES.join(',')} acceptLabel={imageTypeLabel}/> : <div class="mt-8 rounded-xl border border-gray-200 bg-gray-50 p-6"><h2 class="text-lg font-bold">Prepare this school's workspace first</h2><p class="mt-2 max-w-2xl text-gray-600">The retained draft is available to preview. Use “Prepare partner workspace” in School administration before uploading assets or inviting its team. This keeps its public pages private.</p><a href={base} class="mt-5 inline-flex min-h-11 items-center rounded-lg bg-ink px-5 py-2.5 font-semibold text-white">Open School administration</a></div>}
+<AdminLayout title={`${school.short||school.name}: logos & imagery`} description="Upload and replace this school's logos and photos, and choose its brand colors. Everything here belongs to the same school draft as its page details.">
+  <a href="/admin/schools" class="mt-6 inline-block text-sm font-semibold underline">All schools</a>
+  <SchoolAdminNav partnerId={partnerId} active="brand" />
+  {justCreated && <div class="mt-6 rounded-xl border border-lime/40 bg-lime/10 p-5"><h2 class="font-semibold text-ink">School created. Add its branding.</h2><p class="mt-1 text-sm leading-relaxed text-gray-700">Start with a header logo and square logo, then add available photos. You can return to any of these later.</p><a href={base} class="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-ink underline">Continue to school details</a></div>}
+  {partner ? <BrandEditor client:load partnerId={partnerId} completionHref={base} creditable={CREDITABLE_IMAGES} images={images} colors={colors} accept={ALLOWED_IMAGE_TYPES.join(',')} acceptLabel={imageTypeLabel}/> : <PrepareSchoolBrand client:load partnerId={partnerId} revision={retainedRevision!} />}
 </AdminLayout>

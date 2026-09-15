@@ -3,6 +3,11 @@ export const prerender=false;
 import {gateAdmin} from '@/lib/adminGate';
 import AdminLayout from '@/layouts/AdminLayout.astro';
 import SchoolEditor from '@/components/portal/SchoolEditor';
+import SchoolAdminNav from '@/components/portal/SchoolAdminNav.astro';
 const denied=await gateAdmin(Astro);if(denied)return denied;
 ---
-<AdminLayout title="Manage school" description="Prepare the school's pages, review its changes, and invite its team when you're ready."><a href="/admin/schools" class="mt-6 inline-block text-sm font-semibold underline">All schools</a><SchoolEditor client:load admin partnerId={Astro.params.partnerId}/></AdminLayout>
+<AdminLayout title="Manage school" description="Manage its details, logos, imagery and program here. Preview and publish the saved version, then invite its team when ready.">
+  <a href="/admin/schools" class="mt-6 inline-block text-sm font-semibold underline">All schools</a>
+  <SchoolAdminNav partnerId={Astro.params.partnerId!} active="details" />
+  <SchoolEditor client:load admin partnerId={Astro.params.partnerId}/>
+</AdminLayout>

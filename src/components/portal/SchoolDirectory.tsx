@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Search, Plus, ArrowRight, Loader2 } from "lucide-react";
+import { Search, Plus, ArrowRight, Images, Loader2 } from "lucide-react";
+import { mergeSchoolDirectoryRows } from "@/lib/schoolDirectoryRows";
 const input = "w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-base";
 export default function SchoolDirectory() {
   const [customSlug, setCustomSlug] = useState(false);
@@ -41,15 +42,13 @@ export default function SchoolDirectory() {
       });
       const b = await r.json();
       if (!r.ok) throw new Error(b.message ?? "Unable to create school.");
-      window.location.href = `/admin/schools/${encodeURIComponent(b.partnerId)}`;
+      window.location.href = `/admin/schools/${encodeURIComponent(b.partnerId)}/brand?created=1`;
     } catch (e) {
       setError((e as Error).message);
       setBusy(false);
     }
   }
-  const merged = Array.from(
-    new Map(schools.map((s) => [s._id.replace(/^drafts\./, ""), s])).values(),
-  );
+  const merged = mergeSchoolDirectoryRows(schools);
   return (
     <div className="mt-8">
       <div className="flex flex-wrap justify-between gap-4">
@@ -94,8 +93,8 @@ export default function SchoolDirectory() {
         <form onSubmit={create} className="mt-6 rounded-xl border border-gray-200 bg-gray-50 p-6">
           <h2 className="text-xl font-bold">Start with a school</h2>
           <p className="mt-2 text-gray-600">
-            Create the record during your sales call. You'll get a draft to customize before sharing
-            a private preview.
+            Enter the basics, then add its logos, colors and brand imagery. You can finish its
+            pages and share a private preview from this administration workspace.
           </p>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             {[
@@ -140,7 +139,7 @@ export default function SchoolDirectory() {
               className="min-h-11 rounded-lg bg-ink px-5 py-2.5 font-semibold text-white"
               disabled={busy}
             >
-              {busy ? "Creating…" : "Create draft school"}
+              {busy ? "Creating…" : "Create and add branding"}
             </button>
             <button type="button" className="px-4 underline" onClick={() => setCreating(false)}>
               Cancel
@@ -154,10 +153,10 @@ export default function SchoolDirectory() {
         </div>
         <ul className="divide-y divide-gray-200">
           {merged.map((s) => (
-            <li key={s._id}>
+            <li key={s._id} className="grid items-center gap-x-2 pr-5 sm:grid-cols-[minmax(0,1fr)_auto]">
               <a
                 href={`/admin/schools/${encodeURIComponent(s._id.replace(/^drafts\./, ""))}`}
-                className="flex items-center gap-4 px-5 py-5 hover:bg-gray-50"
+                className="flex min-w-0 flex-1 items-center gap-4 px-5 py-5 hover:bg-gray-50"
               >
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gray-100 font-bold text-ink">
                   {s.logo ? (
@@ -167,7 +166,7 @@ export default function SchoolDirectory() {
                   )}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block font-semibold">{s.name || "Untitled school"}</span>
+                  <span className="block break-words font-semibold">{s.name || "Untitled school"}</span>
                   <span className="block text-sm text-gray-600">
                     {s.slug ? `/schools/${s.slug}` : "Page address needed"}
                   </span>
@@ -181,6 +180,11 @@ export default function SchoolDirectory() {
                 </span>
                 <ArrowRight size={18} />
               </a>
+              <a
+                href={`/admin/schools/${encodeURIComponent(s._id.replace(/^drafts\./, ""))}/brand`}
+                aria-label={`Logos and imagery for ${s.name || "this school"}`}
+                className="mb-4 ml-5 inline-flex min-h-11 items-center justify-self-start gap-2 rounded-lg border border-gray-200 px-3 text-sm font-semibold text-ink hover:bg-gray-50 sm:mb-0 sm:ml-0"
+              ><Images size={16} aria-hidden="true" />Logos & imagery</a>
             </li>
           ))}
         </ul>

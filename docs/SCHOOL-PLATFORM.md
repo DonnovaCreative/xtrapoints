@@ -6,7 +6,7 @@ The application owns school preparation, invitations, draft editing and publicat
 
 1. Sign in at `/portal`, choose the XtraPoint staff administrator organization, and open `/admin/schools`.
 2. Create the school during the sales call. Enter its name, short name, community/mascot, beneficiary and unique page address. New schools start private.
-3. Edit its story and program details; open its Brand kit for logos and photography. Save the draft and inspect both page previews.
+3. Select **Create and add branding** to open **Logos & imagery**. Upload the header logo, square logo and available photography, then continue to **Details & program**. Existing schools expose **Logos & imagery** in the directory and school navigation. Save the draft and inspect both page previews.
 4. Create a seven-day private sales preview. It resolves the immutable school ID, stores only a hashed token, disables form submissions and replaces the previous preview link when regenerated.
 5. For a retained draft-only record, select **Prepare retained school for access**. This preserves the draft and creates its application identity without making the pages public. Enable partner access, then invite the school's administrator.
 6. An administrator approves the saved version and chooses the donor and/or ambassador page to publish. School administrators can subsequently publish their own organization's approved changes; editors save drafts and request review. Viewers have read access only.
@@ -16,6 +16,18 @@ The admin supports the default Clerk administrator and member/editor roles. Opti
 New invitations bind the Clerk organization to immutable `partnerId` plus the current compatibility slug. Existing slug-linked organizations remain supported; mismatched immutable IDs or stored organization IDs fail closed. All session mutations enforce same-origin requests and server-side role checks. No invitation was sent as part of implementation.
 
 ## Data and publication
+
+### Where records and images live
+
+The administration portal is a management interface, not a new datastore. School records, drafts, approved snapshots, release history and audit events remain in the existing Sanity production dataset. Logos and imagery are Sanity asset records referenced by those school documents and served from its asset CDN. Clerk handles accounts and membership. The earlier migration adopted existing school records in place; it did not move them to a separate SQL database.
+
+Routine school creation, logos/images, colors, program details and publication are available in the website. Staff use **Schools → Logos & imagery**; school teams use **Brand kit**. New records do not automatically fetch a logo. Existing imported logos remain attached to their original schools; the older ESPN lookup belongs to legacy Studio/CLI tooling.
+
+Uploads save to the current school draft. Colors and photo credits have explicit save actions; editing one field or uploading an image preserves other unsaved brand inputs. School publication makes the approved assets visible on public pages and generated materials. Uploads accept PNG, JPG, WebP and SVG up to 4 MB, below the hosting request limit.
+
+Sanity also supplies shared marketing resources, template overrides, site settings, legal/support content and toolkit editorial artifacts. Removing it now would require replacing those dependencies. A future operational-database migration must preserve school IDs, asset references, published snapshots, access bindings, versions and audit history; it is separate from the administration UI improvements.
+
+### Draft and publication behavior
 
 - Existing records are adopted in place. Published/draft pairs, draft-only records, unknown fields, image references, approved snapshots, portal access and resource customizations are preserved.
 - Draft saves and publication use revision checks. Publication atomically freezes the resolved content/media snapshot, updates page switches, creates history and audit records, and removes the promoted draft. Concurrent changes cause a conflict rather than overwriting another editor.
