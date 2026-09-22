@@ -139,7 +139,7 @@ const whyGivePhotoCredit = whyGivePhotoKey
                 by {" "}{brand.name}. Setup takes less than a minute.
               </p>
               <div class="mt-8 flex flex-wrap items-center gap-4">
-                <CtaButton href="#start" variant="lime" glow={false}>Get early access</CtaButton>
+                <CtaButton href="https://app.xtrapoint.com/greatdanes" variant="lime" glow={false}>Get started</CtaButton>
                 <span class="font-mono text-xs uppercase tracking-[0.04em] text-white/50">Automatic · Round up · Cancel anytime</span>
               </div>
             </div>
@@ -313,36 +313,36 @@ const whyGivePhotoCredit = whyGivePhotoKey
       )}
 
       <!-- ===================== INTEREST / GET EARLY ACCESS ===================== -->
-      <section id="start" class="relative overflow-hidden bg-white py-20 lg:py-28">
-        <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">
-          <div class="grid items-center gap-12 lg:grid-cols-[1fr_1fr] lg:gap-16">
-            <div class="reveal-left">
-              <Eyebrow index={earlyAccessIndex} label="Get early access" />
-              <h2 class="font-display mt-4 text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900">
-                Be first to back the <span class="ed ed-dark">{school.mascot}</span>.
-              </h2>
-              <p class="mt-5 max-w-md text-lg leading-relaxed text-gray-600">
-                Round-up giving for {school.givingDest} is almost here. Join the
-                waitlist and we'll tell you the moment it goes live — so you can be
-                among the first {school.mascot} fans to start giving.
-              </p>
-              <ul class="mt-8 flex flex-col gap-3 text-gray-700">
-                <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>You choose how much you round up · cap it anytime</li>
-                <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>Set it once · cancel anytime</li>
-                <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>Bank connections secured by Plaid</li>
-              </ul>
-            </div>
-            <div class="reveal-right rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-gray-200 sm:p-8 lg:p-10">
-              <h3 class="text-2xl font-bold tracking-tight text-gray-900">Join the waitlist</h3>
-              <p class="mt-2 text-gray-600">No spam — just a heads-up the day we launch.</p>
-              <div class="mt-7">
-                {previewBase && <p class="mb-4 text-sm text-gray-600">Preview only. Form submissions are disabled.</p>}
-                <fieldset disabled={Boolean(previewBase)}><ContactForm client:only="react" school={school.name} variant="interest" /></fieldset>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <!--<section id="start" class="relative overflow-hidden bg-white py-20 lg:py-28">-->
+      <!--  <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">-->
+      <!--    <div class="grid items-center gap-12 lg:grid-cols-[1fr_1fr] lg:gap-16">-->
+      <!--      <div class="reveal-left">-->
+      <!--        <Eyebrow index={earlyAccessIndex} label="Get early access" />-->
+      <!--        <h2 class="font-display mt-4 text-[clamp(2.5rem,6vw,4rem)] uppercase leading-[0.92] tracking-[-0.015em] text-gray-900">-->
+      <!--          Be first to back the <span class="ed ed-dark">{school.mascot}</span>.-->
+      <!--        </h2>-->
+      <!--        <p class="mt-5 max-w-md text-lg leading-relaxed text-gray-600">-->
+      <!--          Round-up giving for {school.givingDest} is almost here. Join the-->
+      <!--          waitlist and we'll tell you the moment it goes live — so you can be-->
+      <!--          among the first {school.mascot} fans to start giving.-->
+      <!--        </p>-->
+      <!--        <ul class="mt-8 flex flex-col gap-3 text-gray-700">-->
+      <!--          <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>You choose how much you round up · cap it anytime</li>-->
+      <!--          <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>Set it once · cancel anytime</li>-->
+      <!--          <li class="flex items-center gap-3"><span class="h-1.5 w-1.5 rounded-full bg-lime"></span>Bank connections secured by Plaid</li>-->
+      <!--        </ul>-->
+      <!--      </div>-->
+      <!--      <div class="reveal-right rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-gray-200 sm:p-8 lg:p-10">-->
+      <!--        <h3 class="text-2xl font-bold tracking-tight text-gray-900">Join the waitlist</h3>-->
+      <!--        <p class="mt-2 text-gray-600">No spam — just a heads-up the day we launch.</p>-->
+      <!--        <div class="mt-7">-->
+      <!--          {previewBase && <p class="mb-4 text-sm text-gray-600">Preview only. Form submissions are disabled.</p>}-->
+      <!--          <fieldset disabled={Boolean(previewBase)}><ContactForm client:only="react" school={school.name} variant="interest" /></fieldset>-->
+      <!--        </div>-->
+      <!--      </div>-->
+      <!--    </div>-->
+      <!--  </div>-->
+      <!--</section>-->
     </main>
 
     <SchoolFooter legalCopy={settings.legalCopy} />
