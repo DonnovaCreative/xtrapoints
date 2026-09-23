@@ -39,6 +39,7 @@ export interface School {
   short: string; // "Sam Houston State"
   mascot: string; // "Bearkats"
   fund: string; // "Bearkat Athletics Fund"
+  fundShort: string; // "KatFund"
   city: string;
   state: string;
   // ── Resolved naming for copy (see schoolsSource `naming`) ──

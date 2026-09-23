@@ -84,6 +84,8 @@ const whyGivePhoto = whyGivePhotoKey ? school.photos?.[whyGivePhotoKey] : undefi
 const whyGivePhotoCredit = whyGivePhotoKey
   ? school.photos?.credits?.[whyGivePhotoKey]
   : undefined;
+
+const fundUrl = school.fundShort == 'KatFund' ? 'https://app.xtrapoint.com/katfund' : 'https://app.xtrapoint.com/greatdanes';
 ---
 
 <Layout
@@ -97,7 +99,7 @@ const whyGivePhotoCredit = whyGivePhotoKey
       school={school}
       home={previewBase}
       nav={ambassadorLive ? { label: "Become an Ambassador", href: ambassadorUrl } : undefined}
-      cta={{ label: "Get early access", href: "#start" }}
+      cta={{ label: "Get Started", href: fundUrl }}
     />
 
     <main>
@@ -139,7 +141,7 @@ const whyGivePhotoCredit = whyGivePhotoKey
                 by {" "}{brand.name}. Setup takes less than a minute.
               </p>
               <div class="mt-8 flex flex-wrap items-center gap-4">
-                <CtaButton href="https://app.xtrapoint.com/greatdanes" variant="lime" glow={false}>Get started</CtaButton>
+                <CtaButton href={fundUrl} variant="lime" glow={false}>Get started</CtaButton>
                 <span class="font-mono text-xs uppercase tracking-[0.04em] text-white/50">Automatic · Round up · Cancel anytime</span>
               </div>
             </div>

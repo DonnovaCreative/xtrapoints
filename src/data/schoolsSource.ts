@@ -263,6 +263,7 @@ const toSchool = (doc: SchoolDoc, live?: LivePagesDoc | null): School => ({
   short: doc.short ?? "",
   mascot: doc.mascot ?? "",
   fund: doc.fund ?? "",
+  fundShort: doc.fundShort ?? "",
   city: doc.city ?? "",
   state: doc.state ?? "",
   ...(doc.logo ? { logo: doc.logo } : {}),
